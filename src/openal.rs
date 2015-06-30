@@ -139,6 +139,7 @@ pub mod ffi {
     }
 
     #[repr(C)]
+    //#[derive(Sync)]
     pub struct ALCdevice;
     #[repr(C)]
     pub struct ALCcontext;

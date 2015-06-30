@@ -40,7 +40,7 @@ use sndfile::StringSoundType::{
  *
  * If the tags doesn't exist in the sound file, the string is "".
  */
-#[deriving(Clone, Show, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Tags {
     /// The title of the sound as a String
     pub title: String,

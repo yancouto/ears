@@ -25,12 +25,14 @@ use std::rc::Rc;
 use std::cell::RefCell;
 
 use internal::OpenAlData;
-use sound_data::{mod, SoundData};
+use sound_data;//::*;//{SoundData};
+use sound_data::{SoundData};
 use openal::{ffi, al};
 use states::State;
 use states::State::{Initial, Playing, Paused, Stopped};
 use audio_controller::AudioController;
 use audio_tags::{AudioTags, Tags};
+
 
 /**
  * Play Sounds easily.
@@ -535,7 +537,7 @@ impl AudioController for Sound {
      * * `position` - A three dimensional vector of f32 containing the position
      * of the listener [x, y, z].
      */
-    fn set_position(&mut self, position: [f32, ..3]) -> () {
+    fn set_position(&mut self, position: [f32; 3]) -> () {
         check_openal_context!(());
 
         al::alSourcefv(self.al_source, ffi::AL_POSITION, &position[0]);
@@ -548,10 +550,10 @@ impl AudioController for Sound {
      * A three dimensional vector of f32 containing the position of the
      * listener [x, y, z].
      */
-    fn get_position(&self) -> [f32, ..3] {
-        check_openal_context!([0., ..3]);
+    fn get_position(&self) -> [f32; 3] {
+        check_openal_context!([0.; 3]);
 
-        let mut position : [f32, ..3] = [0., ..3];
+        let mut position : [f32; 3] = [0.; 3];
         al::alGetSourcefv(self.al_source, ffi::AL_POSITION, &mut position[0]);
         position
     }
@@ -566,7 +568,7 @@ impl AudioController for Sound {
      * # Argument
      * `direction` - The new direction of the Sound.
      */
-    fn set_direction(&mut self, direction: [f32, ..3]) -> () {
+    fn set_direction(&mut self, direction: [f32; 3]) -> () {
         check_openal_context!(());
 
         al::alSourcefv(self.al_source, ffi::AL_DIRECTION, &direction[0]);
@@ -578,10 +580,10 @@ impl AudioController for Sound {
      * # Return
      * The current direction of the Sound.
      */
-    fn get_direction(&self)  -> [f32, ..3] {
-        check_openal_context!([0., ..3]);
+    fn get_direction(&self)  -> [f32; 3] {
+        check_openal_context!([0.; 3]);
 
-        let mut direction : [f32, ..3] = [0., ..3];
+        let mut direction : [f32; 3] = [0.; 3];
         al::alGetSourcefv(self.al_source, ffi::AL_DIRECTION, &mut direction[0]);
         direction
     }

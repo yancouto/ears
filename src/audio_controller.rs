@@ -183,7 +183,7 @@ pub trait AudioController {
      * * `position` - A three dimensional vector of f32 containing the
      * position of the listener [x, y, z].
      */
-    fn set_position(&mut self, position: [f32, ..3]) -> ();
+    fn set_position(&mut self, position: [f32; 3]) -> ();
 
     /**
      * Get the position of the Audio Source in three dimensional space.
@@ -192,7 +192,7 @@ pub trait AudioController {
      * A three dimensional vector of f32 containing the position of the
      * listener [x, y, z].
      */
-    fn get_position(&self) -> [f32, ..3];
+    fn get_position(&self) -> [f32; 3];
 
     /**
      * Set the direction of the Audio Source.
@@ -204,7 +204,7 @@ pub trait AudioController {
      * # Argument
      * `direction` - The new direction of the Audio Source.
      */
-    fn set_direction(&mut self, direction: [f32, ..3]) -> ();
+    fn set_direction(&mut self, direction: [f32; 3]) -> ();
 
     /**
      * Get the direction of the Audio Source.
@@ -212,7 +212,7 @@ pub trait AudioController {
      * # Return
      * The current direction of the Audio Source.
      */
-    fn get_direction(&self)  -> [f32, ..3];
+    fn get_direction(&self)  -> [f32; 3];
 
     /**
      * Set the maximum distance of the Audio Source.

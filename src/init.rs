@@ -101,7 +101,7 @@ mod test {
     #[test]
     fn test_init_in_in_another_task_OK() -> () {
         init();
-        spawn(proc() {
+        spawn(|| {
             assert_eq!(init_in(), None)
         })
     }

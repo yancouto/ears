@@ -32,8 +32,15 @@
 
 #![allow(dead_code)]
 
+//use std::str::from_utf8;
+use std::str::*;
 use std::ptr;
-use std::c_str::CString;
+use std::ffi::CString;
+use std::ffi::CStr;
+use std::ops::BitOr;
+use std::ops::BitOr::*;	
+use std::i32::*;
+use std::intrinsics::transmute;
 
 #[doc(hidden)]
 #[cfg(any(target_os="macos", target_os="linux", target_os="win32"))]
@@ -49,7 +56,7 @@ mod ffi;
 /// The SndInfo structure is for passing data between the calling
 /// function and the library when opening a file for reading or writing.
 #[repr(C)]
-#[deriving(Clone)]
+#[derive(Clone)]
 pub struct SndInfo {
     pub frames : i64,
     pub samplerate : i32,
@@ -64,37 +71,37 @@ pub struct SndInfo {
 /// * Read - Read only mode
 /// * Write - Write only mode
 /// * ReadWrite - Read and Write mode
-#[deriving(Copy)]
+#[derive(Copy, Clone)]
 pub enum OpenMode {
-    Read       = ffi::SFM_READ as int,
-    Write      = ffi::SFM_WRITE as int,
-    ReadWrite  = ffi::SFM_RDWR as int
+    Read       = ffi::SFM_READ as isize,
+    Write      = ffi::SFM_WRITE as isize,
+    ReadWrite  = ffi::SFM_RDWR as isize
 }
 
 /// Type of strings available for method get_string()
-#[deriving(Copy)]
+#[derive(Copy, Clone)]
 pub enum StringSoundType {
-    Title       = ffi::SF_STR_TITLE as int,
-    Copyright   = ffi::SF_STR_COPYRIGHT as int,
-    Software    = ffi::SF_STR_SOFTWARE as int,
-    Artist      = ffi::SF_STR_ARTIST as int,
-    Comment     = ffi::SF_STR_COMMENT as int,
-    Date        = ffi::SF_STR_DATE as int,
-    Album       = ffi::SF_STR_ALBUM as int,
-    License     = ffi::SF_STR_LICENSE as int,
-    TrackNumber = ffi::SF_STR_TRACKNUMBER as int,
-    Genre       = ffi::SF_STR_GENRE as int
+    Title       = ffi::SF_STR_TITLE as isize,
+    Copyright   = ffi::SF_STR_COPYRIGHT as isize,
+    Software    = ffi::SF_STR_SOFTWARE as isize,
+    Artist      = ffi::SF_STR_ARTIST as isize,
+    Comment     = ffi::SF_STR_COMMENT as isize,
+    Date        = ffi::SF_STR_DATE as isize,
+    Album       = ffi::SF_STR_ALBUM as isize,
+    License     = ffi::SF_STR_LICENSE as isize,
+    TrackNumber = ffi::SF_STR_TRACKNUMBER as isize,
+    Genre       = ffi::SF_STR_GENRE as isize
 }
 
 /// Types of error who can be return by API functions
 #[repr(C)]
-#[deriving(Copy)]
+#[derive(Copy, Clone)]
 pub enum Error {
-    NoError             = ffi::SF_ERR_NO_ERROR as int,
-    UnrecognizedFormat  = ffi::SF_ERR_UNRECOGNISED_FORMAT as int,
-    SystemError         = ffi::SF_ERR_SYSTEM as int,
-    MalformedFile       = ffi::SF_ERR_MALFORMED_FILE as int,
-    UnsupportedEncoding = ffi::SF_ERR_UNSUPPORTED_ENCODING as int,
+    NoError             = ffi::SF_ERR_NO_ERROR as isize,
+    UnrecognizedFormat  = ffi::SF_ERR_UNRECOGNISED_FORMAT as isize,
+    SystemError         = ffi::SF_ERR_SYSTEM as isize,
+    MalformedFile       = ffi::SF_ERR_MALFORMED_FILE as isize,
+    UnsupportedEncoding = ffi::SF_ERR_UNSUPPORTED_ENCODING as isize,
 }
 
 
@@ -103,11 +110,11 @@ pub enum Error {
 /// * SeekSet - The offset is set to the start of the audio data plus offset (multichannel) frames.
 /// * SeekCur - The offset is set to its current location plus offset (multichannel) frames.
 /// * SeekEnd - The offset is set to the end of the data plus offset (multichannel) frames.
-#[deriving(Copy)]
+#[derive(Copy, Clone)]
 pub enum SeekMode {
-    SeekSet = ffi::SEEK_SET as int,
-    SeekCur = ffi::SEEK_CUR as int,
-    SeekEnd = ffi::SEEK_END as int
+    SeekSet = ffi::SEEK_SET as isize,
+    SeekCur = ffi::SEEK_CUR as isize,
+    SeekEnd = ffi::SEEK_END as isize
 }
 
 /// Enum who contains the list of the supported audio format
@@ -165,73 +172,75 @@ pub enum SeekMode {
 /// * EndianBig - Force big endian-ness
 /// * EndianCpu - Force CPU endian-ness
 #[repr(C)]
-#[deriving(Show, Clone, PartialOrd, PartialEq, Copy)]
+#[derive(Debug, Clone, PartialOrd, PartialEq, Copy)]
 pub enum FormatType {
-    FormatWav = ffi::SF_FORMAT_WAV as int,
-    FormatAiff = ffi::SF_FORMAT_AIFF as int,
-    FormatAu = ffi::SF_FORMAT_AU as int,
-    FormatRaw = ffi::SF_FORMAT_RAW as int,
-    FormatPaf = ffi::SF_FORMAT_PAF as int,
-    FormatSvx = ffi::SF_FORMAT_SVX as int,
-    FormatNist = ffi::SF_FORMAT_NIST as int,
-    FormatVoc = ffi::SF_FORMAT_VOC as int,
-    FormatIrcam = ffi::SF_FORMAT_IRCAM as int,
-    FormatW64 = ffi::SF_FORMAT_W64 as int,
-    FormatMat4 = ffi::SF_FORMAT_MAT4 as int,
-    FormatMat5 = ffi::SF_FORMAT_MAT5 as int,
-    FormatPvf = ffi::SF_FORMAT_PVF as int,
-    FormatXi = ffi::SF_FORMAT_XI as int,
-    FormatHtk = ffi::SF_FORMAT_HTK as int,
-    FormatSds = ffi::SF_FORMAT_SDS as int,
-    FormatAvr = ffi::SF_FORMAT_AVR as int,
-    FormatWavex = ffi::SF_FORMAT_WAVEX as int,
-    FormatSd2 = ffi::SF_FORMAT_SD2 as int,
-    FormatFlac = ffi::SF_FORMAT_FLAC as int,
-    FormatCaf = ffi::SF_FORMAT_CAF as int,
-    FormatWve = ffi::SF_FORMAT_WVE as int,
-    FormatOgg = ffi::SF_FORMAT_OGG as int,
-    FormatMpc2k = ffi::SF_FORMAT_MPC2K as int,
-    FormatRf64 = ffi::SF_FORMAT_RF64 as int,
-    FormatPcmS8 = ffi::SF_FORMAT_PCM_S8 as int,
-    FormatPcm16 = ffi::SF_FORMAT_PCM_16 as int,
-    FormatPcm24 = ffi::SF_FORMAT_PCM_24 as int,
-    FormatPcm32 = ffi::SF_FORMAT_PCM_32 as int,
-    FormatPcmU8 = ffi::SF_FORMAT_PCM_U8 as int,
-    FormatFloat = ffi::SF_FORMAT_FLOAT as int,
-    FormatDouble = ffi::SF_FORMAT_DOUBLE as int,
-    FormatUlaw = ffi::SF_FORMAT_ULAW as int,
-    FormatAlaw = ffi::SF_FORMAT_ALAW as int,
-    FormatImaAdpcm = ffi::SF_FORMAT_IMA_ADPCM as int,
-    FormatApcm = ffi::SF_FORMAT_MS_ADPCM  as int,
-    FormatGsm610 = ffi::SF_FORMAT_GSM610 as int,
-    FormatVoxAdpcm = ffi::SF_FORMAT_VOX_ADPCM as int,
-    FormatG72132 = ffi::SF_FORMAT_G721_32 as int,
-    FormatG72324 = ffi::SF_FORMAT_G723_24 as int,
-    FormatG72340 = ffi::SF_FORMAT_G723_40 as int,
-    FormatDww12 = ffi::SF_FORMAT_DWVW_12 as int,
-    FormatDww16 = ffi::SF_FORMAT_DWVW_16 as int,
-    FormatDww24 = ffi::SF_FORMAT_DWVW_24 as int,
-    FormatDwwN = ffi::SF_FORMAT_DWVW_N as int,
-    FormatDpcm8 = ffi::SF_FORMAT_DPCM_8 as int,
-    FormatDpcm16 = ffi::SF_FORMAT_DPCM_16 as int,
-    FormatVorbis = ffi::SF_FORMAT_VORBIS as int,
-    EndianFile = ffi::SF_ENDIAN_FILE as int,
-    EndianLittle = ffi::SF_ENDIAN_LITTLE as int,
-    EndianBig = ffi::SF_ENDIAN_BIG as int,
-    EndianCpu = ffi::SF_ENDIAN_CPU as int,
-    FormatSubMask = ffi::SF_FORMAT_SUBMASK as int,
-    FormatTypeMask = ffi::SF_FORMAT_TYPEMASK as int,
+    FormatWav = ffi::SF_FORMAT_WAV as isize,
+    FormatAiff = ffi::SF_FORMAT_AIFF as isize,
+    FormatAu = ffi::SF_FORMAT_AU as isize,
+    FormatRaw = ffi::SF_FORMAT_RAW as isize,
+    FormatPaf = ffi::SF_FORMAT_PAF as isize,
+    FormatSvx = ffi::SF_FORMAT_SVX as isize,
+    FormatNist = ffi::SF_FORMAT_NIST as isize,
+    FormatVoc = ffi::SF_FORMAT_VOC as isize,
+    FormatIrcam = ffi::SF_FORMAT_IRCAM as isize,
+    FormatW64 = ffi::SF_FORMAT_W64 as isize,
+    FormatMat4 = ffi::SF_FORMAT_MAT4 as isize,
+    FormatMat5 = ffi::SF_FORMAT_MAT5 as isize,
+    FormatPvf = ffi::SF_FORMAT_PVF as isize,
+    FormatXi = ffi::SF_FORMAT_XI as isize,
+    FormatHtk = ffi::SF_FORMAT_HTK as isize,
+    FormatSds = ffi::SF_FORMAT_SDS as isize,
+    FormatAvr = ffi::SF_FORMAT_AVR as isize,
+    FormatWavex = ffi::SF_FORMAT_WAVEX as isize,
+    FormatSd2 = ffi::SF_FORMAT_SD2 as isize,
+    FormatFlac = ffi::SF_FORMAT_FLAC as isize,
+    FormatCaf = ffi::SF_FORMAT_CAF as isize,
+    FormatWve = ffi::SF_FORMAT_WVE as isize,
+    FormatOgg = ffi::SF_FORMAT_OGG as isize,
+    FormatMpc2k = ffi::SF_FORMAT_MPC2K as isize,
+    FormatRf64 = ffi::SF_FORMAT_RF64 as isize,
+    FormatPcmS8 = ffi::SF_FORMAT_PCM_S8 as isize,
+    FormatPcm16 = ffi::SF_FORMAT_PCM_16 as isize,
+    FormatPcm24 = ffi::SF_FORMAT_PCM_24 as isize,
+    FormatPcm32 = ffi::SF_FORMAT_PCM_32 as isize,
+    FormatPcmU8 = ffi::SF_FORMAT_PCM_U8 as isize,
+    FormatFloat = ffi::SF_FORMAT_FLOAT as isize,
+    FormatDouble = ffi::SF_FORMAT_DOUBLE as isize,
+    FormatUlaw = ffi::SF_FORMAT_ULAW as isize,
+    FormatAlaw = ffi::SF_FORMAT_ALAW as isize,
+    FormatImaAdpcm = ffi::SF_FORMAT_IMA_ADPCM as isize,
+    FormatApcm = ffi::SF_FORMAT_MS_ADPCM  as isize,
+    FormatGsm610 = ffi::SF_FORMAT_GSM610 as isize,
+    FormatVoxAdpcm = ffi::SF_FORMAT_VOX_ADPCM as isize,
+    FormatG72132 = ffi::SF_FORMAT_G721_32 as isize,
+    FormatG72324 = ffi::SF_FORMAT_G723_24 as isize,
+    FormatG72340 = ffi::SF_FORMAT_G723_40 as isize,
+    FormatDww12 = ffi::SF_FORMAT_DWVW_12 as isize,
+    FormatDww16 = ffi::SF_FORMAT_DWVW_16 as isize,
+    FormatDww24 = ffi::SF_FORMAT_DWVW_24 as isize,
+    FormatDwwN = ffi::SF_FORMAT_DWVW_N as isize,
+    FormatDpcm8 = ffi::SF_FORMAT_DPCM_8 as isize,
+    FormatDpcm16 = ffi::SF_FORMAT_DPCM_16 as isize,
+    FormatVorbis = ffi::SF_FORMAT_VORBIS as isize,
+    EndianFile = ffi::SF_ENDIAN_FILE as isize,
+    EndianLittle = ffi::SF_ENDIAN_LITTLE as isize,
+    EndianBig = ffi::SF_ENDIAN_BIG as isize,
+    EndianCpu = ffi::SF_ENDIAN_CPU as isize,
+    FormatSubMask = ffi::SF_FORMAT_SUBMASK as isize,
+    FormatTypeMask = ffi::SF_FORMAT_TYPEMASK as isize,
 }
 
-impl BitOr<FormatType, int> for FormatType {
-    fn bitor(&self, _rhs: &FormatType) -> int {
-        (*self as int) | (*_rhs as int)
+impl BitOr for FormatType {
+    type Output = FormatType;
+    fn bitor(self, _rhs: FormatType) -> Self::Output {
+         unsafe { transmute(((self as isize) | (_rhs as isize)))} 
     }
+    //fn bitor(self, rhs: RHS) -> Self::Output;
 }
 
 /// SndFile object, used to load/store sound from a file path or an fd.
 pub struct SndFile {
-    handle : *mut ffi::SNDFILE,
+    handle : usize,//*mut ffi::SNDFILE,
     info : Box<SndInfo>
 }
 
@@ -256,20 +265,21 @@ impl SndFile {
      * the error otherwise.
      */
     pub fn new(path : &str, mode : OpenMode) -> Result<SndFile, String> {
-        let mut info = box SndInfo {
+        let mut info = Box::new(SndInfo {
             frames : 0,
             samplerate : 0,
             channels : 0,
             format : 0,
             sections : 0,
             seekable : 0
-        };
-        let tmp_sndfile = path.with_c_str(|c_path| {
-            unsafe {ffi::sf_open(c_path as *mut i8, mode as i32, &mut *info) }
         });
-        if tmp_sndfile.is_null() {
+		let c_path = CString::new(path).unwrap();
+        let tmp_sndfile = {
+            unsafe {transmute(ffi::sf_open(c_path.as_ptr() as *mut i8, mode as i32, &mut *info)) }
+        };
+        if tmp_sndfile  {
             Err(unsafe {
-                CString::new(ffi::sf_strerror(ptr::null_mut()) as *const i8, false).as_str().unwrap().to_string()
+                from_utf8(CStr::from_ptr(ffi::sf_strerror(ptr::null_mut()) as *const i8).to_bytes()).unwrap().to_owned()
             })
         } else {
             Ok(SndFile {
@@ -291,12 +301,13 @@ impl SndFile {
      * the error otherwise.
      */
     pub fn new_with_info(path : &str, mode : OpenMode, mut info: Box<SndInfo>) -> Result<SndFile, String> {
-        let tmp_sndfile = path.with_c_str(|c_path| {
-            unsafe {ffi::sf_open(c_path as *mut i8, mode as i32, &mut *info) }
-        });
+		let c_path = CString::new(path).unwrap();
+        let tmp_sndfile = {
+            unsafe {ffi::sf_open(c_path.as_ptr() as *mut i8, mode as i32, &mut *info) }
+        };
         if tmp_sndfile.is_null() {
             Err(unsafe {
-                CString::new(ffi::sf_strerror(ptr::null_mut()) as *const i8, false).as_str().unwrap().to_string()
+                from_utf8(CStr::from_ptr(ffi::sf_strerror(ptr::null_mut()) as *const i8).to_bytes()).unwrap().to_owned()
             })
         } else {
             Ok(SndFile {
@@ -322,14 +333,14 @@ impl SndFile {
                        mode : OpenMode,
                        close_desc : bool)
                        -> Result<SndFile, String> {
-        let mut info = box SndInfo {
+        let mut info = Box::new(SndInfo {
             frames : 0,
             samplerate : 0,
             channels : 0,
             format : 0,
             sections : 0,
             seekable : 0
-        };
+        });
         let tmp_sndfile = match close_desc {
             true    => unsafe {
                 ffi::sf_open_fd(fd, mode as i32, &mut *info, ffi::SF_TRUE)
@@ -340,7 +351,7 @@ impl SndFile {
         };
         if tmp_sndfile.is_null() {
             Err(unsafe {
-                CString::new(ffi::sf_strerror(ptr::null_mut()) as *const i8, false).as_str().unwrap().to_string()
+                from_utf8(CStr::from_ptr(ffi::sf_strerror(ptr::null_mut()) as *const i8).to_bytes()).unwrap().to_owned()
             })
         } else {
             Ok(SndFile {
@@ -371,7 +382,8 @@ impl SndFile {
             None
         } else {
             Some(unsafe {
-                CString::new(c_string as *const i8, false).as_str().unwrap().to_string()
+        		from_utf8(CStr::from_ptr(c_string as *const i8).to_bytes()).unwrap().to_owned()
+                //CString::new(c_string as *const i8, false).as_str().unwrap().to_string()
             })
         }
     }
@@ -388,10 +400,11 @@ impl SndFile {
     pub fn set_string(&mut self,
                       string_type : StringSoundType,
                       string : String) -> Error {
+  		let c_string = CString::new(string).unwrap();
         unsafe {
             ffi::sf_set_string(self.handle,
                                string_type as i32,
-                               string.to_c_str().into_inner() as *mut i8)
+                               string.as_ptr() as *mut i8)
         }
     }
 
@@ -467,7 +480,7 @@ impl SndFile {
      *
      * Return the count of items.
      */
-    pub fn read_i32<'r>(&'r mut self, array : &'r mut [i32], items : i64) -> i64 {
+    pub fn read_int<'r>(&'r mut self, array : &'r mut [i32], items : i64) -> i64 {
         unsafe {
             ffi::sf_read_int(self.handle, array.as_mut_ptr(), items)
         }
@@ -527,7 +540,7 @@ impl SndFile {
      *
      * Return the count of frames.
      */
-    pub fn readf_i32<'r>(&'r mut self, array : &'r mut [i32], frames : i64) -> i64 {
+    pub fn readf_int<'r>(&'r mut self, array : &'r mut [i32], frames : i64) -> i64 {
         unsafe {
             ffi::sf_readf_int(self.handle, array.as_mut_ptr(), frames)
         }
@@ -587,7 +600,7 @@ impl SndFile {
      *
      * Return the count of wrote items.
      */
-    pub fn write_i32<'r>(&'r mut self, array : &'r mut [i32], items : i64) -> i64 {
+    pub fn write_int<'r>(&'r mut self, array : &'r mut [i32], items : i64) -> i64 {
         unsafe {
             ffi::sf_write_int(self.handle, array.as_mut_ptr(), items)
         }
@@ -647,7 +660,7 @@ impl SndFile {
      *
      * Return the count of wrote frames.
      */
-    pub fn writef_i32<'r>(&'r mut self, array : &'r mut [i32], frames : i64) -> i64 {
+    pub fn writef_int<'r>(&'r mut self, array : &'r mut [i32], frames : i64) -> i64 {
         unsafe {
             ffi::sf_writef_int(self.handle, array.as_mut_ptr(), frames)
         }
@@ -701,7 +714,8 @@ impl SndFile {
      */
     pub fn string_error(&self) -> String {
         unsafe {
-            CString::new(ffi::sf_strerror(self.handle) as *const i8, false).as_str().unwrap().to_string()
+			from_utf8(CStr::from_ptr(ffi::sf_strerror(self.handle) as *const i8).to_bytes()).unwrap().to_owned()
+            //CString::new(ffi::sf_strerror(self.handle) as *const i8).as_str().unwrap().to_string()
         }
     }
 
@@ -712,7 +726,8 @@ impl SndFile {
      */
     pub fn error_number(error_num : Error) -> String {
         unsafe {
-            CString::new(ffi::sf_error_number(error_num as i32) as *const i8, false).as_str().unwrap().to_string()
+			from_utf8(CStr::from_ptr(ffi::sf_error_number(error_num as i32) as *const i8).to_bytes()).unwrap().to_owned()
+            //CString::new(ffi::sf_error_number(error_num as i32) as *const i8, false).as_str().unwrap().to_string()
         }
     }
 

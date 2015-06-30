@@ -21,8 +21,9 @@
 
 //! Record audio
 
-use std::{task, mem};
+use std::{thread, mem};
 use std::vec::Vec;
+use std::sync::mpsc::{channel, Sender, Receiver};
 
 use record_context::RecordContext;
 use record_context;
@@ -89,7 +90,7 @@ impl Recorder {
         self.stop_sender = Some(stop_sender);
         self.data_receiver = Some(data_receiver);
 
-        task::spawn(proc() {
+        thread::spawn(|| {
             let mut terminate = false;
             let ctxt = record_context::get(r_c);
             unsafe { ffi::alcCaptureStart(ctxt); }
@@ -106,7 +107,7 @@ impl Recorder {
 
                 if available_samples != 0 {
                     let tmp_buf =
-                        Vec::from_elem(available_samples as uint, 0i16);
+                        vec![0i16; available_samples as usize];
                     unsafe {
                         ffi::alcCaptureSamples(ctxt,
                                                mem::transmute(&tmp_buf.as_slice()[0]),
@@ -133,7 +134,7 @@ impl Recorder {
                 s_c.send(true);
                 match self.data_receiver {
                     Some(ref d_p) => {
-                        self.samples = d_p.recv();
+                        self.samples = d_p.recv().ok().unwrap();
                         true
                     },
                     None          => false
@@ -147,18 +148,18 @@ impl Recorder {
         if self.samples.len() == 0 {
             false
         } else {
-            let infos = box SndInfo {
+            let infos = Box::new(SndInfo {
                 frames : self.samples.len() as i64,
                 samplerate : 44100,
                 channels : 1,
                 format : (FormatPcm16 | FormatWav) as i32,
                 sections : 0,
                 seekable : 0
-            };
+            });	
 
             let mut file_ext = String::from_str(filename);
             file_ext.push_str(".wav");
-            match SndFile::new_with_info(file_ext.as_slice(), Write, infos) {
+            match SndFile::new_with_info(file_ext.as_str(), Write, infos) {
                 Ok(mut f) => {
                     let len = self.samples.len() as i64;
                     f.write_i16(self.samples.as_mut_slice(), len);

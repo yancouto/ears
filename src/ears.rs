@@ -90,8 +90,8 @@ use ears::Music;
 */
 
 #![crate_name = "ears"]
-#![desc = "Easy Api in Rust for Sounds"]
-#![license = "MIT"]
+//#![desc = "Easy Api in Rust for Sounds"]
+//#![license = "MIT"]
 #![crate_type = "dylib"]
 #![crate_type = "rlib"]
 #![allow(dead_code, unused_attributes)]

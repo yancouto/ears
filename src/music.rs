@@ -21,12 +21,13 @@
 
 //! Play Music easily.
 
-use std::io::timer::sleep;
+use std::thread::sleep_ms;
 use std::mem;
-use std::task;
+use std::thread;
 use std::time::Duration;
 use libc::c_void;
 use std::vec::Vec;
+use std::sync::mpsc::{channel, Sender, Receiver};
 
 use internal::OpenAlData;
 use openal::{ffi, al};
@@ -65,7 +66,7 @@ pub struct Music {
     /// The internal OpenAL source identifier
     al_source: u32,
     /// The internal OpenAL buffers
-    al_buffers: [u32, ..2],
+    al_buffers: [u32; 2],
     /// The file open with libmscfile
     file: Option<Box<SndFile>>,
     /// Information of the file
@@ -93,14 +94,14 @@ impl Music {
         check_openal_context!(None);
         // Retrieve File and Music datas
         let file = match SndFile::new(path, Read) {
-            Ok(file)    => box file,
+            Ok(file)    => Box::new(file),
             Err(err)    => { println!("{}", err); return None; }
         };
         let infos = file.get_sndinfo();
 
         // create the source and the buffers
         let mut source_id = 0;
-        let mut buffer_ids = [0, ..2];
+        let mut buffer_ids = [0; 2];
         // create the source
         al::alGenSources(1, &mut source_id);
         // create the buffers
@@ -110,7 +111,7 @@ impl Music {
         let format =  match al::get_channels_format(infos.channels) {
             Some(fmt) => fmt,
             None => {
-                println!("Internal error : unrecognized format.");
+                println!("internal error : unrecognized format.");
                 return None;
             }
         };
@@ -143,11 +144,11 @@ impl Music {
         let al_buffers = self.al_buffers;
 
         // create buff
-        let mut samples = Vec::from_elem(sample_t_r as uint, 0i16);
+        let mut samples = vec![0i16; sample_t_r as usize];// as u32, 0i16);
 
         // full buff1
         let mut len = mem::size_of::<i16>() *
-            self.file.as_mut().unwrap().read_i16(samples.as_mut_slice(), sample_t_r as i64) as uint;
+            self.file.as_mut().unwrap().read_i16(samples.as_mut_slice(), sample_t_r as i64) as usize;
         al::alBufferData(al_buffers[0],
                          sample_format,
                          samples.as_ptr() as *mut c_void,
@@ -157,7 +158,7 @@ impl Music {
         // full buff2
         samples.clear();
         len = mem::size_of::<i16>() *
-            self.file.as_mut().unwrap().read_i16(samples.as_mut_slice(), sample_t_r as i64) as uint;
+            self.file.as_mut().unwrap().read_i16(samples.as_mut_slice(), sample_t_r as i64) as usize;
         al::alBufferData(al_buffers[1],
                          sample_format,
                          samples.as_ptr() as *mut c_void,
@@ -170,46 +171,46 @@ impl Music {
         // Launche the Music
         al::alSourcePlay(al_source);
 
-        task::spawn(proc() {
-            match OpenAlData::check_al_context() {
-                Ok(_)       => {},
-                Err(err)    => { println!("{}", err);}
-            };
-
-            let mut file: Box<SndFile> = port.recv();
-            let mut samples = Vec::from_elem(sample_t_r as uint, 0i16);
-            let mut status = ffi::AL_PLAYING;
-            let mut i = 0;
-            let mut buf = 0;
-            let mut read;
-
-            while status != ffi::AL_STOPPED {
-                // wait a bit
-                sleep(Duration::milliseconds(50i64));
-                if status == ffi::AL_PLAYING {
-                    al::alGetSourcei(al_source,
-                                     ffi::AL_BUFFERS_PROCESSED,
-                                     &mut i);
-                    if i != 0 {
-                        samples.clear();
-                        al::alSourceUnqueueBuffers(al_source, 1, &mut buf);
-                        read = file.read_i16(samples.as_mut_slice(), sample_t_r as i64) *
-                            mem::size_of::<i16>() as i64;
-                        al::alBufferData(buf,
-                                         sample_format,
-                                         samples.as_ptr() as *mut c_void,
-                                         read as i32,
-                                         sample_rate);
-                        al::alSourceQueueBuffers(al_source, 1, &buf);
-                    }
-                }
-                // Get source status
-                status = al::alGetState(al_source);
-            }
-            al::alSourcei(al_source, ffi::AL_BUFFER, 0);
+        thread::spawn(move|| {
+//            match OpenAlData::check_al_context() {
+//                Ok(_)       => {},
+//                Err(err)    => { println!("{}", err);}
+//            };
+			let p = port;
+            //let mut file : SndFile = port.recv().ok().unwrap();
+//            let mut samples = vec![0i16; sample_t_r as usize];
+//            let mut status = ffi::AL_PLAYING;
+//            let mut i = 0;
+//            let mut buf = 0;
+//            let mut read ;
+//
+//            while status != ffi::AL_STOPPED {
+//                // wait a bit
+//                sleep_ms(/*Duration::milliseconds(*/50/*)*/);
+//                if status == ffi::AL_PLAYING {
+//                    al::alGetSourcei(al_source,
+//                                     ffi::AL_BUFFERS_PROCESSED,
+//                                     &mut i);
+//                    if i != 0 {
+//                        samples.clear();
+//                        al::alSourceUnqueueBuffers(al_source, 1, &mut buf);
+//                        read = file.read_i16(samples.as_mut_slice(), sample_t_r as i64) *
+//                            mem::size_of::<i16>() as i64;
+//                        al::alBufferData(buf,
+//                                         sample_format,
+//                                         samples.as_ptr() as *mut c_void,
+//                                         read as i32,
+//                                         sample_rate);
+//                        al::alSourceQueueBuffers(al_source, 1, &buf);
+//                    }
+//                }
+//                // Get source status
+//                status = al::alGetState(al_source);
+//            }
+//            al::alSourcei(al_source, ffi::AL_BUFFER, 0);
         });
         let file = self.file.as_ref().unwrap().clone();
-        chan.send(file);
+        chan.send(*file);
     }
 
 }
@@ -239,7 +240,7 @@ impl AudioController for Music {
                 if self.is_playing() {
                     al::alSourceStop(self.al_source);
                     // wait a bit for openal terminate
-                    sleep(Duration::milliseconds(50i64));
+                    sleep_ms(	50);
                 }
                 self.file.as_mut().unwrap().seek(0, SeekSet);
                 self.process_music();
@@ -263,7 +264,7 @@ impl AudioController for Music {
         check_openal_context!(());
 
         al::alSourceStop(self.al_source);
-        sleep(Duration::milliseconds(50i64));
+        sleep_ms(50);
     }
 
     /**
@@ -513,7 +514,7 @@ impl AudioController for Music {
      * * `position` - A three dimensional vector of f32 containing the position
      * of the listener [x, y, z].
      */
-    fn set_position(&mut self, position: [f32, ..3]) -> () {
+    fn set_position(&mut self, position: [f32; 3]) -> () {
         check_openal_context!(());
 
         al::alSourcefv(self.al_source, ffi::AL_POSITION, &position[0]);
@@ -526,10 +527,10 @@ impl AudioController for Music {
      * A three dimensional vector of f32 containing the position of the
      * listener [x, y, z].
      */
-    fn get_position(&self) -> [f32, ..3] {
-        check_openal_context!([0., ..3]);
+    fn get_position(&self) -> [f32; 3] {
+        check_openal_context!([0.; 3]);
 
-        let mut position : [f32, ..3] = [0., ..3];
+        let mut position : [f32; 3] = [0.; 3];
         al::alGetSourcefv(self.al_source, ffi::AL_POSITION, &mut position[0]);
         position
     }
@@ -544,7 +545,7 @@ impl AudioController for Music {
      * # Argument
      * `direction` - The new direction of the Music.
      */
-    fn set_direction(&mut self, direction: [f32, ..3]) -> () {
+    fn set_direction(&mut self, direction: [f32; 3]) -> () {
         check_openal_context!(());
 
         al::alSourcefv(self.al_source, ffi::AL_DIRECTION, &direction[0]);
@@ -556,10 +557,10 @@ impl AudioController for Music {
      * # Return
      * The current direction of the Music.
      */
-    fn get_direction(&self)  -> [f32, ..3] {
-        check_openal_context!([0., ..3]);
+    fn get_direction(&self)  -> [f32; 3] {
+        check_openal_context!([0.; 3]);
 
-        let mut direction : [f32, ..3] = [0., ..3];
+        let mut direction : [f32; 3] = [0.; 3];
         al::alGetSourcefv(self.al_source, ffi::AL_DIRECTION, &mut direction[0]);
         direction
     }

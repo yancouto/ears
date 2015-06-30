@@ -100,7 +100,7 @@ impl SoundData {
 
         let nb_sample = infos.channels as i64 * infos.frames;
 
-        let mut samples = Vec::from_elem(nb_sample as uint, 0i16);
+        let mut samples = vec![0i16; nb_sample as usize];
         file.read_i16(samples.as_mut_slice(), nb_sample as i64);
 
         let mut buffer_id = 0;
@@ -110,7 +110,7 @@ impl SoundData {
         let format =  match al::get_channels_format(infos.channels) {
             Some(fmt) => fmt,
             None => {
-                println!("Internal error : unrecognized format.");
+                println!("internal error : unrecognized format.");
                 return None;
             }
         };
