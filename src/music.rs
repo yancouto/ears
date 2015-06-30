@@ -172,42 +172,42 @@ impl Music {
         al::alSourcePlay(al_source);
 
         thread::spawn(move|| {
-//            match OpenAlData::check_al_context() {
-//                Ok(_)       => {},
-//                Err(err)    => { println!("{}", err);}
-//            };
+            match OpenAlData::check_al_context() {
+                Ok(_)       => {},
+                Err(err)    => { println!("{}", err);}
+            };
 			let p = port;
-            //let mut file : SndFile = port.recv().ok().unwrap();
-//            let mut samples = vec![0i16; sample_t_r as usize];
-//            let mut status = ffi::AL_PLAYING;
-//            let mut i = 0;
-//            let mut buf = 0;
-//            let mut read ;
-//
-//            while status != ffi::AL_STOPPED {
-//                // wait a bit
-//                sleep_ms(/*Duration::milliseconds(*/50/*)*/);
-//                if status == ffi::AL_PLAYING {
-//                    al::alGetSourcei(al_source,
-//                                     ffi::AL_BUFFERS_PROCESSED,
-//                                     &mut i);
-//                    if i != 0 {
-//                        samples.clear();
-//                        al::alSourceUnqueueBuffers(al_source, 1, &mut buf);
-//                        read = file.read_i16(samples.as_mut_slice(), sample_t_r as i64) *
-//                            mem::size_of::<i16>() as i64;
-//                        al::alBufferData(buf,
-//                                         sample_format,
-//                                         samples.as_ptr() as *mut c_void,
-//                                         read as i32,
-//                                         sample_rate);
-//                        al::alSourceQueueBuffers(al_source, 1, &buf);
-//                    }
-//                }
-//                // Get source status
-//                status = al::alGetState(al_source);
-//            }
-//            al::alSourcei(al_source, ffi::AL_BUFFER, 0);
+            let mut file : SndFile = port.recv().ok().unwrap();
+            let mut samples = vec![0i16; sample_t_r as usize];
+            let mut status = ffi::AL_PLAYING;
+            let mut i = 0;
+            let mut buf = 0;
+            let mut read ;
+
+            while status != ffi::AL_STOPPED {
+                // wait a bit
+                sleep_ms(/*Duration::milliseconds(*/50/*)*/);
+                if status == ffi::AL_PLAYING {
+                    al::alGetSourcei(al_source,
+                                     ffi::AL_BUFFERS_PROCESSED,
+                                     &mut i);
+                    if i != 0 {
+                        samples.clear();
+                        al::alSourceUnqueueBuffers(al_source, 1, &mut buf);
+                        read = file.read_i16(samples.as_mut_slice(), sample_t_r as i64) *
+                            mem::size_of::<i16>() as i64;
+                        al::alBufferData(buf,
+                                         sample_format,
+                                         samples.as_ptr() as *mut c_void,
+                                         read as i32,
+                                         sample_rate);
+                        al::alSourceQueueBuffers(al_source, 1, &buf);
+                    }
+                }
+                // Get source status
+                status = al::alGetState(al_source);
+            }
+            al::alSourcei(al_source, ffi::AL_BUFFER, 0);
         });
         let file = self.file.as_ref().unwrap().clone();
         chan.send(*file);

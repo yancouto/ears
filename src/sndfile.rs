@@ -240,7 +240,7 @@ impl BitOr for FormatType {
 
 /// SndFile object, used to load/store sound from a file path or an fd.
 pub struct SndFile {
-    handle : usize,//*mut ffi::SNDFILE,
+    handle : usize,//*const ffi::SNDFILE,
     info : Box<SndInfo>
 }
 
@@ -275,11 +275,11 @@ impl SndFile {
         });
 		let c_path = CString::new(path).unwrap();
         let tmp_sndfile = {
-            unsafe {transmute(ffi::sf_open(c_path.as_ptr() as *mut i8, mode as i32, &mut *info)) }
+            unsafe {ffi::sf_open(c_path.as_ptr() as *mut i8, mode as i32, &mut *info) }
         };
-        if tmp_sndfile  {
+        if tmp_sndfile == 0 {
             Err(unsafe {
-                from_utf8(CStr::from_ptr(ffi::sf_strerror(ptr::null_mut()) as *const i8).to_bytes()).unwrap().to_owned()
+                from_utf8(CStr::from_ptr(ffi::sf_strerror(0) as *const i8).to_bytes()).unwrap().to_owned()
             })
         } else {
             Ok(SndFile {
@@ -305,9 +305,9 @@ impl SndFile {
         let tmp_sndfile = {
             unsafe {ffi::sf_open(c_path.as_ptr() as *mut i8, mode as i32, &mut *info) }
         };
-        if tmp_sndfile.is_null() {
+        if tmp_sndfile == 0 {
             Err(unsafe {
-                from_utf8(CStr::from_ptr(ffi::sf_strerror(ptr::null_mut()) as *const i8).to_bytes()).unwrap().to_owned()
+                from_utf8(CStr::from_ptr(ffi::sf_strerror(0) as *const i8).to_bytes()).unwrap().to_owned()
             })
         } else {
             Ok(SndFile {
@@ -349,9 +349,9 @@ impl SndFile {
                 ffi::sf_open_fd(fd, mode as i32, &mut *info, ffi::SF_FALSE)
             }
         };
-        if tmp_sndfile.is_null() {
+        if tmp_sndfile == 0 {
             Err(unsafe {
-                from_utf8(CStr::from_ptr(ffi::sf_strerror(ptr::null_mut()) as *const i8).to_bytes()).unwrap().to_owned()
+                from_utf8(CStr::from_ptr(ffi::sf_strerror(0) as *const i8).to_bytes()).unwrap().to_owned()
             })
         } else {
             Ok(SndFile {
