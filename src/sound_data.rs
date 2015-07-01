@@ -101,7 +101,7 @@ impl SoundData {
         let nb_sample = infos.channels as i64 * infos.frames;
 
         let mut samples = vec![0i16; nb_sample as usize];
-        file.read_i16(samples.as_mut_slice(), nb_sample as i64);
+        file.read_i16(&mut samples[..], nb_sample as i64);
 
         let mut buffer_id = 0;
         let len = mem::size_of::<i16>() * (samples.len());

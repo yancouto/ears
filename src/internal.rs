@@ -25,7 +25,7 @@
 //! to be sure that the context is created.
 
 #![macro_use]
-#![allow(raw_pointer_deriving)]
+#![allow(raw_pointer_derive)]
 
 use std::ffi::CString;
 use std::cell::RefCell;
@@ -38,9 +38,9 @@ thread_local!(static AL_CONTEXT: RefCell<Box<OpenAlData>> = RefCell::new(Box::ne
 
 #[derive(Clone)]
 pub struct OpenAlData {
-    pub al_context: *mut ffi::ALCcontext,
-    pub al_device: *mut ffi::ALCdevice,
-    pub al_capt_device: *mut ffi::ALCdevice
+    pub al_context: usize,
+    pub al_device: usize,
+    pub al_capt_device: usize
 }
 
 impl OpenAlData {
@@ -49,11 +49,11 @@ impl OpenAlData {
     /// Private method.
     fn new() -> Result<OpenAlData, String> {
         let device = unsafe { ffi::alcOpenDevice(ptr::null_mut()) };
-        if device.is_null() {
+        if device == 0 {
             return Err("internal error: cannot open the default device.".to_string());
         }
         let context = unsafe { ffi::alcCreateContext(device, ptr::null_mut()) };
-        if context.is_null() {
+        if context == 0 {
             return Err("internal error: cannot create the OpenAL context.".to_string());
         }
         if unsafe { ffi::alcMakeContextCurrent(context) } == ffi::ALC_FALSE {
@@ -64,23 +64,23 @@ impl OpenAlData {
             OpenAlData {
                 al_context: context,
                 al_device: device,
-                al_capt_device: ptr::null_mut()
+                al_capt_device: 0
             }
         )
     }
 
     fn default() -> OpenAlData {
         OpenAlData {
-            al_context: ptr::null_mut(),
-            al_device: ptr::null_mut(),
-            al_capt_device: ptr::null_mut()
+            al_context: 0,
+            al_device: 0,
+            al_capt_device: 0
         }
     }
 
     fn is_default(&self) -> bool {
-        if self.al_context.is_null() &&
-           self.al_device.is_null() &&
-           self.al_capt_device.is_null() {
+        if self.al_context == 0 &&
+           self.al_device == 0 &&
+           self.al_capt_device == 0 {
             false
         } else {
             true
@@ -97,7 +97,7 @@ impl OpenAlData {
     /// A result containing nothing if the OpenAlData struct exist,
     /// otherwise an error message.
     pub fn check_al_context() -> Result<(), String> {
-        if unsafe { !ffi::alcGetCurrentContext().is_null() } {
+        if unsafe { !ffi::alcGetCurrentContext() == 0 } {
             return Ok(())
         }
         AL_CONTEXT.with(|f| {
@@ -121,7 +121,7 @@ impl OpenAlData {
             let is_def = f.borrow_mut().is_default();
             if !is_def {
                 let mut new_context = f.borrow_mut();
-                if !new_context.al_capt_device.is_null() {
+                if !new_context.al_capt_device == 0 {
                     Ok(record_context::new(new_context.al_capt_device))
                 } else {				
 					let c_str = CString::new("ALC_EXT_CAPTURE").unwrap();
@@ -134,7 +134,7 @@ impl OpenAlData {
                                                   44100,
                                                   ffi::AL_FORMAT_MONO16,
                                                   44100) };
-                        if new_context.al_capt_device.is_null() {
+                        if new_context.al_capt_device == 0 {
                             return Err("internal error: cannot open the default capture device.".to_string())
                         } else {
                            let cap_device = new_context.al_capt_device;
@@ -161,7 +161,7 @@ impl OpenAlData {
     /// A result containing nothing if the OpenAlData struct exist,
     /// otherwise an error message.
     pub fn check_al_input_context() -> Result<RecordContext, String> {
-        if unsafe { !ffi::alcGetCurrentContext().is_null() } {
+        if unsafe { !ffi::alcGetCurrentContext() == 0 } {
             OpenAlData::is_input_context_init()
         } else {
             match OpenAlData::check_al_context() {
@@ -176,7 +176,7 @@ impl Drop for OpenAlData {
     fn drop(&mut self) {
         unsafe {
             ffi::alcDestroyContext(self.al_context);
-            if !self.al_capt_device.is_null() {
+            if !self.al_capt_device == 0 {
                 ffi::alcCaptureCloseDevice(self.al_capt_device);
             }
             ffi::alcCloseDevice(self.al_device);

@@ -24,7 +24,7 @@
 use std::thread::sleep_ms;
 use std::mem;
 use std::thread;
-use std::time::Duration;
+//use std::time::Duration;
 use libc::c_void;
 use std::vec::Vec;
 use std::sync::mpsc::{channel, Sender, Receiver};
@@ -148,7 +148,7 @@ impl Music {
 
         // full buff1
         let mut len = mem::size_of::<i16>() *
-            self.file.as_mut().unwrap().read_i16(samples.as_mut_slice(), sample_t_r as i64) as usize;
+            self.file.as_mut().unwrap().read_i16(&mut samples[..], sample_t_r as i64) as usize;
         al::alBufferData(al_buffers[0],
                          sample_format,
                          samples.as_ptr() as *mut c_void,
@@ -158,7 +158,7 @@ impl Music {
         // full buff2
         samples.clear();
         len = mem::size_of::<i16>() *
-            self.file.as_mut().unwrap().read_i16(samples.as_mut_slice(), sample_t_r as i64) as usize;
+            self.file.as_mut().unwrap().read_i16(&mut samples[..], sample_t_r as i64) as usize;
         al::alBufferData(al_buffers[1],
                          sample_format,
                          samples.as_ptr() as *mut c_void,
@@ -176,7 +176,6 @@ impl Music {
                 Ok(_)       => {},
                 Err(err)    => { println!("{}", err);}
             };
-			let p = port;
             let mut file : SndFile = port.recv().ok().unwrap();
             let mut samples = vec![0i16; sample_t_r as usize];
             let mut status = ffi::AL_PLAYING;
@@ -194,7 +193,7 @@ impl Music {
                     if i != 0 {
                         samples.clear();
                         al::alSourceUnqueueBuffers(al_source, 1, &mut buf);
-                        read = file.read_i16(samples.as_mut_slice(), sample_t_r as i64) *
+                        read = file.read_i16(&mut samples[..], sample_t_r as i64) *
                             mem::size_of::<i16>() as i64;
                         al::alBufferData(buf,
                                          sample_format,

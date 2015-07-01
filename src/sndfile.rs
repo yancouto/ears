@@ -378,7 +378,7 @@ impl SndFile {
         let c_string = unsafe {
             ffi::sf_get_string(self.handle, string_type as i32)
         };
-        if c_string.is_null() {
+        if c_string == ptr::null_mut() {
             None
         } else {
             Some(unsafe {
@@ -400,7 +400,7 @@ impl SndFile {
     pub fn set_string(&mut self,
                       string_type : StringSoundType,
                       string : String) -> Error {
-  		let c_string = CString::new(string).unwrap();
+  		//let c_string = CString::new(string).unwrap();
         unsafe {
             ffi::sf_set_string(self.handle,
                                string_type as i32,

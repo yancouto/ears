@@ -691,7 +691,7 @@ impl AudioController for Sound {
 
 }
 
-#[unsafe_destructor]
+//#[unsafe_destructor]
 impl Drop for Sound {
     ///Destroy all the resources attached to the Sound.
     fn drop(&mut self) -> () {

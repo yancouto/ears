@@ -86,14 +86,14 @@ pub mod ffi {
 
     extern "C" {
         /// Context functions
-        pub fn alcCreateContext(device: *mut ALCdevice, attrlist: *mut i32) -> *mut ALCcontext;
-        pub fn alcMakeContextCurrent(context: *mut ALCcontext) -> ALCboolean;
-        pub fn alcDestroyContext(context: *mut ALCcontext);
-        pub fn alcGetCurrentContext() -> *mut ALCcontext;
+        pub fn alcCreateContext(device: usize, attrlist: *mut i32) -> usize;
+        pub fn alcMakeContextCurrent(context: usize) -> ALCboolean;
+        pub fn alcDestroyContext(context: usize);
+        pub fn alcGetCurrentContext() -> usize;
 
         /// Device functions
-        pub fn alcOpenDevice(devicename: *mut c_char) -> *mut ALCdevice;
-        pub fn alcCloseDevice(device: *mut ALCdevice) -> ALCboolean;
+        pub fn alcOpenDevice(devicename: *mut c_char) -> usize;
+        pub fn alcCloseDevice(device: usize) -> ALCboolean;
 
         /// Listener functions
         pub fn alListenerf(param: i32, value: f32) -> ();
@@ -119,15 +119,15 @@ pub mod ffi {
         pub fn alSourceUnqueueBuffers(source: u32, nb: i32, buffers: *mut u32) -> ();
 
         /// Sound capture functions
-        pub fn alcCaptureCloseDevice(device: *mut ALCdevice) -> ALCboolean;
-        pub fn alcCaptureOpenDevice(device: *mut c_char, sample_rate: i32, format: i32, buffer_size: i32) -> *mut ALCdevice;
-        pub fn alcCaptureStart(devide: *mut ALCdevice);
-        pub fn alcCaptureStop(devide: *mut ALCdevice);
-        pub fn alcGetIntegerv(devide: *mut ALCdevice, param: i32,  size: i32, values: *mut i32);
-        pub fn alcCaptureSamples(devide: *mut ALCdevice, buffer: *mut c_void,sample: i32);
+        pub fn alcCaptureCloseDevice(device: usize) -> ALCboolean;
+        pub fn alcCaptureOpenDevice(device: *mut c_char, sample_rate: i32, format: i32, buffer_size: i32) -> usize;
+        pub fn alcCaptureStart(devide: usize);
+        pub fn alcCaptureStop(devide: usize);
+        pub fn alcGetIntegerv(devide: usize, param: i32,  size: i32, values: *mut i32);
+        pub fn alcCaptureSamples(devide: usize, buffer: *mut c_void,sample: i32);
 
         /// extension check
-        pub fn alcIsExtensionPresent(device: *mut ALCdevice, extension: *const c_char) -> ALCboolean;
+        pub fn alcIsExtensionPresent(device: usize, extension: *const c_char) -> ALCboolean;
 
         /// Buffers functions
         pub fn alGenBuffers(n: i32, buffers: *mut u32) -> ();

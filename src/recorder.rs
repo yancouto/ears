@@ -31,6 +31,7 @@ use openal::ffi;
 use sndfile::{SndInfo, SndFile};
 use sndfile::OpenMode::Write;
 use sndfile::FormatType::{FormatWav, FormatPcm16};
+use std::intrinsics::transmute;
 
 /**
  * Record audio
@@ -90,7 +91,7 @@ impl Recorder {
         self.stop_sender = Some(stop_sender);
         self.data_receiver = Some(data_receiver);
 
-        thread::spawn(|| {
+        thread::spawn(move || {
             let mut terminate = false;
             let ctxt = record_context::get(r_c);
             unsafe { ffi::alcCaptureStart(ctxt); }
@@ -106,11 +107,10 @@ impl Recorder {
                 };
 
                 if available_samples != 0 {
-                    let tmp_buf =
-                        vec![0i16; available_samples as usize];
+                    let tmp_buf = vec![0i16; available_samples as usize];
                     unsafe {
                         ffi::alcCaptureSamples(ctxt,
-                                               mem::transmute(&tmp_buf.as_slice()[0]),
+                                               transmute(&tmp_buf[0]),
                                                available_samples);
                     }
                     samples.extend(tmp_buf.into_iter());
@@ -121,7 +121,7 @@ impl Recorder {
                         unsafe { ffi::alcCaptureStop(ctxt); }
                         terminate = true;
                     },
-                    _       => {}
+                    _ => {}
                 }
             }
             data_sender.send(samples);
@@ -157,12 +157,14 @@ impl Recorder {
                 seekable : 0
             });	
 
-            let mut file_ext = String::from_str(filename);
+	
+            let mut file_ext = String::new();
+            file_ext.push_str(filename);
             file_ext.push_str(".wav");
-            match SndFile::new_with_info(file_ext.as_str(), Write, infos) {
+            match SndFile::new_with_info(file_ext.as_ref(), Write, infos) {
                 Ok(mut f) => {
                     let len = self.samples.len() as i64;
-                    f.write_i16(self.samples.as_mut_slice(), len);
+                    f.write_i16(&mut self.samples[..], len);
                     f.close();
                     true
                 },

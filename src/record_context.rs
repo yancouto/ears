@@ -19,22 +19,22 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#![allow(raw_pointer_deriving)]
+#![allow(raw_pointer_derive)]
 
 use openal::ffi;
 
 /// The context needed to initialize a new Recorder
 #[derive(Clone, PartialEq, Debug, Copy)]
 pub struct RecordContext {
-    capt_device: *mut ffi::ALCdevice
+    capt_device: usize
 }
 
-pub fn new(capt_device: *mut ffi::ALCdevice) -> RecordContext {
+pub fn new(capt_device: usize) -> RecordContext {
     RecordContext {
         capt_device: capt_device
     }
 }
 
-pub fn get(ctxt: RecordContext) -> *mut ffi::ALCdevice {
+pub fn get(ctxt: RecordContext) -> usize {
     ctxt.capt_device
 }
