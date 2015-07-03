@@ -26,7 +26,8 @@
 
 #![allow(dead_code, non_snake_case)]
 
-#[link(name = "openal")]
+#[link(name = "libsndfile-1")]
+#[link(name = "openal32")]
 extern {}
 
 pub mod ffi {

@@ -24,7 +24,8 @@
 extern crate ears;
 
 use std::io::stdin;
-use std::io::stdio::flush;
+use std::io::stdout;
+use std::io::Write;
 
 use ears::{Music, AudioController};
 use ears::State::{Playing, Stopped, Paused};
@@ -35,13 +36,14 @@ fn main() {
     let mut stdin = stdin();
 
     print!("Insert the path to an audio file : ");
-    flush();
+    stdout().flush().ok();
 
-    let mut line = stdin.read_line().unwrap();
+    let mut line = String::new();
+    stdin.read_line(&mut line).ok();
     unsafe { line.as_mut_vec().pop(); }
 
     // Try to create the music
-    let mut music = match Music::new(line.as_slice()) {
+    let mut music = match Music::new(&line[..]) {
         Some(music) => music,
         None        => panic!("Cannot load the music.")
     };
@@ -52,7 +54,9 @@ fn main() {
     loop {
         // Make your choice
         println!("Commands :\n\tPlay  : l\n\tPause : p\n\tStop  : s\n\tExit  : x\n");
-        match stdin.read_line().unwrap().as_slice() {
+        let mut cmd = String::new();
+        stdin.read_line(&mut cmd).ok();
+        match &cmd[..] {
             "l\n"    => music.play(),
             "p\n"    => music.pause(),
             "s\n"    => music.stop(),

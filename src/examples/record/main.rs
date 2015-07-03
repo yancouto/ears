@@ -23,8 +23,7 @@
 
 extern crate ears;
 
-use std::time::Duration;
-use std::io::timer::sleep;
+use std::thread::sleep_ms;
 
 fn main() -> () {
     // call ears_init() function to ensure that the ears context is not destroyed by a task.
@@ -36,7 +35,7 @@ fn main() -> () {
     // Create a new Recorder using the RecordContext
     let mut recorder = ears::Recorder::new(ctxt);
     recorder.start();
-    sleep_ms(Duration::milliseconds(5000i64));
+    sleep_ms(5000);
     recorder.stop();
     match recorder.save_to_file("hello") {
         true => println!("Save okay !"),
