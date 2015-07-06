@@ -25,7 +25,8 @@
 */
 
 #![allow(dead_code, non_snake_case)]
-
+//#![feature(link_args)]
+//#[link_args = "-LC:\\Develop\\ears\\target\\debug"]
 #[link(name = "libsndfile-1")]
 #[link(name = "openal32")]
 extern {}

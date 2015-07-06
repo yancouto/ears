@@ -827,7 +827,7 @@ mod test {
 
         msc.set_position([50., 150., 250.]);
         let res = msc.get_position();
-        assert_eq!([res[0], res[1], res[2]][], [50f32, 150f32, 250f32][]);
+        assert_eq!([res[0], res[1], res[2]], [50f32, 150f32, 250f32]);
     }
 
     #[test]
@@ -836,7 +836,7 @@ mod test {
 
         msc.set_direction([50., 150., 250.]);
         let res = msc.get_direction();
-        assert_eq!([res[0], res[1], res[2]][], [50f32, 150f32, 250f32][]);
+        assert_eq!([res[0], res[1], res[2]], [50f32, 150f32, 250f32]);
     }
 
     #[test]

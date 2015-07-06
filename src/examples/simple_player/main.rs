@@ -36,11 +36,13 @@ fn main() {
     let mut stdin = stdin();
 
     print!("Insert the path to an audio file : ");
-    stdout().flush().ok();
+   	stdout().flush().ok();
 
     let mut line = String::new();
-    stdin.read_line(&mut line).ok();
-    unsafe { line.as_mut_vec().pop(); }
+    line.push_str("C:/Develop/ears/target/debug/spawn_7.wav");
+   // stdin.read_line(&mut line).ok();
+    //unsafe { line.as_mut_vec().pop(); }
+    //unsafe { line.as_mut_vec().pop(); }
 
     // Try to create the music
     let mut music = match Music::new(&line[..]) {

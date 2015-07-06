@@ -197,7 +197,7 @@ mod test {
     }
 
     #[test]
-    #[should_fail]
+    #[should_panic]
     fn sounddata_create_FAIL() -> () {
         #![allow(unused_variables)]
         let snd_data = SoundData::new("toto.wav").unwrap();

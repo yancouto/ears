@@ -79,6 +79,7 @@ mod test {
 
     use init;
     use init_in;
+	use std::thread;
 
     #[test]
     fn test_init_ears_OK() -> () {
@@ -101,8 +102,8 @@ mod test {
     #[test]
     fn test_init_in_in_another_task_OK() -> () {
         init();
-        spawn(|| {
+        thread::spawn(move || {
             assert_eq!(init_in(), None)
-        })
+        });
     }
 }
