@@ -22,7 +22,7 @@
 #![allow(dead_code, non_camel_case_types)]
 
 use super::{SndInfo, Error};
-use libc::{c_char, c_void};
+use libc::{c_char, c_void, intptr_t};
 
 pub type SF_MODE = i32;
 pub const SFM_READ : SF_MODE   = 0x10;
@@ -120,6 +120,7 @@ pub const SF_FORMAT_TYPEMASK : FORMAT_TYPE     = 0x0FFF0000;
 pub const SF_FORMAT_ENDMASK : FORMAT_TYPE      = 0x30000000;
 
 pub type SNDFILE = c_void;
+pub type SNDFILEhandle = intptr_t;
 
 #[repr(C)]
 pub struct FormatInfo {
@@ -129,47 +130,47 @@ pub struct FormatInfo {
 }
 
 extern "C" {
-    pub fn sf_open(path : *mut c_char, mode : SF_MODE, info : *mut SndInfo) -> usize;
-    pub fn sf_open_fd(fd : i32, mode : SF_MODE, info : *mut SndInfo, close_desc : SF_BOOL) -> usize;
+    pub fn sf_open(path : *mut c_char, mode : SF_MODE, info : *mut SndInfo) -> SNDFILEhandle;
+    pub fn sf_open_fd(fd : i32, mode : SF_MODE, info : *mut SndInfo, close_desc : SF_BOOL) -> SNDFILEhandle;
     pub fn sf_format_check(info : *mut SndInfo) -> SF_BOOL;
 
-    pub fn sf_seek(sndfile : usize, frames : i64, whence : i32) -> i64;
-    pub fn sf_command(sndfile : usize, cmd : i32, data : *mut c_void, datasize : i32) -> Error;
+    pub fn sf_seek(sndfile : SNDFILEhandle, frames : i64, whence : i32) -> i64;
+    pub fn sf_command(sndfile : SNDFILEhandle, cmd : i32, data : *mut c_void, datasize : i32) -> Error;
 
-    pub fn sf_error(sndfile : usize) -> Error;
-    pub fn sf_strerror(sndfile : usize) -> *mut c_char;
+    pub fn sf_error(sndfile : SNDFILEhandle) -> Error;
+    pub fn sf_strerror(sndfile : SNDFILEhandle) -> *mut c_char;
     pub fn sf_error_number(errnum : i32) -> *mut c_char;
 
-    pub fn sf_perror(sndfile : usize) -> Error;
-    pub fn sf_error_str(sndfile : usize, string : *mut c_char, len : i64) ;
+    pub fn sf_perror(sndfile : SNDFILEhandle) -> Error;
+    pub fn sf_error_str(sndfile : SNDFILEhandle, string : *mut c_char, len : i64) ;
 
-    pub fn sf_close(sndfile : usize) -> Error;
-    pub fn sf_write_sync(sndfile : usize) -> ();
+    pub fn sf_close(sndfile : SNDFILEhandle) -> Error;
+    pub fn sf_write_sync(sndfile : SNDFILEhandle) -> ();
 
-    pub fn sf_read_short(sndfile : usize, ptr : *mut i16, items : i64) -> i64;
-    pub fn sf_read_int(sndfile : usize, ptr : *mut i32, items : i64) -> i64;
-    pub fn sf_read_float(sndfile : usize, ptr : *mut f32, items : i64) -> i64;
-    pub fn sf_read_double(sndfile : usize, ptr : *mut f64, items : i64) -> i64;
+    pub fn sf_read_short(sndfile : SNDFILEhandle, ptr : *mut i16, items : i64) -> i64;
+    pub fn sf_read_int(sndfile : SNDFILEhandle, ptr : *mut i32, items : i64) -> i64;
+    pub fn sf_read_float(sndfile : SNDFILEhandle, ptr : *mut f32, items : i64) -> i64;
+    pub fn sf_read_double(sndfile : SNDFILEhandle, ptr : *mut f64, items : i64) -> i64;
 
-    pub fn sf_readf_short(sndfile : usize, ptr : *mut i16, frames : i64) -> i64;
-    pub fn sf_readf_int(sndfile : usize, ptr : *mut i32, frames : i64) -> i64;
-    pub fn sf_readf_float(sndfile : usize, ptr : *mut f32, frames : i64) -> i64;
-    pub fn sf_readf_double(sndfile : usize, ptr : *mut f64, frames : i64) -> i64;
+    pub fn sf_readf_short(sndfile : SNDFILEhandle, ptr : *mut i16, frames : i64) -> i64;
+    pub fn sf_readf_int(sndfile : SNDFILEhandle, ptr : *mut i32, frames : i64) -> i64;
+    pub fn sf_readf_float(sndfile : SNDFILEhandle, ptr : *mut f32, frames : i64) -> i64;
+    pub fn sf_readf_double(sndfile : SNDFILEhandle, ptr : *mut f64, frames : i64) -> i64;
 
-    pub fn sf_write_short(sndfile : usize, ptr : *mut i16, items : i64) -> i64;
-    pub fn sf_write_int(sndfile : usize, ptr : *mut i32, items : i64) -> i64;
-    pub fn sf_write_float(sndfile : usize, ptr : *mut f32, items : i64) -> i64;
-    pub fn sf_write_double(sndfile : usize, ptr : *mut f64, items : i64) -> i64;
+    pub fn sf_write_short(sndfile : SNDFILEhandle, ptr : *mut i16, items : i64) -> i64;
+    pub fn sf_write_int(sndfile : SNDFILEhandle, ptr : *mut i32, items : i64) -> i64;
+    pub fn sf_write_float(sndfile : SNDFILEhandle, ptr : *mut f32, items : i64) -> i64;
+    pub fn sf_write_double(sndfile : SNDFILEhandle, ptr : *mut f64, items : i64) -> i64;
 
-    pub fn sf_writef_short(sndfile : usize, ptr : *mut i16, frames : i64) -> i64;
-    pub fn sf_writef_int(sndfile : usize, ptr : *mut i32, frames : i64) -> i64;
-    pub fn sf_writef_float(sndfile : usize, ptr : *mut f32, frames : i64) -> i64;
-    pub fn sf_writef_double(sndfile : usize, ptr : *mut f64, frames : i64) -> i64;
+    pub fn sf_writef_short(sndfile : SNDFILEhandle, ptr : *mut i16, frames : i64) -> i64;
+    pub fn sf_writef_int(sndfile : SNDFILEhandle, ptr : *mut i32, frames : i64) -> i64;
+    pub fn sf_writef_float(sndfile : SNDFILEhandle, ptr : *mut f32, frames : i64) -> i64;
+    pub fn sf_writef_double(sndfile : SNDFILEhandle, ptr : *mut f64, frames : i64) -> i64;
+ 
+    pub fn sf_read_raw(sndfile : SNDFILEhandle, ptr : *mut c_void, bytes : i64) -> i64;
+    pub fn sf_write_raw(sndfile : SNDFILEhandle, ptr : *mut c_void, bytes : i64) -> i64;
 
-    pub fn sf_read_raw(sndfile : usize, ptr : *mut c_void, bytes : i64) -> i64;
-    pub fn sf_write_raw(sndfile : usize, ptr : *mut c_void, bytes : i64) -> i64;
-
-    pub fn sf_get_string(sndfile : usize, str_type : i32) -> *mut c_char;
-    pub fn sf_set_string(sndfile : usize, str_type : i32, string : *mut c_char) -> Error;
+    pub fn sf_get_string(sndfile : SNDFILEhandle, str_type : i32) -> *mut c_char;
+    pub fn sf_set_string(sndfile : SNDFILEhandle, str_type : i32, string : *mut c_char) -> Error;
 
 }

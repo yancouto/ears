@@ -240,7 +240,7 @@ impl BitOr for FormatType {
 
 /// SndFile object, used to load/store sound from a file path or an fd.
 pub struct SndFile {
-    handle : usize,//*const ffi::SNDFILE,
+    handle : ffi::SNDFILEhandle, //*const ffi::SNDFILE,
     info : Box<SndInfo>
 }
 

@@ -99,9 +99,9 @@ use ears::Music;
 //#![feature(unsafe_destructor)]
 
 #![allow(unused_imports)]
-#![allow(raw_pointer_derive)]
+//#![allow(raw_pointer_derive)] 
 #![allow(unused_must_use)]
-#![allow(improper_ctypes)]
+//#![allow(improper_ctypes)]
 
 extern crate libc;
 

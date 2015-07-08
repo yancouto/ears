@@ -25,18 +25,18 @@
 */
 
 #![allow(dead_code, non_snake_case)]
-//#![feature(link_args)]
-//#[link_args = "-LC:\\Develop\\ears\\target\\debug"]
 #[link(name = "libsndfile-1")]
 #[link(name = "openal32")]
 extern {}
 
 pub mod ffi {
 
-    use libc::{c_char, c_void};
+    use libc::{c_char, c_void, intptr_t };
 
     /// OpenAL types
     pub type ALCboolean = c_char;
+    pub type ALCdevicePtr = intptr_t;
+    pub type ALCcontextPtr = intptr_t;
     pub const ALC_TRUE:               ALCboolean  = 1;
     pub const ALC_FALSE:              ALCboolean  = 0;
 
@@ -88,14 +88,14 @@ pub mod ffi {
 
     extern "C" {
         /// Context functions
-        pub fn alcCreateContext(device: usize, attrlist: *mut i32) -> usize;
-        pub fn alcMakeContextCurrent(context: usize) -> ALCboolean;
-        pub fn alcDestroyContext(context: usize);
-        pub fn alcGetCurrentContext() -> usize;
+        pub fn alcCreateContext(device: ALCdevicePtr, attrlist: *mut i32) -> ALCcontextPtr;
+        pub fn alcMakeContextCurrent(context: ALCcontextPtr) -> ALCboolean;
+        pub fn alcDestroyContext(context: ALCcontextPtr);
+        pub fn alcGetCurrentContext() -> ALCcontextPtr;
 
         /// Device functions
-        pub fn alcOpenDevice(devicename: *mut c_char) -> usize;
-        pub fn alcCloseDevice(device: usize) -> ALCboolean;
+        pub fn alcOpenDevice(devicename: *mut c_char) -> ALCdevicePtr;
+        pub fn alcCloseDevice(device: ALCdevicePtr) -> ALCboolean;
 
         /// Listener functions
         pub fn alListenerf(param: i32, value: f32) -> ();
@@ -121,15 +121,15 @@ pub mod ffi {
         pub fn alSourceUnqueueBuffers(source: u32, nb: i32, buffers: *mut u32) -> ();
 
         /// Sound capture functions
-        pub fn alcCaptureCloseDevice(device: usize) -> ALCboolean;
-        pub fn alcCaptureOpenDevice(device: *mut c_char, sample_rate: i32, format: i32, buffer_size: i32) -> usize;
-        pub fn alcCaptureStart(devide: usize);
-        pub fn alcCaptureStop(devide: usize);
-        pub fn alcGetIntegerv(devide: usize, param: i32,  size: i32, values: *mut i32);
-        pub fn alcCaptureSamples(devide: usize, buffer: *mut c_void,sample: i32);
+        pub fn alcCaptureCloseDevice(device: ALCdevicePtr) -> ALCboolean;
+        pub fn alcCaptureOpenDevice(device: *mut c_char, sample_rate: i32, format: i32, buffer_size: i32) -> ALCdevicePtr;
+        pub fn alcCaptureStart(devide: ALCdevicePtr);
+        pub fn alcCaptureStop(devide: ALCdevicePtr);
+        pub fn alcGetIntegerv(devide: ALCdevicePtr, param: i32,  size: i32, values: *mut i32);
+        pub fn alcCaptureSamples(devide: ALCdevicePtr, buffer: *mut c_void,sample: i32);
 
         /// extension check
-        pub fn alcIsExtensionPresent(device: usize, extension: *const c_char) -> ALCboolean;
+        pub fn alcIsExtensionPresent(device: ALCdevicePtr, extension: *const c_char) -> ALCboolean;
 
         /// Buffers functions
         pub fn alGenBuffers(n: i32, buffers: *mut u32) -> ();
@@ -141,7 +141,6 @@ pub mod ffi {
     }
 
     #[repr(C)]
-    //#[derive(Sync)]
     pub struct ALCdevice;
     #[repr(C)]
     pub struct ALCcontext;

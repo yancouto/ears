@@ -26,15 +26,15 @@ use openal::ffi;
 /// The context needed to initialize a new Recorder
 #[derive(Clone, PartialEq, Debug, Copy)]
 pub struct RecordContext {
-    capt_device: usize
+    capt_device: ffi::ALCdevicePtr
 }
 
-pub fn new(capt_device: usize) -> RecordContext {
+pub fn new(capt_device: ffi::ALCdevicePtr) -> RecordContext {
     RecordContext {
         capt_device: capt_device
     }
 }
 
-pub fn get(ctxt: RecordContext) -> usize {
+pub fn get(ctxt: RecordContext) -> ffi::ALCdevicePtr {
     ctxt.capt_device
 }

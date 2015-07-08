@@ -38,9 +38,9 @@ thread_local!(static AL_CONTEXT: RefCell<Box<OpenAlData>> = RefCell::new(Box::ne
 
 #[derive(Clone)]
 pub struct OpenAlData {
-    pub al_context: usize,
-    pub al_device: usize,
-    pub al_capt_device: usize
+    pub al_context: ffi::ALCcontextPtr,
+    pub al_device: ffi::ALCdevicePtr,
+    pub al_capt_device: ffi::ALCdevicePtr
 }
 
 impl OpenAlData {
@@ -97,7 +97,7 @@ impl OpenAlData {
     /// A result containing nothing if the OpenAlData struct exist,
     /// otherwise an error message.
     pub fn check_al_context() -> Result<(), String> {
-        if unsafe { !ffi::alcGetCurrentContext() == 0 } {
+        if unsafe { ffi::alcGetCurrentContext() != 0 } {
             return Ok(())
         }
         AL_CONTEXT.with(|f| {
