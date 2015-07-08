@@ -81,9 +81,9 @@ impl OpenAlData {
         if self.al_context == 0 &&
            self.al_device == 0 &&
            self.al_capt_device == 0 {
-            false
-        } else {
             true
+        } else {
+            false
         }
     }
 
