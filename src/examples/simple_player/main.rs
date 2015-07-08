@@ -39,10 +39,14 @@ fn main() {
    	stdout().flush().ok();
 
     let mut line = String::new();
-    line.push_str("C:/Develop/ears/target/debug/spawn_7.wav");
-   // stdin.read_line(&mut line).ok();
-    //unsafe { line.as_mut_vec().pop(); }
-    //unsafe { line.as_mut_vec().pop(); }
+    stdin.read_line(&mut line).ok();
+    loop {
+    	match &line[line.len()-1..] {
+    		"\n" => { line.pop(); () },
+    		"\r" => { line.pop(); () },	
+    		_ => { break; },
+    	}
+    }
 
     // Try to create the music
     let mut music = match Music::new(&line[..]) {
@@ -58,12 +62,12 @@ fn main() {
         println!("Commands :\n\tPlay  : l\n\tPause : p\n\tStop  : s\n\tExit  : x\n");
         let mut cmd = String::new();
         stdin.read_line(&mut cmd).ok();
-        match &cmd[..] {
-            "l\n"    => music.play(),
-            "p\n"    => music.pause(),
-            "s\n"    => music.stop(),
-            "x\n"    => { music.stop(); break; },
-            _       => println!("Unknwon command.")
+        match &cmd[..1] {
+            "l" => music.play(),
+            "p" => music.pause(),
+            "s" => music.stop(),
+            "x" => { music.stop(); break; },
+            _ => println!("Unknwon command.")
         }
         match music.get_state() {
             Playing => println!("State : Playing"),
