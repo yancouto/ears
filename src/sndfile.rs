@@ -43,9 +43,12 @@ use std::i32::*;
 use std::intrinsics::transmute;
 
 #[doc(hidden)]
-#[cfg(any(target_os="macos", target_os="linux", target_os="win32"))]
 mod libsndfile {
+    #[cfg(unix)]
     #[link(name = "sndfile")]
+    extern {}
+    #[cfg(not(unix))]
+    #[link(name = "sndfile-1")]
     extern {}
 }
 
@@ -233,7 +236,7 @@ pub enum FormatType {
 impl BitOr for FormatType {
     type Output = FormatType;
     fn bitor(self, _rhs: FormatType) -> Self::Output {
-         unsafe { transmute(((self as i32) | (_rhs as i32))) } 
+         unsafe { transmute(((self as i32) | (_rhs as i32))) }
     }
     //fn bitor(self, rhs: RHS) -> Self::Output;
 }
