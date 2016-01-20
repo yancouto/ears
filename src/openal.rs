@@ -25,7 +25,12 @@
 */
 
 #![allow(dead_code, non_snake_case)]
-#[link(name = "libsndfile-1")]
+
+#[cfg(target_os = "linux")]
+#[link(name = "openal")]
+extern {}
+
+#[cfg(not(target_os = "linux"))]
 #[link(name = "openal32")]
 extern {}
 
