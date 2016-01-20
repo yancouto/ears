@@ -38,7 +38,7 @@ use std::ptr;
 use std::ffi::CString;
 use std::ffi::CStr;
 use std::ops::BitOr;
-use std::ops::BitOr::*;	
+use std::ops::BitOr::*;
 use std::i32::*;
 use std::intrinsics::transmute;
 
@@ -233,7 +233,7 @@ pub enum FormatType {
 impl BitOr for FormatType {
     type Output = FormatType;
     fn bitor(self, _rhs: FormatType) -> Self::Output {
-         unsafe { transmute(((self as isize) | (_rhs as isize)))} 
+         unsafe { transmute(((self as i32) | (_rhs as i32))) } 
     }
     //fn bitor(self, rhs: RHS) -> Self::Output;
 }
@@ -732,4 +732,3 @@ impl SndFile {
     }
 
 }
-
