@@ -33,7 +33,7 @@ use ears::State::{Playing, Stopped, Paused};
 fn main() {
 
     // Read the inputs
-    let mut stdin = stdin();
+    let stdin = stdin();
 
     print!("Insert the path to an audio file : ");
    	stdout().flush().ok();
@@ -43,7 +43,7 @@ fn main() {
     loop {
     	match &line[line.len()-1..] {
     		"\n" => { line.pop(); () },
-    		"\r" => { line.pop(); () },	
+    		"\r" => { line.pop(); () },
     		_ => { break; },
     	}
     }
