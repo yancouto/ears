@@ -1,9 +1,11 @@
 language: rust
+os:
+  - linux
+  - osx
 before_install:
-  - sudo apt-get update
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; else sudo apt-get update; fi
 install:
-  - sudo apt-get install libopenal-dev
-  - sudo apt-get install libsndfile1-dev
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install openal-soft libsndfile; else sudo apt-get install libopenal-dev libsndfile1-dev; fi
 env:
  - RUST_TEST_TASKS=1
 script:

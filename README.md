@@ -7,13 +7,29 @@ libsndfile.
 * Provides an access to the OpenAL spatialization functionality in a simple way.
 * Accepts a lot of audio formats, thanks to libsndfile.
 
-You need to install OpenAL and libsndfile on your system. You can run the basic example using:
+You need to install OpenAL and libsndfile on your system:
+
+## Linux
+
+```
+sudo apt install libopenal-dev libsndfile1-dev
+```
+
+## Mac
+
+```
+brew install openal-soft libsndfile
+```
+
+## Usage
+
+Run the basic example using:
 
 ```
 cargo run --example basic
 ```
 
-# Functionalities
+## Functionality
 
 __ears__ provides two ways to play audio files:
 

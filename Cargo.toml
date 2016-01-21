@@ -6,6 +6,7 @@ authors = ["Jeremy Letang <letang.jeremy@gmail.com>"]
 license = "MIT"
 keywords = ["audio", "openal", "sndfile"]
 readme = "README.md"
+build = "build.rs"
 
 repository = "https://github.com/jeremyletang/ears"
 homepage = "https://github.com/jeremyletang/ears"
