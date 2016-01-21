@@ -31,7 +31,7 @@ __ears__ is build on the top of OpenAL and libsndfile.
 
 # A simple example
 
-```Rust
+```rust
 extern crate ears;
 use ears::Sound;
 
@@ -56,24 +56,10 @@ __ears__ provide two way for play audio files.
 
 # Use ears
 
-As said before, __ears__ require OpenAL and libsndfile, you need to install these two librarieson your system.
+As said before, __ears__ require OpenAL and libsndfile, you need to install these two librarieson
+your system. Then import stuff from __ears__ in your project, you can import all the stuff:
 
-__ears__ compiles against the last Rust compiler, so if it doesn't work on your computer you may need to update your compiler.
-
-__ears__ is built using make, so just type `make` at the root of the __ears__ repository, this command
-build __ears__, the examples, and the documentation.
-
-You can build them separately too with the dedicated commands:
-
-```Shell
-> make ears
-> make examples
-> make doc
-```
-
-then import stuff from __ears__ in your project, you can import all the stuff :
-
-```Rust
+```rust
 #[feature(globs)];
 extern crate ears;
 
@@ -82,7 +68,7 @@ use ears::*;
 
 or a specific one:
 
-```Rust
+```rust
 extern crate ears;
 
 use ears::Music;
@@ -99,7 +85,7 @@ use ears::Music;
 //#![feature(unsafe_destructor)]
 
 #![allow(unused_imports)]
-//#![allow(raw_pointer_derive)] 
+//#![allow(raw_pointer_derive)]
 #![allow(unused_must_use)]
 //#![allow(improper_ctypes)]
 

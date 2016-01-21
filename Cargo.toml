@@ -8,7 +8,7 @@ readme = "README.md"
 build = "build.rs"
 
 repository = "https://github.com/jhasse/ears"
-documentation = "http://bixense.com/ears"
+documentation = "http://bixense.com/ears/ears/"
 description = "Easy Api in Rust to play Sounds"
 
 [lib]
