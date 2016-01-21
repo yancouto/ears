@@ -1,14 +1,34 @@
 language: rust
+rust:
+  - stable
+  - beta
+  - nightly
+matrix:
+  allow_failures:
+    - rust: nightly
 os:
   - linux
   - osx
 before_install:
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; else sudo apt-get update; fi
+  - [ $TRAVIS_OS_NAME = osx ] && brew update
 install:
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install openal-soft libsndfile; else sudo apt-get install libopenal-dev libsndfile1-dev; fi
-env:
- - RUST_TEST_TASKS=1
+  - [ $TRAVIS_OS_NAME = osx ] && brew install openal-soft libsndfile
+addons:
+  apt:
+    packages:
+      - libopenal-dev
+      - libsndfile1-dev
 script:
-  - rustc --version
   - cargo build
-  - cargo doc
+after_success:
+  - |
+  [ $TRAVIS_BRANCH = master ] &&
+  [ $TRAVIS_PULL_REQUEST = false ] &&
+  [ $TRAVIS_RUST_VERSION = stable ] &&
+  cargo doc &&
+  npm install gitbook-cli -g &&
+  gitbook build ./book &&
+  mv ./book/_book ./target/doc/book &&
+  git clone https://github.com/davisp/ghp-import &&
+  ./ghp-import/ghp-import target/doc &&
+  git push -fq https://${GH_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git gh-pages
