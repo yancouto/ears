@@ -21,12 +21,11 @@ sudo apt install libopenal-dev libsndfile1-dev
 brew install openal-soft libsndfile
 ```
 
-## Usage
-
-Run the basic example using:
+## Examples
 
 ```
 cargo run --example basic
+cargo run --example music
 ```
 
 ## Functionality
