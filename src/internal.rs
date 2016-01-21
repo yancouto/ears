@@ -25,7 +25,6 @@
 //! to be sure that the context is created.
 
 #![macro_use]
-#![allow(raw_pointer_derive)]
 
 use std::ffi::CString;
 use std::cell::RefCell;
@@ -123,7 +122,7 @@ impl OpenAlData {
                 let mut new_context = f.borrow_mut();
                 if !new_context.al_capt_device == 0 {
                     Ok(record_context::new(new_context.al_capt_device))
-                } else {				
+                } else {
 					let c_str = CString::new("ALC_EXT_CAPTURE").unwrap();
                     if unsafe {
                         ffi::alcIsExtensionPresent(new_context.al_device, c_str.as_ptr()) } == ffi::ALC_FALSE {

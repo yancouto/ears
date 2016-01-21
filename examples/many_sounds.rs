@@ -21,7 +21,8 @@
 
 extern crate ears;
 
-use std::thread::sleep_ms;
+use std::thread::sleep;
+use std::time::Duration;
 use std::thread;
 
 use ears::{Sound, AudioController};
@@ -32,17 +33,20 @@ fn main() -> () {
 
     let mut i = 0;
 
+    let mut handles = Vec::new();
     while i < 20 {
-        thread::spawn(|| {
+        handles.push(thread::spawn(|| {
             let mut snd2 = Sound::new("res/shot.wav").expect("Error on Sound loading.");
             snd2.play();
             while snd2.is_playing() {}
-        });
+        }));
         i += 1;
-        sleep_ms(150);
+        sleep(Duration::from_millis(150));
     }
 
     // Wait until the last sound is played, the main task own the ears context,
     // so we should kepp it alive
-    sleep_ms(900);
+    for handle in handles {
+        handle.join().unwrap();
+    }
 }

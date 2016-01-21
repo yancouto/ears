@@ -21,7 +21,8 @@
 
 extern crate ears;
 
-use std::thread::sleep_ms;
+use std::thread::sleep;
+use std::time::Duration;
 use ears::AudioController;
 
 fn main() -> () {
@@ -35,7 +36,7 @@ fn main() -> () {
     let mut recorder = ears::Recorder::new(ctxt);
     println!("Recording for 3 seconds");
     recorder.start();
-    sleep_ms(3000);
+    sleep(Duration::from_millis(3000));
     recorder.stop();
     match recorder.save_to_file("hello") {
         true => println!("Save okay!"),

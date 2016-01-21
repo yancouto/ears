@@ -21,10 +21,10 @@
 
 //! Play Music easily.
 
-use std::thread::sleep_ms;
+use std::thread::sleep;
 use std::mem;
 use std::thread;
-//use std::time::Duration;
+use std::time::Duration;
 use libc::c_void;
 use std::vec::Vec;
 use std::sync::mpsc::{channel, Sender, Receiver};
@@ -185,7 +185,7 @@ impl Music {
 
             while status != ffi::AL_STOPPED {
                 // wait a bit
-                sleep_ms(/*Duration::milliseconds(*/50/*)*/);
+                sleep(Duration::from_millis(50));
                 if status == ffi::AL_PLAYING {
                     al::alGetSourcei(al_source,
                                      ffi::AL_BUFFERS_PROCESSED,
@@ -239,7 +239,7 @@ impl AudioController for Music {
                 if self.is_playing() {
                     al::alSourceStop(self.al_source);
                     // wait a bit for openal terminate
-                    sleep_ms(	50);
+                    sleep(Duration::from_millis(50));
                 }
                 self.file.as_mut().unwrap().seek(0, SeekSet);
                 self.process_music();
@@ -263,7 +263,7 @@ impl AudioController for Music {
         check_openal_context!(());
 
         al::alSourceStop(self.al_source);
-        sleep_ms(50);
+        sleep(Duration::from_millis(50));
     }
 
     /**
