@@ -9,12 +9,9 @@ matrix:
 os:
   - linux
   - osx
-before_install:
-  - |
-    [ $TRAVIS_OS_NAME = osx ] && brew update
 install:
   - |
-    [ $TRAVIS_OS_NAME = osx ] && brew install openal-soft libsndfile
+    [ $TRAVIS_OS_NAME = linux ] || brew install openal-soft libsndfile
 addons:
   apt:
     packages:
@@ -27,6 +24,7 @@ after_success:
     [ $TRAVIS_BRANCH = master ] &&
     [ $TRAVIS_PULL_REQUEST = false ] &&
     [ $TRAVIS_RUST_VERSION = stable ] &&
+    [ $TRAVIS_OS_NAME = linux ] &&
     cargo doc &&
     npm install gitbook-cli -g &&
     gitbook build ./book &&
