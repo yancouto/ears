@@ -19,26 +19,31 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#![crate_name = "record"]
-
 extern crate ears;
 
 use std::thread::sleep_ms;
+use ears::AudioController;
 
 fn main() -> () {
     // call ears_init() function to ensure that the ears context is not destroyed by a task.
     ears::init();
 
     // initialize the RecordContext
-    let ctxt = ears::init_in().expect("initialization error !");
+    let ctxt = ears::init_in().expect("Initialization error!");
 
     // Create a new Recorder using the RecordContext
     let mut recorder = ears::Recorder::new(ctxt);
+    println!("Recording for 3 seconds");
     recorder.start();
-    sleep_ms(5000);
+    sleep_ms(3000);
     recorder.stop();
     match recorder.save_to_file("hello") {
-        true => println!("Save okay !"),
+        true => println!("Save okay!"),
         false => println!("Cannot save ...")
     }
+
+    println!("Playing hello.wav");
+    let mut sound = ears::Sound::new("hello.wav").unwrap();
+    sound.play();
+    while sound.is_playing() {}
 }

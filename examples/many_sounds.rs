@@ -19,8 +19,6 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#![crate_name = "many_sounds"]
-
 extern crate ears;
 
 use std::thread::sleep_ms;
@@ -36,7 +34,7 @@ fn main() -> () {
 
     while i < 20 {
         thread::spawn(|| {
-            let mut snd2 = Sound::new("../res/shot.wav").expect("Error on Sound loading.");
+            let mut snd2 = Sound::new("res/shot.wav").expect("Error on Sound loading.");
             snd2.play();
             while snd2.is_playing() {}
         });

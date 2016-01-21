@@ -1,4 +1,4 @@
-# ears [![Build Status](https://travis-ci.org/jhasse/ears.svg?branch=master)](https://travis-ci.org/jhasse/ears)
+# ears [![Build Status](https://travis-ci.org/jhasse/ears.svg?branch=master)](https://travis-ci.org/jhasse/ears) [![License](https://img.shields.io/badge/license-MIT-blue.svg)]()
 
 
 __ears__ is a simple library to play sounds and music in Rust and is build on the top of OpenAL and
@@ -25,7 +25,10 @@ brew install openal-soft libsndfile
 
 ```
 cargo run --example basic
+cargo run --example many_sounds
 cargo run --example music
+cargo run --example record
+cargo run --example simple_player
 ```
 
 ## Functionality

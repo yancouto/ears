@@ -19,8 +19,6 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#![crate_name = "simple_player"]
-
 extern crate ears;
 
 use std::io::stdin;
@@ -35,7 +33,7 @@ fn main() {
     // Read the inputs
     let stdin = stdin();
 
-    print!("Insert the path to an audio file : ");
+    print!("Insert the path to an audio file: ");
    	stdout().flush().ok();
 
     let mut line = String::new();
