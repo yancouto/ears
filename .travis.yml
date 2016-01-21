@@ -1,31 +1,34 @@
 language: rust
 rust:
-  - stable
-  - beta
-  - nightly
+- stable
+- beta
+- nightly
 matrix:
   allow_failures:
-    - rust: nightly
+  - rust: nightly
 os:
-  - linux
-  - osx
+- linux
+- osx
 install:
-  - |
-    [ $TRAVIS_OS_NAME = linux ] || brew install openal-soft libsndfile
+- |
+  [ $TRAVIS_OS_NAME = linux ] || brew install openal-soft libsndfile
 addons:
   apt:
     packages:
     - libopenal-dev
     - libsndfile1-dev
 script:
-  - cargo build
+- cargo build
 after_success:
-  - |
-    [ $TRAVIS_BRANCH = master ] &&
-    [ $TRAVIS_PULL_REQUEST = false ] &&
-    [ $TRAVIS_RUST_VERSION = stable ] &&
-    [ $TRAVIS_OS_NAME = linux ] &&
-    cargo doc &&
-    git clone https://github.com/davisp/ghp-import &&
-    ./ghp-import/ghp-import target/doc &&
-    git push -fq https://${GH_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git gh-pages
+- |
+  [ $TRAVIS_BRANCH = master ] &&
+  [ $TRAVIS_PULL_REQUEST = false ] &&
+  [ $TRAVIS_RUST_VERSION = stable ] &&
+  [ $TRAVIS_OS_NAME = linux ] &&
+  cargo doc &&
+  git clone https://github.com/davisp/ghp-import &&
+  ./ghp-import/ghp-import target/doc &&
+  git push -fq https://${GH_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git gh-pages
+env:
+  global:
+    secure: JD7bA3rHwfdx9yZwyoQ8fYJYmEF1DsDC4Juvl17Ote+ByasL+4aa9/VluJ0HYZtpXhY7hJDpverSM7JuzY0QUGaulKz5HABZsRwon7WbVtJFL9gVC/7mtTUE7T2Vw9OZusJ7kBlvZ7qLQmrWSaqzySA1PI+UOR1Y12/sp5NyAho=
