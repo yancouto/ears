@@ -43,8 +43,8 @@ use std::intrinsics::transmute;
  * The Recorder work in it's own task.
  *
  * # Examples
- * ```
- * use ears::{RecordContext, Recorder};
+ * ```no_run
+ * use ears::Recorder;
  *
  * fn main() -> () {
  *     // Create a new context to record audio

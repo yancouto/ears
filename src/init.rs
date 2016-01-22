@@ -61,7 +61,7 @@ pub fn init() -> bool {
  * true if initialization is made with success, false otherwise
  *
  * # Example
- * ```
+ * ```no_run
  * match ears::init_in() {
  *     Some(rc) => {
  *         // do stuff
