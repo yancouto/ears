@@ -43,19 +43,18 @@ use std::intrinsics::transmute;
  * The Recorder work in it's own task.
  *
  * # Examples
- * ```Rust
- * extern mod ears;
+ * ```
  * use ears::{RecordContext, Recorder};
  *
  * fn main() -> () {
  *     // Create a new context to record audio
  *     let context = ears::init_in().unwrap();
  *     // Create the recorder
- *     let recorder = Recorder::new(context);
+ *     let mut recorder = Recorder::new(context);
  *     // Start to record something
  *     recorder.start();
  *
- *     // Do some other stuff here //
+ *     // Do some other stuff here
  *
  *     // Stop the recorder
  *     recorder.stop();
@@ -155,9 +154,9 @@ impl Recorder {
                 format : (FormatPcm16 | FormatWav) as i32,
                 sections : 0,
                 seekable : 0
-            });	
+            });
 
-	
+
             let mut file_ext = String::new();
             file_ext.push_str(filename);
             file_ext.push_str(".wav");

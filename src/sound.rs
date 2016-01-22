@@ -37,23 +37,23 @@ use audio_tags::{AudioTags, Tags};
 /**
  * Play Sounds easily.
  *
- * Simple class to play sound easily in 2 lines, Sounds are really ligth
- * objects, the sounds data are entirely load in memory and can be share between
+ * Simple class to play sounds easily in 2 lines. Sounds are really light
+ * objects, the sound's data is entirely loaded into memory and can be shared between
  * Sounds using the SoundData object.
  *
  * # Examples
- * ```Rust
+ * ```no_run
  * extern crate ears;
- * use ears::Sound;
+ * use ears::{Sound, AudioController};
  *
  * fn main() -> () {
- *    // Create a Sound whith the path of the sound file.
- *    let snd = Sound::new("path/to/my/sound.ogg").unwrap();
+ *    // Create a Sound with the path of the sound file.
+ *    let mut snd = Sound::new("path/to/my/sound.ogg").unwrap();
  *
  *    // Play it
  *    snd.play();
  *
- *    // Wait until the sound is playing
+ *    // Wait until the sound stopped playing
  *    while snd.is_playing() {}
  * }
  * ```
@@ -79,8 +79,8 @@ impl Sound {
      * un error has occured.
      *
      * # Example
-     * ```Rust
-     * let snd = match Sound::new("path/to/the/sound.ogg") {
+     * ```no_run
+     * let snd = match ears::Sound::new("path/to/the/sound.ogg") {
      *     Some(snd) => snd,
      *     None      => panic!("Cannot load the sound from a file !")
      * };
@@ -108,8 +108,8 @@ impl Sound {
      * un error has occured.
      *
      * # Example
-     * ```Rust
-     * use ears::SoundData;
+     * ```no_run
+     * use ears::{Sound, SoundData, AudioController};
      * use std::rc::Rc;
      * use std::cell::RefCell;
      *
@@ -117,10 +117,10 @@ impl Sound {
      *     Some(snd_data) => Rc::new(RefCell::new(snd_data)),
      *     None           => panic!("Cannot create the sound data !")
      * };
-     * let snd = match Sound::new_with_data(snd_data) {
-     *     Some(snd) => snd,
+     * let mut snd = match Sound::new_with_data(snd_data) {
+     *     Some(mut snd) => snd.play(),
      *     None      => panic!("Cannot create a sound using a sound data !")
-     * }
+     * };
      * ```
      */
     pub fn new_with_data(sound_data: Rc<RefCell<SoundData>>) -> Option<Sound> {
@@ -154,8 +154,8 @@ impl Sound {
      * The SoundData associated to this Sound.
      *
      * # Example
-     * ```Rust
-     * let snd = Sound::new("path/to/the/sound.ogg").unwrap();
+     * ```no_run
+     * let snd = ears::Sound::new("path/to/the/sound.ogg").unwrap();
      * let snd_data = snd.get_datas();
      * ```
      */
@@ -172,9 +172,9 @@ impl Sound {
      * `sound_data` - The new sound_data
      *
      * # Example
-     * ```Rust
-     * let snd1 = Sound::new("path/to/the/sound.ogg").unwrap();
-     * let snd2 = Sound::new("other/path/to/the/sound.ogg").unwrap();
+     * ```no_run
+     * let snd1 = ears::Sound::new("path/to/the/sound.ogg").unwrap();
+     * let mut snd2 = ears::Sound::new("other/path/to/the/sound.ogg").unwrap();
      * let snd_data = snd1.get_datas();
      * snd2.set_datas(snd_data);
      * ```
@@ -213,8 +213,10 @@ impl AudioController for Sound {
      * Play or resume the Sound.
      *
      * # Example
-     * ```Rust
-     * let snd = Sound::new("path/to/the/sound.ogg").unwrap();
+     * ```no_run
+     * use ears::{Sound, AudioController};
+     *
+     * let mut snd = Sound::new("path/to/the/sound.ogg").unwrap();
      * snd.play();
      * ```
      */
@@ -233,11 +235,13 @@ impl AudioController for Sound {
       * Pause the Sound.
       *
       * # Example
-      * ```Rust
-      * let snd = Sound::new("path/to/the/sound.ogg").unwrap();
+      * ```no_run
+      * use ears::{Sound, AudioController};
+      *
+      * let mut snd = Sound::new("path/to/the/sound.ogg").unwrap();
       * snd.play();
       * snd.pause();
-      * snd.play(); // the sound restart at the moment of the pause
+      * snd.play(); // the sound restarts at the moment of the pause
       * ```
       */
     fn pause(&mut self) -> () {
@@ -250,8 +254,10 @@ impl AudioController for Sound {
      * Stop the Sound.
      *
      * # Example
-     * ```Rust
-     * let snd = Sound::new("path/to/the/sound.ogg").unwrap();
+     * ```no_run
+     * use ears::{Sound, AudioController};
+     *
+     * let mut snd = Sound::new("path/to/the/sound.ogg").unwrap();
      * snd.play();
      * snd.stop();
      * snd.play(); // the sound restart at the begining
@@ -270,8 +276,10 @@ impl AudioController for Sound {
      * True if the Sound is playing, false otherwise.
      *
      * # Example
-     * ```Rust
-     * let snd = Sound::new("path/to/the/sound.ogg").unwrap();
+     * ```no_run
+     * use ears::{Sound, AudioController};
+     *
+     * let mut snd = Sound::new("path/to/the/sound.ogg").unwrap();
      * snd.play();
      * if snd.is_playing() {
      *     println!("Sound is Playing !");
@@ -294,13 +302,15 @@ impl AudioController for Sound {
      * The state of the sound as a variant of the enum State
      *
      * # Example
-     * ```Rust
+     * ```no_run
+     * use ears::{Sound, State, AudioController};
+     *
      * let snd = Sound::new("path/to/the/sound.ogg").unwrap();
      * match snd.get_state() {
-     *     ears::Initial => println!("Sound has never been played"),
-     *     ears::Playing => println!("Sound is playing !"),
-     *     ears::Paused  => println!("Sound is paused !"),
-     *     ears::Stopped => println!("Sound is stopped !")
+     *     State::Initial => println!("Sound has never been played"),
+     *     State::Playing => println!("Sound is playing!"),
+     *     State::Paused  => println!("Sound is paused!"),
+     *     State::Stopped => println!("Sound is stopped!")
      * }
      * ```
      */

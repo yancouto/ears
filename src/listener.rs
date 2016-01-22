@@ -35,7 +35,7 @@ use openal::{ffi, al};
  * * `volume` - The global volume for the scene, should be between 0. and 1.
  *
  * # Example
- * ```Rust
+ * ```
  * # use ears::listener;
  * listener::set_volume(0.7f32);
  * ```
@@ -52,7 +52,7 @@ pub fn set_volume(volume: f32) -> () {
  * The global volume of the scene between 0. and 1.
  *
  * # Example
- * ```Rust
+ * ```
  * # use ears::listener;
  * let vol = listener::get_volume();
  * println!("Global volume: {}", vol);
@@ -82,9 +82,9 @@ pub fn get_volume() -> f32 {
  * of the listener [x, y, z].
  *
  * # Example
- * ```Rust
+ * ```
  * # use ears::listener;
- * listener::set_position([45, 90, 35]);
+ * listener::set_position([45., 90., 35.]);
  */
 pub fn set_position(position: [f32; 3]) -> () {
     check_openal_context!(());
@@ -99,10 +99,10 @@ pub fn set_position(position: [f32; 3]) -> () {
  * of the listener [x, y, z].
  *
  * # Example
- * ```Rust
+ * ```
  * # use ears::listener;
  * let pos = listener::get_position();
- * println!("Listener position: {}", &pos);
+ * println!("Listener position: {:?}", &pos);
  * ```
  */
 pub fn get_position() -> [f32; 3] {
@@ -123,7 +123,7 @@ pub fn get_position() -> [f32; 3] {
  * * `orientation_up` - The top as a three dimensional vector [x, y, z].
  *
  * # Example
- * ```Rust
+ * ```
  * # use ears::listener;
  * listener::set_orientation([0.3f32, -0.4f32, 0.9f32], [0.7f32, 0.3f32, 0.8f32]);
  * ```
@@ -143,11 +143,11 @@ pub fn set_orientation(orientation_at: [f32; 3], orientation_up : [f32; 3]) {
  * A tuple containing the orientation as two three dimensional vector [x, y, z].
  *
  * # Example
- * ```Rust
+ * ```
  * # use ears::listener;
  * let (at, up) = listener::get_orientation();
- * println!("At orientation: {}", &at);
- * println!("Up orientation: {}", &up);
+ * println!("At orientation: {:?}", &at);
+ * println!("Up orientation: {:?}", &up);
  * ```
  */
 pub fn get_orientation() -> ([f32; 3], [f32; 3]) {

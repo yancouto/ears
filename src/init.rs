@@ -61,9 +61,11 @@ pub fn init() -> bool {
  * true if initialization is made with success, false otherwise
  *
  * # Example
- * ```Rust
+ * ```
  * match ears::init_in() {
- *     Some(rc) => { do_stuff() },
+ *     Some(rc) => {
+ *         // do stuff
+ *     },
  *     None     => panic!("ears init input error")
  * }
  * ```
