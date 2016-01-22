@@ -1,4 +1,4 @@
-# ears [![Build Status](https://travis-ci.org/jhasse/ears.svg?branch=master)](https://travis-ci.org/jhasse/ears) [![License](https://img.shields.io/badge/license-MIT-blue.svg)]()
+# ears [![Build Status](https://travis-ci.org/jhasse/ears.svg?branch=master)](https://travis-ci.org/jhasse/ears) [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/jhasse/ears/blob/master/LICENSE)
 
 
 __ears__ is a simple library to play sounds and music in [Rust](https://www.rust-lang.org).

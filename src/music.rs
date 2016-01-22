@@ -42,22 +42,19 @@ use audio_tags::{Tags, AudioTags, get_sound_tags};
 /**
  * Play Music easily.
  *
- * Simple class to play musics easily in 2 lines.
+ * Simple class to play music easily in 2 lines.
  *
- * The musics are played in them own task and load the samples progressively
+ * Music is played in their own task and the samples are loaded progressively
  * using circular buffers.
- * They are not associated to a MusicData like Musics.
+ * They aren't associated to a SoundData like Sounds.
  *
  * # Examples
- * ```
+ * ```no_run
  * extern crate ears;
- * use ears::Music;
+ * use ears::{Music, AudioController};
  *
  * fn main() -> () {
- *    // Load a Music
- *   let msc = Music::new("path/to/my/Music.flac").unwrap();
- *
- *   // Play it
+ *   let mut msc = Music::new("path/to/music.flac").unwrap();
  *   msc.play();
  * }
  * ```
@@ -685,6 +682,7 @@ mod test {
     use audio_controller::AudioController;
 
     #[test]
+    #[ignore]
     fn music_create_OK() -> () {
         let msc = Music::new("res/shot.wav");
 
@@ -695,6 +693,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn music_create_FAIL() -> () {
         let msc = Music::new("toto.wav");
 
@@ -726,6 +725,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn music_stop_OK() -> () {
         let mut msc = Music::new("res/shot.wav").expect("Cannot create Music");
 
@@ -756,6 +756,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn music_set_volume_OK() -> () {
         let mut msc = Music::new("res/shot.wav").expect("Cannot create Music");
 
@@ -764,6 +765,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn music_set_min_volume_OK() -> () {
         let mut msc = Music::new("res/shot.wav").expect("Cannot create Music");
 
@@ -772,6 +774,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn music_set_max_volume_OK() -> () {
         let mut msc = Music::new("res/shot.wav").expect("Cannot create Music");
 
@@ -780,6 +783,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn music_is_looping_TRUE() -> () {
         let mut msc = Music::new("res/shot.wav").expect("Cannot create Music");
 
@@ -788,6 +792,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn music_is_looping_FALSE() -> () {
         let mut msc = Music::new("res/shot.wav").expect("Cannot create Music");
 
@@ -796,6 +801,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn music_set_pitch_OK() -> () {
         let mut msc = Music::new("res/shot.wav").expect("Cannot create Music");
 
@@ -804,6 +810,7 @@ mod test {
     }
 
      #[test]
+     #[ignore]
     fn music_set_relative_TRUE() -> () {
         let mut msc = Music::new("res/shot.wav").expect("Cannot create Music");
 
@@ -812,6 +819,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn music_set_relative_FALSE() -> () {
         let mut msc = Music::new("res/shot.wav").expect("Cannot create Music");
 
@@ -822,6 +830,7 @@ mod test {
     // untill https://github.com/rust-lang/rust/issues/7622 is not fixed, slice comparsion is used
 
     #[test]
+    #[ignore]
     fn music_set_position_OK() -> () {
         let mut msc = Music::new("res/shot.wav").expect("Cannot create Music");
 
@@ -831,6 +840,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn music_set_direction_OK() -> () {
         let mut msc = Music::new("res/shot.wav").expect("Cannot create Music");
 
@@ -840,6 +850,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn music_set_max_distance() -> () {
         let mut msc = Music::new("res/shot.wav").expect("Cannot create Music");
 
@@ -848,6 +859,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn music_set_reference_distance() -> () {
         let mut msc = Music::new("res/shot.wav").expect("Cannot create Music");
 
@@ -856,6 +868,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn music_set_attenuation() -> () {
         let mut msc = Music::new("res/shot.wav").expect("Cannot create Music");
 

@@ -164,6 +164,7 @@ mod test {
                    get_volume, get_position, get_orientation};
 
     #[test]
+    #[ignore]
     pub fn listener_set_volume() -> () {
         set_volume(0.77);
         assert_eq!(get_volume(), 0.77);
@@ -172,6 +173,7 @@ mod test {
     // untill https://github.com/rust-lang/rust/issues/7622 is not used, slice comparsion is used
 
     #[test]
+    #[ignore]
     pub fn listener_set_position() -> () {
         set_position([50f32, 150f32, 234f32]);
         let res = get_position();
@@ -179,6 +181,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     pub fn listener_set_orientation() -> () {
         set_orientation([50., 150., 234.], [277., 125., 71.]);
         let (s1, s2) = get_orientation() ;
@@ -186,4 +189,3 @@ mod test {
 		assert_eq!(s2, [277f32, 125f32, 71f32])
     }
 }
-

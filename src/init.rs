@@ -38,9 +38,11 @@ use internal::OpenAlData;
  * true if initialization is made with success, false otherwise
  *
  * # Example
- * ```Rust
+ * ```
  * match ears::init() {
- *     true  => { do_stuff() },
+ *     true  => {
+ *         // do stuff
+ *     },
  *     false => panic!("ears init error")
  * }
  * ```
@@ -82,6 +84,7 @@ mod test {
 	use std::thread;
 
     #[test]
+    #[ignore]
     fn test_init_ears_OK() -> () {
         assert_eq!(init(), true)
     }
@@ -100,6 +103,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn test_init_in_in_another_task_OK() -> () {
         init();
         thread::spawn(move || {

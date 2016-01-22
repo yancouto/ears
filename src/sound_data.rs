@@ -38,9 +38,11 @@ use audio_tags::{Tags, AudioTags, get_sound_tags};
  * time.
  *
  * # Example
- * ```
+ * ```no_run
  * extern crate ears;
- * use ears::{Sound, SoundData};
+ * use ears::{Sound, SoundData, AudioController};
+ * use std::cell::RefCell;
+ * use std::rc::Rc;
  *
  * fn main() -> () {
  *   // Create a SoundData
@@ -48,8 +50,8 @@ use audio_tags::{Tags, AudioTags, get_sound_tags};
  *                                       .unwrap()));
  *
  *   // Create two Sound with the same SoundData
- *   let snd1 = Sound::new_with_data(snd_data.clone()).unwrap();
- *   let snd2 = Sound::new_with_data(snd_data.clone()).unwrap();
+ *   let mut snd1 = Sound::new_with_data(snd_data.clone()).unwrap();
+ *   let mut snd2 = Sound::new_with_data(snd_data.clone()).unwrap();
  *
  *   // Play the sounds
  *   snd1.play();
@@ -190,6 +192,7 @@ mod test {
     use sound_data::SoundData;
 
     #[test]
+    #[ignore]
     fn sounddata_create_OK() -> () {
         #![allow(unused_variables)]
         let snd_data = SoundData::new("res/shot.wav").unwrap();
@@ -197,6 +200,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     #[should_panic]
     fn sounddata_create_FAIL() -> () {
         #![allow(unused_variables)]

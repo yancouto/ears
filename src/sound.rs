@@ -710,6 +710,7 @@ mod test {
     use audio_controller::AudioController;
 
     #[test]
+    #[ignore]
     fn sound_create_OK() -> () {
         let snd = Sound::new("res/shot.wav");
         println!("YOUHOU");
@@ -720,6 +721,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn sound_create_FAIL() -> () {
         let snd = Sound::new("toto.wav");
 
@@ -730,6 +732,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn sound_play_OK() -> () {
         let mut snd = Sound::new("res/shot.wav").expect("Cannot create sound");
 
@@ -739,6 +742,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn sound_pause_OK() -> () {
         let mut snd = Sound::new("res/shot.wav").expect("Cannot create sound");
 
@@ -749,6 +753,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn sound_stop_OK() -> () {
         let mut snd = Sound::new("res/shot.wav").expect("Cannot create sound");
 
@@ -759,6 +764,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn sound_is_playing_TRUE() -> () {
         let mut snd = Sound::new("res/shot.wav").expect("Cannot create sound");
 
@@ -768,6 +774,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn sound_is_playing_FALSE() -> () {
         let mut snd = Sound::new("res/shot.wav").expect("Cannot create sound");
 
@@ -776,6 +783,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn sound_set_volume_OK() -> () {
         let mut snd = Sound::new("res/shot.wav").expect("Cannot create sound");
 
@@ -794,6 +802,7 @@ mod test {
     // }
 
     #[test]
+    #[ignore]
     #[should_panic]
     fn sound_set_volume_low_FAIL() -> () {
         let mut snd = Sound::new("res/shot.wav").expect("Cannot create sound");
@@ -803,6 +812,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn sound_set_min_volume_OK() -> () {
         let mut snd = Sound::new("res/shot.wav").expect("Cannot create sound");
 
@@ -811,6 +821,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     #[should_panic]
     fn sound_set_min_volume_high_FAIL() -> () {
         let mut snd = Sound::new("res/shot.wav").expect("Cannot create sound");
@@ -820,6 +831,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     #[should_panic]
     fn sound_set_min_volume_low_FAIL() -> () {
         let mut snd = Sound::new("res/shot.wav").expect("Cannot create sound");
@@ -829,6 +841,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn sound_set_max_volume_OK() -> () {
         let mut snd = Sound::new("res/shot.wav").expect("Cannot create sound");
 
@@ -837,6 +850,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     #[should_panic]
     fn sound_set_max_volume_high_FAIL() -> () {
         let mut snd = Sound::new("res/shot.wav").expect("Cannot create sound");
@@ -846,6 +860,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     #[should_panic]
     fn sound_set_max_volume_low_FAIL() -> () {
         let mut snd = Sound::new("res/shot.wav").expect("Cannot create sound");
@@ -855,6 +870,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn sound_is_looping_TRUE() -> () {
         let mut snd = Sound::new("res/shot.wav").expect("Cannot create sound");
 
@@ -863,6 +879,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn sound_is_looping_FALSE() -> () {
         let mut snd = Sound::new("res/shot.wav").expect("Cannot create sound");
 
@@ -871,6 +888,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn sound_set_pitch_OK() -> () {
         let mut snd = Sound::new("res/shot.wav").expect("Cannot create sound");
 
@@ -879,6 +897,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     #[should_panic]
     fn sound_set_pitch_too_low_FAIL() -> () {
         let mut snd = Sound::new("res/shot.wav").expect("Cannot create sound");
@@ -898,6 +917,7 @@ mod test {
     // }
 
      #[test]
+    #[ignore]
     fn sound_set_relative_TRUE() -> () {
         let mut snd = Sound::new("res/shot.wav").expect("Cannot create sound");
 
@@ -906,6 +926,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn sound_set_relative_FALSE() -> () {
         let mut snd = Sound::new("res/shot.wav").expect("Cannot create sound");
 
@@ -916,6 +937,7 @@ mod test {
     // untill https://github.com/rust-lang/rust/issues/7622 is not fixed, slice comparsion is used
 
     #[test]
+    #[ignore]
     fn sound_set_position_OK() -> () {
         let mut snd = Sound::new("res/shot.wav").expect("Cannot create sound");
 
@@ -925,6 +947,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn sound_set_direction_OK() -> () {
         let mut snd = Sound::new("res/shot.wav").expect("Cannot create sound");
 
@@ -935,6 +958,7 @@ mod test {
 
 
     #[test]
+    #[ignore]
     fn sound_set_max_distance_OK() -> () {
         let mut snd = Sound::new("res/shot.wav").expect("Cannot create sound");
 
@@ -943,6 +967,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     #[should_panic]
     fn sound_set_max_distance_FAIL() -> () {
         let mut snd = Sound::new("res/shot.wav").expect("Cannot create sound");
@@ -952,6 +977,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn sound_set_reference_distance_OK() -> () {
         let mut snd = Sound::new("res/shot.wav").expect("Cannot create sound");
 
@@ -960,6 +986,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     #[should_panic]
     fn sound_set_reference_distance_FAIL() -> () {
         let mut snd = Sound::new("res/shot.wav").expect("Cannot create sound");
@@ -969,6 +996,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn sound_set_attenuation_OK() -> () {
         let mut snd = Sound::new("res/shot.wav").expect("Cannot create sound");
 
@@ -977,6 +1005,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     #[should_panic]
     fn sound_set_attenuation_FAIL() -> () {
         let mut snd = Sound::new("res/shot.wav").expect("Cannot create sound");
