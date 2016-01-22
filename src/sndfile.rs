@@ -44,11 +44,7 @@ use std::intrinsics::transmute;
 
 #[doc(hidden)]
 mod libsndfile {
-    #[cfg(unix)]
     #[link(name = "sndfile")]
-    extern {}
-    #[cfg(not(unix))]
-    #[link(name = "sndfile-1")]
     extern {}
 }
 

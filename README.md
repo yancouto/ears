@@ -1,24 +1,33 @@
 # ears [![Build Status](https://travis-ci.org/jhasse/ears.svg?branch=master)](https://travis-ci.org/jhasse/ears) [![License](https://img.shields.io/badge/license-MIT-blue.svg)]()
 
 
-__ears__ is a simple library to play sounds and music in Rust and is build on the top of OpenAL and
-libsndfile.
+__ears__ is a simple library to play sounds and music in [Rust](https://www.rust-lang.org).
 
 * Provides an access to the OpenAL spatialization functionality in a simple way.
 * Accepts a lot of audio formats, thanks to libsndfile.
 
+[Documentation](http://bixense.com/ears/ears/)
+
+## Building
+
 You need to install OpenAL and libsndfile on your system:
 
-## Linux
+### Linux
 
 ```
 sudo apt install libopenal-dev libsndfile1-dev
 ```
 
-## Mac
+### Mac
 
 ```
 brew install openal-soft libsndfile
+```
+
+### Windows
+
+```
+pacman -S mingw-w64-x86_64-libsndfile mingw-w64-x86_64-openal
 ```
 
 ## Examples
