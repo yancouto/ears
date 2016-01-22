@@ -29,15 +29,15 @@ __ears__ is build on the top of OpenAL and libsndfile.
 * Provide anaccess to the OpenAL spatialization functionality in a simple way.
 * Accept a lot of audio formats thanks to libsndfile.
 
-# A simple example
+# Example
 
-```rust
+```no_run
 extern crate ears;
-use ears::Sound;
+use ears::{Sound, AudioController};
 
 fn main() {
 	// Create a new Sound.
-	let snd = Sound::new("path/to/my/sound.ogg").unwrap();
+	let mut snd = Sound::new("path/to/my/sound.ogg").unwrap();
 
 	// Play the Sound
 	snd.play();
@@ -60,10 +60,10 @@ As said before, __ears__ require OpenAL and libsndfile, you need to install thes
 your system. Then import stuff from __ears__ in your project, you can import all the stuff:
 
 ```rust
-#[feature(globs)];
 extern crate ears;
 
 use ears::*;
+# fn main() {}
 ```
 
 or a specific one:
@@ -72,6 +72,7 @@ or a specific one:
 extern crate ears;
 
 use ears::Music;
+# fn main() {}
 ```
 */
 
