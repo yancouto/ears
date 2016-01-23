@@ -1,0 +1,7 @@
+install:
+  - ps: Start-FileDownload 'https://static.rust-lang.org/dist/rust-nightly-x86_64-pc-windows-gnu.exe'
+  - rust-nightly-x86_64-pc-windows-gnu.exe /VERYSILENT /NORESTART /DIR="C:\Rust"
+  - C:\msys64\usr\bin\bash -lc "pacman -S --noconfirm mingw-w64-x86_64-libsndfile mingw-w64-x86_64-openal"
+  - SET PATH=%PATH%;C:\Rust\bin;C:\msys64\mingw64\bin
+test_script:
+  - cargo test
