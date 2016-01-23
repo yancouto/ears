@@ -38,7 +38,7 @@ use internal::OpenAlData;
  * true if initialization is made with success, false otherwise
  *
  * # Example
- * ```
+ * ```no_run
  * match ears::init() {
  *     true  => {
  *         // do stuff
