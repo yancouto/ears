@@ -1,7 +1,12 @@
+environment:
+  PATH: '%PATH%;C:\msys64\mingw64\bin;C:\Rust\bin'
+  matrix:
+  - RUST_CHANNEL: beta
+  - RUST_CHANNEL: nightly
 install:
-  - ps: Start-FileDownload 'https://static.rust-lang.org/dist/rust-nightly-x86_64-pc-windows-gnu.exe'
-  - rust-nightly-x86_64-pc-windows-gnu.exe /VERYSILENT /NORESTART /DIR="C:\Rust"
+  - ps: Start-FileDownload 'https://static.rust-lang.org/dist/rust-${env:RUST_CHANNEL}-x86_64-pc-windows-gnu.msi'
+  - msiexec /passive /i "rust-%RUST_CHANNEL%-x86_64-pc-windows-gnu.msi" ADDLOCAL=Rustc,Cargo,Std INSTALLDIR=C:\Rust /log install.log
+  - if %ERRORLEVEL% NEQ 0 type install.log
   - C:\msys64\usr\bin\bash -lc "pacman -S --noconfirm mingw-w64-x86_64-libsndfile mingw-w64-x86_64-openal"
-  - SET PATH=%PATH%;C:\Rust\bin;C:\msys64\mingw64\bin
 build_script:
   - cargo test
