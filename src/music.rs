@@ -73,7 +73,11 @@ pub struct Music {
     /// Format of the sample
     sample_format: i32,
     /// Audio tags
-    sound_tags: Tags
+    sound_tags: Tags,
+
+    is_looping: bool,
+    /// Channel to tell the thread, if is_looping changed
+    looping_sender: Option<Sender<bool>>,
 }
 
 impl Music {
@@ -121,14 +125,16 @@ impl Music {
 
         let sound_tags = get_sound_tags(&*file);
 
-        Some( Music {
+        Some(Music {
             al_source: source_id,
             al_buffers: buffer_ids,
             file: Some(file),
             file_infos: infos,
             sample_to_read: 50000,
             sample_format: format,
-            sound_tags: sound_tags
+            sound_tags: sound_tags,
+            is_looping: false,
+            looping_sender: None,
         })
     }
 
@@ -168,6 +174,10 @@ impl Music {
         // Launche the Music
         al::alSourcePlay(al_source);
 
+        let (looping_sender, looping_receiver): (Sender<bool>, Receiver<bool>) = channel();
+        self.looping_sender = Some(looping_sender);
+        let is_looping_clone = self.is_looping.clone();
+
         thread::spawn(move|| {
             match OpenAlData::check_al_context() {
                 Ok(_)       => {},
@@ -178,20 +188,28 @@ impl Music {
             let mut status = ffi::AL_PLAYING;
             let mut i = 0;
             let mut buf = 0;
-            let mut read ;
+            let mut is_looping = is_looping_clone;
 
             while status != ffi::AL_STOPPED {
                 // wait a bit
                 sleep(Duration::from_millis(50));
                 if status == ffi::AL_PLAYING {
+                    if let Ok(new_is_looping) = looping_receiver.try_recv() {
+                        is_looping = new_is_looping;
+                    }
                     al::alGetSourcei(al_source,
                                      ffi::AL_BUFFERS_PROCESSED,
                                      &mut i);
                     if i != 0 {
                         samples.clear();
                         al::alSourceUnqueueBuffers(al_source, 1, &mut buf);
-                        read = file.read_i16(&mut samples[..], sample_t_r as i64) *
-                            mem::size_of::<i16>() as i64;
+                        let mut read = file.read_i16(&mut samples[..], sample_t_r as i64) *
+                                       mem::size_of::<i16>() as i64;
+                        if is_looping && read == 0 {
+                            file.seek(0, SeekSet);
+                            read = file.read_i16(&mut samples[..], sample_t_r as i64) *
+                                   mem::size_of::<i16>() as i64;
+                        }
                         al::alBufferData(buf,
                                          sample_format,
                                          samples.as_ptr() as *mut c_void,
@@ -395,16 +413,10 @@ impl AudioController for Music {
      * `looping` - The new looping state.
      */
     fn set_looping(&mut self, looping: bool) -> () {
-        check_openal_context!(());
-
-        match looping {
-            true    => al::alSourcei(self.al_source,
-                                     ffi::AL_LOOPING,
-                                     ffi::ALC_TRUE as i32),
-            false   => al::alSourcei(self.al_source,
-                                     ffi::AL_LOOPING,
-                                     ffi::ALC_FALSE as i32)
-        };
+        if let Some(ref sender) = self.looping_sender {
+            sender.send(looping);
+        }
+        self.is_looping = looping;
     }
 
     /**
@@ -414,15 +426,7 @@ impl AudioController for Music {
      * True if the Music is looping, false otherwise.
      */
     fn is_looping(&self) -> bool {
-        check_openal_context!(false);
-
-        let mut boolean = 0;
-        al::alGetSourcei(self.al_source, ffi::AL_LOOPING, &mut boolean);
-        match boolean as i8 {
-            ffi::ALC_TRUE  => true,
-            ffi::ALC_FALSE => false,
-            _              => unreachable!()
-        }
+        self.is_looping
     }
 
     /**
@@ -478,7 +482,7 @@ impl AudioController for Music {
     }
 
     /**
-     * Is the Music relative to the listener or not ?
+     * Is the Music relative to the listener or not?
      *
      * # Return
      * True if the Music is relative to the listener false otherwise
