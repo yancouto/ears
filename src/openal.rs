@@ -26,12 +26,7 @@
 
 #![allow(dead_code, non_snake_case)]
 
-#[cfg(unix)]
 #[link(name = "openal")]
-extern {}
-
-#[cfg(not(unix))]
-#[link(name = "openal32")]
 extern {}
 
 pub mod ffi {
