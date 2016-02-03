@@ -78,6 +78,9 @@ pub struct Music {
     is_looping: bool,
     /// Channel to tell the thread, if is_looping changed
     looping_sender: Option<Sender<bool>>,
+
+    /// Thread which streams the music file
+    thread_handle: Option<thread::JoinHandle<()>>,
 }
 
 impl Music {
@@ -135,6 +138,7 @@ impl Music {
             sound_tags: sound_tags,
             is_looping: false,
             looping_sender: None,
+            thread_handle: None,
         })
     }
 
@@ -178,7 +182,7 @@ impl Music {
         self.looping_sender = Some(looping_sender);
         let is_looping_clone = self.is_looping.clone();
 
-        thread::spawn(move|| {
+        self.thread_handle = Some(thread::spawn(move|| {
             match OpenAlData::check_al_context() {
                 Ok(_)       => {},
                 Err(err)    => { println!("{}", err);}
@@ -222,7 +226,7 @@ impl Music {
                 status = al::alGetState(al_source);
             }
             al::alSourcei(al_source, ffi::AL_BUFFER, 0);
-        });
+        }));
         let file = self.file.as_ref().unwrap().clone();
         chan.send(*file);
     }
@@ -278,7 +282,6 @@ impl AudioController for Music {
         check_openal_context!(());
 
         al::alSourceStop(self.al_source);
-        sleep(Duration::from_millis(50));
     }
 
     /**
@@ -669,6 +672,10 @@ impl AudioController for Music {
 impl Drop for Music {
     /// Destroy all the resources of the Music.
     fn drop(&mut self) -> () {
+        self.stop();
+        if let Some(handle) = self.thread_handle.take() {
+            handle.join();
+        }
         unsafe {
             al::alSourcei(self.al_source, ffi::AL_BUFFER, 0);
             ffi::alDeleteBuffers(2, &mut self.al_buffers[0]);
