@@ -14,6 +14,14 @@ You need to install OpenAL and libsndfile on your system:
 
 ### Linux
 
+Fedora:
+
+```
+sudo dnf install openal-soft-devel libsndfile-devel
+```
+
+Debian or Ubuntu:
+
 ```
 sudo apt install libopenal-dev libsndfile1-dev
 ```
