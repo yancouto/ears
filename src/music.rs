@@ -93,13 +93,16 @@ impl Music {
      * # Return
      * An Option containing Some(Music) on success, None otherwise
      */
-    pub fn new(path: &str) -> Option<Music> {
+    pub fn new(path: &str) -> Result<Music, String> {
         // Check that OpenAL is launched
-        check_openal_context!(None);
+        check_openal_context!(Err("Invalid OpenAL context.".into()));
+
         // Retrieve File and Music datas
         let file = match SndFile::new(path, Read) {
             Ok(file)    => Box::new(file),
-            Err(err)    => { println!("{}", err); return None; }
+            Err(err)    => {
+                return Err(format!("Error while loading music file: {}", err));
+            }
         };
         let infos = file.get_sndinfo();
 
@@ -111,24 +114,22 @@ impl Music {
         // create the buffers
         al::alGenBuffers(2, &mut buffer_ids[0]);
 
-        // Retrieve format informations
+        // Retrieve format information
         let format =  match al::get_channels_format(infos.channels) {
             Some(fmt) => fmt,
             None => {
-                println!("internal error : unrecognized format.");
-                return None;
+                return Err("Unrecognized music format.".into());
             }
         };
 
         // Check if there is OpenAL internal error
-        match al::openal_has_error() {
-            Some(err) => { println!("{}", err); return None; },
-            None => {}
+        if let Some(err) = al::openal_has_error() {
+             return Err(format!("Internal OpenAL error: {}", err));
         };
 
         let sound_tags = get_sound_tags(&*file);
 
-        Some(Music {
+        Ok(Music {
             al_source: source_id,
             al_buffers: buffer_ids,
             file: Some(file),
@@ -697,10 +698,7 @@ mod test {
     fn music_create_OK() -> () {
         let msc = Music::new("res/shot.wav");
 
-        match msc {
-            Some(_) => {},
-            None    => panic!()
-        }
+        assert!(msc.is_ok());
     }
 
     #[test]
@@ -708,10 +706,7 @@ mod test {
     fn music_create_FAIL() -> () {
         let msc = Music::new("toto.wav");
 
-        match msc {
-            Some(_) => panic!(),
-            None    => {}
-        }
+        assert!(msc.is_err());
     }
 
     #[test]

@@ -34,23 +34,20 @@ fn main() {
     let stdin = stdin();
 
     print!("Insert the path to an audio file: ");
-   	stdout().flush().ok();
+    stdout().flush().ok();
 
     let mut line = String::new();
     stdin.read_line(&mut line).ok();
     loop {
-    	match &line[line.len()-1..] {
-    		"\n" => { line.pop(); () },
-    		"\r" => { line.pop(); () },
-    		_ => { break; },
-    	}
+        match &line[line.len()-1..] {
+            "\n" => { line.pop(); () },
+            "\r" => { line.pop(); () },
+            _ => { break; },
+        }
     }
 
     // Try to create the music
-    let mut music = match Music::new(&line[..]) {
-        Some(music) => music,
-        None        => panic!("Cannot load the music.")
-    };
+    let mut music = Music::new(&line[..]).expect("Error loading music.");
 
     // Play it
     music.play();
