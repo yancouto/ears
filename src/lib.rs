@@ -56,7 +56,7 @@ __ears__ provide two way for play audio files.
 
 # Use ears
 
-As said before, __ears__ require OpenAL and libsndfile, you need to install these two librarieson
+As said before, __ears__ require OpenAL and libsndfile, you need to install these two libraries on
 your system. Then import stuff from __ears__ in your project, you can import all the stuff:
 
 ```rust
