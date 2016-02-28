@@ -91,7 +91,8 @@ impl Music {
      * * `path` - The path of the file to load the music
      *
      * # Return
-     * An Option containing Some(Music) on success, None otherwise
+     * A `Result` containing Ok(Music) on success, Err(String)
+     * if there has been an error.
      */
     pub fn new(path: &str) -> Result<Music, String> {
         // Check that OpenAL is launched
