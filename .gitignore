@@ -5,3 +5,9 @@ bin/
 /.rust
 target/
 Cargo.lock
+
+# Travis CI
+travis.log
+
+# Visual Studio Code
+.vscode/.browse.VC.db*
