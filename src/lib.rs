@@ -91,6 +91,8 @@ use ears::Music;
 //#![allow(improper_ctypes)]
 
 extern crate libc;
+#[macro_use]
+extern crate lazy_static;
 
 // Reexport public API
 pub use einit::{init, init_in};

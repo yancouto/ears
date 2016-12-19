@@ -29,11 +29,15 @@
 use std::ffi::CString;
 use std::cell::RefCell;
 use std::ptr;
+use std::sync::Mutex;
+use libc;
 use openal::ffi;
 use record_context;
 use record_context::RecordContext;
 
-thread_local!(static AL_CONTEXT: RefCell<Box<OpenAlData>> = RefCell::new(Box::new(OpenAlData::default())));
+lazy_static! {
+    static ref AL_CONTEXT: Mutex<Result<OpenAlData, String>> = Mutex::new(OpenAlData::new());
+}
 
 #[derive(Clone)]
 pub struct OpenAlData {
@@ -59,6 +63,10 @@ impl OpenAlData {
             return Err("internal error: cannot make the OpenAL context current.".to_string());
         }
 
+        unsafe {
+            libc::atexit(cleanup_openal_context);
+        }
+
         Ok(
             OpenAlData {
                 al_context: context,
@@ -66,24 +74,6 @@ impl OpenAlData {
                 al_capt_device: 0
             }
         )
-    }
-
-    fn default() -> OpenAlData {
-        OpenAlData {
-            al_context: 0,
-            al_device: 0,
-            al_capt_device: 0
-        }
-    }
-
-    fn is_default(&self) -> bool {
-        if self.al_context == 0 &&
-           self.al_device == 0 &&
-           self.al_capt_device == 0 {
-            true
-        } else {
-            false
-        }
     }
 
     /// Check if the context is created.
@@ -99,55 +89,55 @@ impl OpenAlData {
         if unsafe { ffi::alcGetCurrentContext() != 0 } {
             return Ok(())
         }
-        AL_CONTEXT.with(|f| {
-            let is_def = f.borrow_mut().is_default();
-            if is_def {
-                match OpenAlData::new() {
-                    Ok(al_data) => {
-                        *f.borrow_mut() = Box::new(al_data); Ok(())
-                    },
-                    Err(err) => Err(err)
+        match AL_CONTEXT.lock() {
+            Ok(guard) => {
+                match *guard {
+                    Ok(_) => Ok(()),
+                    Err(ref err) => Err(err.clone())
                 }
-            } else {
-                Ok(())
-            }
-        })
+            },
+            Err(poison_error) => Err(
+                String::from(format!("Can't lock OpenAL context mutex: {}", poison_error))
+            )
+        }
     }
 
     fn is_input_context_init() -> Result<RecordContext, String> {
-        // let is_some = AL_CONTEXT.get().is_some();
-        AL_CONTEXT.with(|f| {
-            let is_def = f.borrow_mut().is_default();
-            if !is_def {
-                let mut new_context = f.borrow_mut();
-                if !new_context.al_capt_device == 0 {
-                    Ok(record_context::new(new_context.al_capt_device))
-                } else {
-					let c_str = CString::new("ALC_EXT_CAPTURE").unwrap();
-                    if unsafe {
-                        ffi::alcIsExtensionPresent(new_context.al_device, c_str.as_ptr()) } == ffi::ALC_FALSE {
-                        return Err("Error: no input device available on your system.".to_string())
+        match AL_CONTEXT.lock() {
+            Ok(mut guard) => {
+                if let Ok(ref mut new_context) = *guard {
+                    if new_context.al_capt_device != 0 {
+                        Ok(record_context::new(new_context.al_capt_device))
                     } else {
-                        new_context.al_capt_device = unsafe {
-                        ffi::alcCaptureOpenDevice(ptr::null_mut(),
-                                                  44100,
-                                                  ffi::AL_FORMAT_MONO16,
-                                                  44100) };
-                        if new_context.al_capt_device == 0 {
-                            return Err("internal error: cannot open the default capture device.".to_string())
+                        let c_str = CString::new("ALC_EXT_CAPTURE").unwrap();
+                        if unsafe {
+                            ffi::alcIsExtensionPresent(new_context.al_device, c_str.as_ptr()) } == ffi::ALC_FALSE {
+                            return Err("Error: no input device available on your system.".to_string())
                         } else {
-                           let cap_device = new_context.al_capt_device;
-                           return Ok(record_context::new(cap_device))
+                            new_context.al_capt_device = unsafe {
+                            ffi::alcCaptureOpenDevice(ptr::null_mut(),
+                                                        44100,
+                                                        ffi::AL_FORMAT_MONO16,
+                                                        44100) };
+                            if new_context.al_capt_device == 0 {
+                                return Err("internal error: cannot open the default capture device.".to_string())
+                            } else {
+                                let cap_device = new_context.al_capt_device;
+                                return Ok(record_context::new(cap_device))
+                            }
                         }
+                        Err("Error: you must request the input context, \
+                            in the task where you initialize ears.".to_string())
                     }
+                } else {
                     Err("Error: you must request the input context, \
                         in the task where you initialize ears.".to_string())
                 }
-            } else {
-                Err("Error: you must request the input context, \
-                    in the task where you initialize ears.".to_string())
-            }
-        })
+            },
+            Err(poison_error) => Err(
+                String::from(format!("Can't lock OpenAL context mutex: {}", poison_error))
+            )
+        }
     }
 
     /// Check if the input context is created.
@@ -171,14 +161,16 @@ impl OpenAlData {
     }
 }
 
-impl Drop for OpenAlData {
-    fn drop(&mut self) {
-        unsafe {
-            ffi::alcDestroyContext(self.al_context);
-            if !self.al_capt_device == 0 {
-                ffi::alcCaptureCloseDevice(self.al_capt_device);
+extern "C" fn cleanup_openal_context() {
+    if let Ok(mut guard) = AL_CONTEXT.lock() {
+        if let Ok(ref mut context) = *guard {
+            unsafe {
+                ffi::alcDestroyContext(context.al_context);
+                if context.al_capt_device != 0 {
+                    ffi::alcCaptureCloseDevice(context.al_capt_device);
+                }
+                ffi::alcCloseDevice(context.al_device);
             }
-            ffi::alcCloseDevice(self.al_device);
         }
     }
 }

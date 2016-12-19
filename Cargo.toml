@@ -1,6 +1,6 @@
 [package]
 name = "ears"
-version = "0.3.5"
+version = "0.4.0"
 authors = ["Jeremy Letang <letang.jeremy@gmail.com>", "Jan Niklas Hasse <jhasse@bixense.com>"]
 license = "MIT"
 keywords = ["audio", "openal", "sndfile", "sound", "music"]
@@ -17,3 +17,4 @@ crate-type = ["dylib", "rlib"]
 
 [dependencies]
 libc = "0.2"
+lazy_static = "0.2"

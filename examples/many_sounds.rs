@@ -27,10 +27,7 @@ use std::thread;
 
 use ears::{Sound, AudioController};
 
-fn main() -> () {
-    // call ears_init() function to ensure that the ears context is not destroyed by a task.
-    ears::init();
-
+fn main() {
     let mut i = 0;
 
     let mut handles = Vec::new();

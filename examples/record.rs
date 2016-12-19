@@ -25,10 +25,7 @@ use std::thread::sleep;
 use std::time::Duration;
 use ears::AudioController;
 
-fn main() -> () {
-    // call ears_init() function to ensure that the ears context is not destroyed by a task.
-    ears::init();
-
+fn main() {
     // initialize the RecordContext
     let ctxt = ears::init_in().expect("Initialization error!");
 
