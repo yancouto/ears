@@ -126,8 +126,6 @@ impl OpenAlData {
                                 return Ok(record_context::new(cap_device))
                             }
                         }
-                        Err("Error: you must request the input context, \
-                            in the task where you initialize ears.".to_string())
                     }
                 } else {
                     Err("Error: you must request the input context, \
