@@ -34,6 +34,10 @@ brew install openal-soft libsndfile
 
 ### Windows
 
+Install [MSYS2](http://www.msys2.org/) according to the instructions. Be sure to
+use the default installation folder (i.e. `C:\msys32` or `C:\msys64`), otherwise
+compiling won't work. Then, run the following in the MSYS2 shell:
+
 ```
 pacman -S mingw-w64-x86_64-libsndfile mingw-w64-x86_64-openal
 ```
