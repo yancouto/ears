@@ -38,8 +38,7 @@ use audio_tags::{Tags, AudioTags, get_sound_tags};
  * time.
  *
  * # Example
- * ```no_run
- * extern crate ears;
+ * ```ignore
  * use ears::{Sound, SoundData, AudioController};
  * use std::cell::RefCell;
  * use std::rc::Rc;
@@ -85,17 +84,17 @@ impl SoundData {
      * * `path` - The path of the file to load
      *
      * # Return
-     * An Option with Some(SoundData) if the SoundData is create, or None if
-     * an error has occured.
+     * A `Result` containing Ok(SoundData) on success, Err(String)
+     * if there has been an error.
      */
-    pub fn new(path: &str) -> Option<SoundData> {
-        check_openal_context!(None);
+    pub fn new(path: &str) -> Result<SoundData, String> {
+        check_openal_context!(Err("Invalid OpenAL context.".into()));
 
-        let mut file;
-
-        match SndFile::new(path, Read) {
-            Ok(file_) => file = file_,
-            Err(err) => { println!("{}", err); return None; }
+        let mut file = match SndFile::new(path, Read) {
+            Ok(file) => file,
+            Err(err) => {
+                return Err(format!("Error while loading sound file: {}", err));
+            }
         };
 
         let infos = file.get_sndinfo();
@@ -112,8 +111,7 @@ impl SoundData {
         let format =  match al::get_channels_format(infos.channels) {
             Some(fmt) => fmt,
             None => {
-                println!("internal error : unrecognized format.");
-                return None;
+                return Err("Unrecognized sound format.".into());
             }
         };
 
@@ -124,20 +122,19 @@ impl SoundData {
                          len as i32,
                          infos.samplerate);
 
-        match al::openal_has_error() {
-            Some(err)   => { println!("{}", err); return None; },
-            None        => {}
+        if let Some(err) = al::openal_has_error() {
+             return Err(format!("Internal OpenAL error: {}", err));
         };
 
         let sound_data = SoundData {
-            sound_tags  : get_sound_tags(&file),
-            snd_info    : infos,
-            nb_sample   : nb_sample,
-            al_buffer   : buffer_id
+            sound_tags: get_sound_tags(&file),
+            snd_info: infos,
+            nb_sample: nb_sample,
+            al_buffer: buffer_id
         };
         file.close();
 
-        Some(sound_data)
+        Ok(sound_data)
     }
 }
 

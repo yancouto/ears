@@ -75,26 +75,28 @@ impl Sound {
      * `path` - The path of the sound file to create the SoundData.
      *
      * # Return
-     * An Option with Some(Sound) if the Sound is created properly, or None if
-     * un error has occured.
+     * A `Result` containing Ok(Sound) on success, Err(String)
+     * if there has been an error.
      *
      * # Example
-     * ```no_run
-     * let snd = match ears::Sound::new("path/to/the/sound.ogg") {
-     *     Some(snd) => snd,
-     *     None      => panic!("Cannot load the sound from a file !")
-     * };
+     * ```ignore
+     * use ears::Sound;
+     *
+     * let snd = Sound::new("path/to/the/sound.ogg")
+     *                  .expect("Cannot load the sound from a file!");
      * ```
      */
-    pub fn new(path: &str) -> Option<Sound> {
-        check_openal_context!(None);
+    pub fn new(path: &str) -> Result<Sound, String> {
+        check_openal_context!(Err("Invalid OpenAL context.".into()));
 
-        let s_data = match SoundData::new(path) {
-            Some(s_d) => Rc::new(RefCell::new(s_d)),
-            None      => return None
+        let sound_data = match SoundData::new(path) {
+            Ok(data) => Rc::new(RefCell::new(data)),
+            Err(err) => {
+                return Err(format!("Error creating sound data: {}", err));
+            }
         };
 
-        Sound::new_with_data(s_data)
+        Sound::new_with_data(sound_data)
     }
 
     /**
@@ -108,23 +110,17 @@ impl Sound {
      * un error has occured.
      *
      * # Example
-     * ```no_run
+     * ```ignore
      * use ears::{Sound, SoundData, AudioController};
      * use std::rc::Rc;
      * use std::cell::RefCell;
      *
-     * let snd_data = match SoundData::new("path/to/the/sound.ogg") {
-     *     Some(snd_data) => Rc::new(RefCell::new(snd_data)),
-     *     None           => panic!("Cannot create the sound data !")
-     * };
-     * let mut snd = match Sound::new_with_data(snd_data) {
-     *     Some(mut snd) => snd.play(),
-     *     None      => panic!("Cannot create a sound using a sound data !")
-     * };
+     * let data = Rc::new(RefCell::new(SoundData::new("path/to/the/sound.ogg").unwrap()))
+     * let sound = Sound::new_with_data(data).unwrap();
      * ```
      */
-    pub fn new_with_data(sound_data: Rc<RefCell<SoundData>>) -> Option<Sound> {
-        check_openal_context!(None);
+    pub fn new_with_data(sound_data: Rc<RefCell<SoundData>>) -> Result<Sound, String> {
+        check_openal_context!(Err("Invalid OpenAL context.".into()));
 
         let mut source_id = 0;
         // create the source
@@ -136,12 +132,11 @@ impl Sound {
                                              .borrow_mut()) as i32);
 
         // Check if there is OpenAL internal error
-        match al::openal_has_error() {
-            Some(err) => { println!("{}", err); return None; },
-            None => {}
+        if let Some(err) = al::openal_has_error() {
+             return Err(format!("Internal OpenAL error: {}", err));
         };
 
-        Some(Sound {
+        Ok(Sound {
             al_source: source_id,
             sound_data: sound_data
         })
@@ -723,11 +718,8 @@ mod test {
     #[ignore]
     fn sound_create_OK() -> () {
         let snd = Sound::new("res/shot.wav");
-        println!("YOUHOU");
-        match snd {
-            Some(_) => {},
-            None    => panic!()
-        }
+
+        assert!(snd.is_ok());
     }
 
     #[test]
@@ -735,10 +727,7 @@ mod test {
     fn sound_create_FAIL() -> () {
         let snd = Sound::new("toto.wav");
 
-        match snd {
-            Some(_) => panic!(),
-            None    => {}
-        }
+        assert!(snd.is_err());
     }
 
     #[test]

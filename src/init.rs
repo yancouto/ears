@@ -35,46 +35,30 @@ use internal::OpenAlData;
  * Initialize the internal context
  *
  * # Return
- * true if initialization is made with success, false otherwise
+ * `Ok(())` if initialization is successful, `Err(String)` otherwise
  *
  * # Example
  * ```no_run
- * match ears::init() {
- *     true  => {
- *         // do stuff
- *     },
- *     false => panic!("ears init error")
- * }
+ * ears::init().unwrap()
  * ```
  */
-pub fn init() -> bool {
-    match OpenAlData::check_al_context() {
-        Ok(_)    => true,
-        Err(err) => { println!("{}", err); false }
-    }
+pub fn init() -> Result<(), String> {
+    return OpenAlData::check_al_context()
 }
 
 /**
  * Initialize the input device context
  *
  * # Return
- * true if initialization is made with success, false otherwise
+ * `Ok(RecordContext)` if initialization is successful, `Err(String)` otherwise
  *
  * # Example
  * ```no_run
- * match ears::init_in() {
- *     Some(rc) => {
- *         // do stuff
- *     },
- *     None     => panic!("ears init input error")
- * }
+ * ears::init_in().unwrap();
  * ```
  */
-pub fn init_in() -> Option<RecordContext> {
-    match OpenAlData::check_al_input_context() {
-        Ok(ctxt) => Some(ctxt),
-        Err(err) => { println!("{}", err); None }
-    }
+pub fn init_in() -> Result<RecordContext, String> {
+    return OpenAlData::check_al_input_context()
 }
 
 #[cfg(test)]
@@ -88,20 +72,20 @@ mod test {
     #[test]
     #[ignore]
     fn test_init_ears_OK() -> () {
-        assert_eq!(init(), true)
+        assert!(init().is_ok())
     }
 
     #[test]
     #[ignore]
     fn test_init_in_with_normal_init_OK() -> () {
         init();
-        assert!(init_in().is_some())
+        assert!(init_in().is_ok())
     }
 
     #[test]
     #[ignore]
     fn test_init_in_alone_OK() -> () {
-        assert!(init_in().is_some())
+        assert!(init_in().is_ok())
     }
 
     #[test]
@@ -109,7 +93,7 @@ mod test {
     fn test_init_in_in_another_task_OK() -> () {
         init();
         thread::spawn(move || {
-            assert_eq!(init_in(), None)
+            assert!(init_in().is_err())
         });
     }
 }
