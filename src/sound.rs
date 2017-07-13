@@ -321,7 +321,7 @@ impl AudioController for Sound {
             ffi::AL_PLAYING => Playing,
             ffi::AL_PAUSED  => Paused,
             ffi::AL_STOPPED => Stopped,
-            _               => unreachable!()
+            _               => panic!(format!("AL_SOURCE_STATE == {}", state))
         }
 
     }
