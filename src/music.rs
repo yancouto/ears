@@ -703,7 +703,6 @@ mod test {
     }
 
     #[test]
-    #[ignore]
     fn music_create_FAIL() -> () {
         let msc = Music::new("toto.wav");
 
@@ -816,8 +815,8 @@ mod test {
         assert_eq!(msc.get_pitch(), 1.5);
     }
 
-     #[test]
-     #[ignore]
+    #[test]
+    #[ignore]
     fn music_set_relative_TRUE() -> () {
         let mut msc = Music::new("res/shot.wav").expect("Cannot create Music");
 
