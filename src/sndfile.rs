@@ -273,11 +273,11 @@ impl SndFile {
         });
 		let c_path = CString::new(path).unwrap();
         let tmp_sndfile = {
-            unsafe {ffi::sf_open(c_path.as_ptr() as *mut i8, mode as i32, &mut *info) }
+            unsafe {ffi::sf_open(c_path.as_ptr() as *mut _, mode as i32, &mut *info) }
         };
         if tmp_sndfile == 0 {
             Err(unsafe {
-                from_utf8(CStr::from_ptr(ffi::sf_strerror(0) as *const i8).to_bytes()).unwrap().to_owned()
+                from_utf8(CStr::from_ptr(ffi::sf_strerror(0) as *const _).to_bytes()).unwrap().to_owned()
             })
         } else {
             Ok(SndFile {
@@ -301,11 +301,11 @@ impl SndFile {
     pub fn new_with_info(path : &str, mode : OpenMode, mut info: Box<SndInfo>) -> Result<SndFile, String> {
 		let c_path = CString::new(path).unwrap();
         let tmp_sndfile = {
-            unsafe {ffi::sf_open(c_path.as_ptr() as *mut i8, mode as i32, &mut *info) }
+            unsafe {ffi::sf_open(c_path.as_ptr() as *mut _, mode as i32, &mut *info) }
         };
         if tmp_sndfile == 0 {
             Err(unsafe {
-                from_utf8(CStr::from_ptr(ffi::sf_strerror(0) as *const i8).to_bytes()).unwrap().to_owned()
+                from_utf8(CStr::from_ptr(ffi::sf_strerror(0) as *const _).to_bytes()).unwrap().to_owned()
             })
         } else {
             Ok(SndFile {
@@ -349,7 +349,7 @@ impl SndFile {
         };
         if tmp_sndfile == 0 {
             Err(unsafe {
-                from_utf8(CStr::from_ptr(ffi::sf_strerror(0) as *const i8).to_bytes()).unwrap().to_owned()
+                from_utf8(CStr::from_ptr(ffi::sf_strerror(0) as *const _).to_bytes()).unwrap().to_owned()
             })
         } else {
             Ok(SndFile {
@@ -380,7 +380,7 @@ impl SndFile {
             None
         } else {
             Some(unsafe {
-        		from_utf8(CStr::from_ptr(c_string as *const i8).to_bytes()).unwrap().to_owned()
+        		from_utf8(CStr::from_ptr(c_string as *const _).to_bytes()).unwrap().to_owned()
                 //CString::new(c_string as *const i8, false).as_str().unwrap().to_string()
             })
         }
@@ -402,7 +402,7 @@ impl SndFile {
         unsafe {
             ffi::sf_set_string(self.handle,
                                string_type as i32,
-                               string.as_ptr() as *mut i8)
+                               string.as_ptr() as *mut _)
         }
     }
 
@@ -712,7 +712,7 @@ impl SndFile {
      */
     pub fn string_error(&self) -> String {
         unsafe {
-			from_utf8(CStr::from_ptr(ffi::sf_strerror(self.handle) as *const i8).to_bytes()).unwrap().to_owned()
+			from_utf8(CStr::from_ptr(ffi::sf_strerror(self.handle) as *const _).to_bytes()).unwrap().to_owned()
             //CString::new(ffi::sf_strerror(self.handle) as *const i8).as_str().unwrap().to_string()
         }
     }
@@ -724,7 +724,7 @@ impl SndFile {
      */
     pub fn error_number(error_num : Error) -> String {
         unsafe {
-			from_utf8(CStr::from_ptr(ffi::sf_error_number(error_num as i32) as *const i8).to_bytes()).unwrap().to_owned()
+			from_utf8(CStr::from_ptr(ffi::sf_error_number(error_num as i32) as *const _).to_bytes()).unwrap().to_owned()
             //CString::new(ffi::sf_error_number(error_num as i32) as *const i8, false).as_str().unwrap().to_string()
         }
     }

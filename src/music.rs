@@ -497,7 +497,7 @@ impl AudioController for Music {
 
         let mut boolean = 0;
         al::alGetSourcei(self.al_source, ffi::AL_SOURCE_RELATIVE, &mut boolean);
-        match boolean as i8 {
+        match boolean as _ {
             ffi::ALC_TRUE  => true,
             ffi::ALC_FALSE => false,
             _              => unreachable!()
