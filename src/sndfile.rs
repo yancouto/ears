@@ -231,7 +231,7 @@ pub enum FormatType {
 impl BitOr for FormatType {
     type Output = FormatType;
     fn bitor(self, _rhs: FormatType) -> Self::Output {
-         unsafe { transmute(((self as i32) | (_rhs as i32))) }
+         unsafe { transmute((self as i32) | (_rhs as i32)) }
     }
     //fn bitor(self, rhs: RHS) -> Self::Output;
 }
