@@ -62,7 +62,7 @@ fn main() {
             "p" => music.pause(),
             "s" => music.stop(),
             "x" => { music.stop(); break; },
-            _ => println!("Unknwon command.")
+            _ => println!("Unknown command.")
         }
         match music.get_state() {
             Playing => println!("State : Playing"),
