@@ -133,6 +133,7 @@ pub mod ffi {
         pub fn alcCaptureSamples(devide: ALCdevicePtr, buffer: *mut c_void,sample: i32);
 
         /// extension check
+        pub fn alIsExtensionPresent(extension: *const c_char) -> ALboolean;
         pub fn alcIsExtensionPresent(device: ALCdevicePtr, extension: *const c_char) -> ALCboolean;
 
         /// Buffers functions
