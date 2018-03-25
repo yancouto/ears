@@ -279,4 +279,41 @@ pub trait AudioController {
      * The current attenuation for the Audio Source in the range [0., 1.].
      */
     fn get_attenuation(&self) -> f32;
+
+    /**
+     * Enable or disable direct channel mode for an Audio Source.
+     *
+     * Sometimes audio tracks are authored with their own spatialization
+     * effects, where the AL's virtualization methods can cause a notable
+     * decrease in audio quality.
+     *
+     * The AL_SOFT_direct_channels extension provides a mechanism for
+     * applications to specify whether audio should be filtered according
+     * to the AL's channel virtualization rules for multi-channel buffers.
+     *
+     * When set to true, the audio channels are not virtualized and play
+     * directly on the matching output channels if they exist, otherwise
+     * they are dropped. Applies only when the extension exists and when
+     * playing non-mono buffers.
+     *
+     * http://kcat.strangesoft.net/openal-extensions/SOFT_direct_channels.txt
+     *
+     * The default is false.
+     *
+     * # Argument
+     * * `enabled` - true to enable direct channel mode, false to disable
+     */
+    fn set_direct_channel(&mut self, enabled: bool) -> ();
+
+    /**
+     * Returns whether direct channel is enabled or not.
+     *
+     * Will always return false if the AL_SOFT_direct_channels extension
+     * is not present.
+     *
+     * # Return
+     * `true` if source is using direct channel mode
+     * `false` otherwise
+     */
+    fn get_direct_channel(&self) -> bool;
 }
