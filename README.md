@@ -1,4 +1,4 @@
-# ears [![Build Status](https://travis-ci.org/jhasse/ears.svg?branch=master)](https://travis-ci.org/jhasse/ears) [![Build status](https://ci.appveyor.com/api/projects/status/7s7wo0m97x70f3w6?svg=true)](https://ci.appveyor.com/project/jhasse/ears) [![](http://meritbadge.herokuapp.com/ears)](https://crates.io/crates/ears)
+# ears [![Build Status](https://travis-ci.org/nickbrowne/ears.svg?branch=master)](https://travis-ci.org/nickbrowne/ears) [![Build status](https://ci.appveyor.com/api/projects/status/0dhp10u9y2ivrieo?svg=true)](https://ci.appveyor.com/project/nickbrowne/ears) [![](http://meritbadge.herokuapp.com/ears)](https://crates.io/crates/ears)
 
 A simple library to play sounds and music in [Rust](https://www.rust-lang.org).
 
