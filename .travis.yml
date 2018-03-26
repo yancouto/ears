@@ -20,16 +20,3 @@ addons:
     - libsndfile1-dev
 script:
 - cargo test
-after_success:
-- |
-  [ $TRAVIS_BRANCH = master ] &&
-  [ $TRAVIS_PULL_REQUEST = false ] &&
-  [ $TRAVIS_RUST_VERSION = stable ] &&
-  [ $TRAVIS_OS_NAME = linux ] &&
-  cargo doc &&
-  git clone https://github.com/davisp/ghp-import &&
-  ./ghp-import/ghp-import target/doc &&
-  git push -fq https://${GH_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git gh-pages
-env:
-  global:
-    secure: Y9hUYf92K2SdAQKlWpM/I6Lv0Ft3MpEv7pVurOyRlSfUL5ZbllKdOUimXz9yNk+KB+xa7EPAw/TeJCgxH6h3TflKSowecLVkg7o5t2V1AEqZqmZ5yrB5sOZc4auT+r1xM8EnFsksf8IJb9vQ1HVr234ho/is6jft4GIKEvKmwi0=
