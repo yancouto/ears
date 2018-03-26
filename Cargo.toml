@@ -8,7 +8,7 @@ readme = "README.md"
 build = "build.rs"
 exclude = [ "appveyor.yml", ".travis.yml", "res/*" ]
 repository = "https://github.com/jhasse/ears"
-documentation = "http://bixense.com/ears/ears/"
+documentation = "https://docs.rs/ears/"
 description = "Easy Api in Rust to play Sounds"
 
 [lib]
