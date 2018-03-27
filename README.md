@@ -13,7 +13,7 @@ A simple library to play sounds and music in [Rust](https://www.rust-lang.org).
 
 You need to install OpenAL and libsndfile on your system.
 
-#### Linux (debian and ubuntu)
+#### Linux (Debian and Ubuntu)
 
 ```
 sudo apt install libopenal-dev libsndfile1-dev
