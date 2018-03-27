@@ -13,27 +13,25 @@ A simple library to play sounds and music in [Rust](https://www.rust-lang.org).
 
 You need to install OpenAL and libsndfile on your system.
 
-#### Linux
-
-Fedora:
-
-```
-sudo dnf install openal-soft-devel libsndfile-devel
-```
-
-Debian or Ubuntu:
+#### Linux (debian and ubuntu)
 
 ```
 sudo apt install libopenal-dev libsndfile1-dev
 ```
 
-#### Mac
+#### Linux (Fedora):
+
+```
+sudo dnf install openal-soft-devel libsndfile-devel
+```
+
+#### Mac:
 
 ```
 brew install openal-soft libsndfile
 ```
 
-#### Windows
+#### Windows:
 
 Install [MSYS2](http://www.msys2.org/) according to the instructions. Be sure to
 use the default installation folder (i.e. `C:\msys32` or `C:\msys64`), otherwise
