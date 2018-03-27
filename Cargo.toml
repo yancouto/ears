@@ -9,7 +9,7 @@ build = "build.rs"
 exclude = [ "appveyor.yml", ".travis.yml", "res/*" ]
 repository = "https://github.com/nickbrowne/ears"
 documentation = "https://docs.rs/ears/"
-description = "Easy Api in Rust to play Sounds"
+description = "Easy Rust API to play audio using OpenAL"
 
 [lib]
 name = "ears"
