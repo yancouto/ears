@@ -1,13 +1,13 @@
 [package]
 name = "ears"
-version = "0.4.0"
-authors = ["Jeremy Letang <letang.jeremy@gmail.com>", "Jan Niklas Hasse <jhasse@bixense.com>"]
+version = "0.5.0"
+authors = ["Jeremy Letang <letang.jeremy@gmail.com>", "Jan Niklas Hasse <jhasse@bixense.com>", "Nick Browne <nickbrowne@users.noreply.github.com>"]
 license = "MIT"
 keywords = ["audio", "openal", "sndfile", "sound", "music"]
 readme = "README.md"
 build = "build.rs"
 exclude = [ "appveyor.yml", ".travis.yml", "res/*" ]
-repository = "https://github.com/jhasse/ears"
+repository = "https://github.com/nickbrowne/ears"
 documentation = "https://docs.rs/ears/"
 description = "Easy Api in Rust to play Sounds"
 
