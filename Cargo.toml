@@ -1,6 +1,6 @@
 [package]
 name = "ears"
-version = "0.5.0"
+version = "0.5.1"
 authors = ["Jeremy Letang <letang.jeremy@gmail.com>", "Jan Niklas Hasse <jhasse@bixense.com>", "Nick Browne <nickbrowne@users.noreply.github.com>"]
 license = "MIT"
 keywords = ["audio", "openal", "sndfile", "sound", "music"]

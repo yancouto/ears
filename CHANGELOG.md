@@ -1,3 +1,7 @@
+# v0.5.1
+  - Improved documentation
+  - Added CI badges to Cargo.toml
+
 # v0.5.0
   - Made building on Windows easier [#12](https://github.com/jhasse/ears/pull/12)
   - Improved error handling [#13](https://github.com/jhasse/ears/pull/13)
