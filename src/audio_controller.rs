@@ -296,7 +296,7 @@ pub trait AudioController {
      * they are dropped. Applies only when the extension exists and when
      * playing non-mono buffers.
      *
-     * http://kcat.strangesoft.net/openal-extensions/SOFT_direct_channels.txt
+     * [http://kcat.strangesoft.net/openal-extensions/SOFT_direct_channels.txt]()
      *
      * The default is false.
      *
