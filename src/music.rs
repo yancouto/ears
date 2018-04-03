@@ -332,7 +332,7 @@ impl AudioController for Music {
      * +6dB.
      *
      * # Argument
-     * * `volume` - The volume of the Music, should be between 0. and 1.
+     * * `volume` - The volume of the Music, should be between 0.0 and 1.0
      */
     fn set_volume(&mut self, volume: f32) -> () {
         check_openal_context!(());
@@ -344,7 +344,7 @@ impl AudioController for Music {
      * Get the volume of the Music.
      *
      * # Return
-     * The volume of the Music between 0. and 1.
+     * The volume of the Music between 0.0 and 1.0
      */
     fn get_volume(&self) -> f32 {
         check_openal_context!(0.);
@@ -362,7 +362,7 @@ impl AudioController for Music {
      *
      * # Argument
      * * `min_volume` - The new minimal volume of the Music should be
-     * between 0. and 1.
+     * between 0.0 and 1.0
      */
     fn set_min_volume(&mut self, min_volume: f32) -> () {
         check_openal_context!(());
@@ -374,7 +374,7 @@ impl AudioController for Music {
      * Get the minimal volume of the Music.
      *
      * # Return
-     * The minimal volume of the Music between 0. and 1.
+     * The minimal volume of the Music between 0.0 and 1.0
      */
     fn get_min_volume(&self) -> f32 {
         check_openal_context!(0.);
@@ -392,7 +392,7 @@ impl AudioController for Music {
      *
      * # Argument
      * * `max_volume` - The new maximal volume of the Music should be
-     * between 0. and 1.
+     * between 0.0 and 1.0
      */
     fn set_max_volume(&mut self, max_volume: f32) -> () {
         check_openal_context!(());
@@ -404,7 +404,7 @@ impl AudioController for Music {
      * Get the maximal volume of the Music.
      *
      * # Return
-     * The maximal volume of the Music between 0. and 1.
+     * The maximal volume of the Music between 0.0 and 1.0
      */
     fn get_max_volume(&self) -> f32 {
         check_openal_context!(0.);
@@ -518,7 +518,7 @@ impl AudioController for Music {
      * To switch from a left handed coordinate system, flip the sign on the Z
      * coordinate.
      *
-     * Default position is [0., 0., 0.].
+     * Default position is [0.0, 0.0, 0.0].
      *
      * # Argument
      * * `position` - A three dimensional vector of f32 containing the position
@@ -550,7 +550,7 @@ impl AudioController for Music {
      *
      * Specifies the current direction in local space.
      *
-     * The default direction is: [0., 0., 0.]
+     * The default direction is: [0.0, 0.0, 0.0]
      *
      * # Argument
      * `direction` - The new direction of the Music.
@@ -585,7 +585,7 @@ impl AudioController for Music {
      * The default maximum distance is +inf.
      *
      * # Argument
-     * `max_distance` - The new maximum distance in the range [0., +inf]
+     * `max_distance` - The new maximum distance in the range [0.0, +inf]
      */
     fn set_max_distance(&mut self, max_distance: f32) -> () {
         check_openal_context!(());
@@ -597,7 +597,7 @@ impl AudioController for Music {
      * Get the maximum distance of the Music.
      *
      * # Return
-     * The maximum distance of the Music in the range [0., +inf]
+     * The maximum distance of the Music in the range [0.0, +inf]
      */
     fn get_max_distance(&self) -> f32 {
         check_openal_context!(0.);
@@ -650,7 +650,7 @@ impl AudioController for Music {
      * The default attenuation is 1.
      *
      * # Arguments
-     * `attenuation` - The new attenuation for the Music in the range [0., 1.].
+     * `attenuation` - The new attenuation for the Music in the range [0.0, 1.0].
      */
     fn set_attenuation(&mut self, attenuation: f32) -> () {
         check_openal_context!(());
@@ -662,7 +662,7 @@ impl AudioController for Music {
      * Get the attenuation of a Music.
      *
      * # Return
-     * The current attenuation for the Music in the range [0., 1.].
+     * The current attenuation for the Music in the range [0.0, 1.0].
      */
     fn get_attenuation(&self) -> f32 {
         check_openal_context!(1.);

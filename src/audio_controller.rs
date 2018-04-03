@@ -58,7 +58,7 @@ pub trait AudioController {
      * +6dB.
      *
      * # Argument
-     * * `volume` - The volume of the Audio Source, should be between 0. and 1.
+     * * `volume` - The volume of the Audio Source, should be between 0.0 and 1.0
      */
     fn set_volume(&mut self, volume: f32) -> ();
 
@@ -66,7 +66,7 @@ pub trait AudioController {
      * Get the volume of the Audio Source.
      *
      * # Return
-     * The volume of the Audio Source between 0. and 1.
+     * The volume of the Audio Source between 0.0 and 1.0
      */
     fn get_volume(&self) -> f32;
 
@@ -78,7 +78,7 @@ pub trait AudioController {
      *
      * # Argument
      * * `min_volume` - The new minimal volume of the Audio Source should be
-     * between 0. and 1.
+     * between 0.0 and 1.0
      */
     fn set_min_volume(&mut self, min_volume: f32) -> ();
 
@@ -86,7 +86,7 @@ pub trait AudioController {
      * Get the minimal volume of the Audio Source.
      *
      * # Return
-     * The minimal volume of the Audio Source between 0. and 1.
+     * The minimal volume of the Audio Source between 0.0 and 1.0
      */
     fn get_min_volume(&self) -> f32;
 
@@ -98,7 +98,7 @@ pub trait AudioController {
      *
      * # Argument
      * * `max_volume` - The new maximal volume of the Audio Source should be
-     * between 0. and 1.
+     * between 0.0 and 1.0
      */
     fn set_max_volume(&mut self, max_volume: f32) -> ();
 
@@ -106,7 +106,7 @@ pub trait AudioController {
      * Get the maximal volume of the Audio Source.
      *
      * # Return
-     * The maximal volume of the Audio Source between 0. and 1.
+     * The maximal volume of the Audio Source between 0.0 and 1.0
      */
     fn get_max_volume(&self) -> f32;
 
@@ -177,7 +177,7 @@ pub trait AudioController {
      * To switch from a left handed coordinate system, flip the sign on the Z
      * coordinate.
      *
-     * Default position is [0., 0., 0.].
+     * Default position is [0.0, 0.0, 0.0].
      *
      * # Argument
      * * `position` - A three dimensional vector of f32 containing the
@@ -199,7 +199,7 @@ pub trait AudioController {
      *
      * Specifies the current direction in local space.
      *
-     * The default direction is: [0., 0., 0.]
+     * The default direction is: [0.0, 0.0, 0.0]
      *
      * # Argument
      * `direction` - The new direction of the Audio Source.
@@ -224,7 +224,7 @@ pub trait AudioController {
      * The default maximum distance is +inf.
      *
      * # Argument
-     * `max_distance` - The new maximum distance in the range [0., +inf]
+     * `max_distance` - The new maximum distance in the range [0.0, +inf]
      */
     fn set_max_distance(&mut self, max_distance: f32) -> ();
 
@@ -232,7 +232,7 @@ pub trait AudioController {
      * Get the maximum distance of the Audio Source.
      *
      * # Return
-     * The maximum distance of the Audio Source in the range [0., +inf]
+     * The maximum distance of the Audio Source in the range [0.0, +inf]
      */
     fn get_max_distance(&self) -> f32;
 
@@ -268,7 +268,7 @@ pub trait AudioController {
      *
      * # Arguments
      * `attenuation` - The new attenuation for the Audio Source in the
-     * range [0., 1.].
+     * range [0.0, 1.0].
      */
     fn set_attenuation(&mut self, attenuation: f32) -> ();
 
@@ -276,7 +276,7 @@ pub trait AudioController {
      * Get the attenuation of a Sound.
      *
      * # Return
-     * The current attenuation for the Audio Source in the range [0., 1.].
+     * The current attenuation for the Audio Source in the range [0.0, 1.0].
      */
     fn get_attenuation(&self) -> f32;
 

@@ -334,7 +334,7 @@ impl AudioController for Sound {
      * amplification of about +6dB.
      *
      * # Argument
-     * * `volume` - The volume of the Sound, should be between 0. and 1.
+     * * `volume` - The volume of the Sound, should be between 0.0 and 1.0
      */
     fn set_volume(&mut self, volume: f32) -> () {
         check_openal_context!(());
@@ -346,7 +346,7 @@ impl AudioController for Sound {
      * Get the volume of the Sound.
      *
      * # Return
-     * The volume of the Sound between 0. and 1.
+     * The volume of the Sound between 0.0 and 1.0
      */
     fn get_volume(&self) -> f32 {
         check_openal_context!(0.);
@@ -364,7 +364,7 @@ impl AudioController for Sound {
      *
      * # Argument
      * * `min_volume` - The new minimal volume of the Sound should be between
-     * 0. and 1.
+     * 0.0 and 1.0
      */
     fn set_min_volume(&mut self, min_volume: f32) -> () {
         check_openal_context!(());
@@ -376,7 +376,7 @@ impl AudioController for Sound {
      * Get the minimal volume of the Sound.
      *
      * # Return
-     * The minimal volume of the Sound between 0. and 1.
+     * The minimal volume of the Sound between 0.0 and 1.0
      */
     fn get_min_volume(&self) -> f32 {
         check_openal_context!(0.);
@@ -394,7 +394,7 @@ impl AudioController for Sound {
      *
      * # Argument
      * * `max_volume` - The new maximal volume of the Sound should be between
-     * 0. and 1.
+     * 0.0 and 1.0
      */
     fn set_max_volume(&mut self, max_volume: f32) -> () {
         check_openal_context!(());
@@ -406,7 +406,7 @@ impl AudioController for Sound {
      * Get the maximal volume of the Sound.
      *
      * # Return
-     * The maximal volume of the Sound between 0. and 1.
+     * The maximal volume of the Sound between 0.0 and 1.0
      */
     fn get_max_volume(&self) -> f32 {
         check_openal_context!(0.);
@@ -536,7 +536,7 @@ impl AudioController for Sound {
      * To switch from a left handed coordinate system, flip the sign on the Z
      * coordinate.
      *
-     * Default position is [0., 0., 0.].
+     * Default position is [0.0, 0.0, 0.0].
      *
      * # Argument
      * * `position` - A three dimensional vector of f32 containing the position
@@ -568,7 +568,7 @@ impl AudioController for Sound {
      *
      * Specifies the current direction in local space.
      *
-     * The default direction is: [0., 0., 0.]
+     * The default direction is: [0.0, 0.0, 0.0]
      *
      * # Argument
      * `direction` - The new direction of the Sound.
@@ -603,7 +603,7 @@ impl AudioController for Sound {
      * The default maximum distance is +inf.
      *
      * # Argument
-     * `max_distance` - The new maximum distance in the range [0., +inf]
+     * `max_distance` - The new maximum distance in the range [0.0, +inf]
      */
     fn set_max_distance(&mut self, max_distance: f32) -> () {
         check_openal_context!(());
@@ -615,7 +615,7 @@ impl AudioController for Sound {
      * Get the maximum distance of the Sound.
      *
      * # Return
-     * The maximum distance of the Sound in the range [0., +inf]
+     * The maximum distance of the Sound in the range [0.0, +inf]
      */
     fn get_max_distance(&self) -> f32 {
         check_openal_context!(0.);
@@ -670,7 +670,7 @@ impl AudioController for Sound {
      * The default attenuation is 1.
      *
      * # Arguments
-     * `attenuation` - The new attenuation for the sound in the range [0., 1.].
+     * `attenuation` - The new attenuation for the sound in the range [0.0, 1.0].
      */
     fn set_attenuation(&mut self, attenuation: f32) -> () {
         check_openal_context!(());
@@ -682,7 +682,7 @@ impl AudioController for Sound {
      * Get the attenuation of a Sound.
      *
      * # Return
-     * The current attenuation for the sound in the range [0., 1.].
+     * The current attenuation for the sound in the range [0.0, 1.0].
      */
     fn get_attenuation(&self) -> f32 {
         check_openal_context!(1.);
@@ -972,8 +972,8 @@ mod test {
     // fn sound_set_pitch_too_high_FAIL() -> () {
     //     let mut snd = Sound::new("shot.wav").expect("Cannot create sound");
 
-    //     snd.set_pitch(3.);
-    //     assert_eq!(snd.get_pitch(), 3.);
+    //     snd.set_pitch(3.0);
+    //     assert_eq!(snd.get_pitch(), 3.0);
     // }
 
      #[test]
