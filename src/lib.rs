@@ -22,12 +22,14 @@
 /*!
 # ears
 
-__ears__ is a simple library for play Sounds and Musics in Rust.
+A simple library to play sounds and music in Rust, using OpenAL and libsndfile.
 
-__ears__ is build on the top of OpenAL and libsndfile.
+# Functionality
 
-* Provide anaccess to the OpenAL spatialization functionality in a simple way.
-* Accept a lot of audio formats thanks to libsndfile.
+`ears` provides two ways to play audio files.
+
+* `Sound`, which is for short lived audio samples, like sound effects.
+* `Music`, which is for longer audio and streamed from the disk.
 
 # Example
 
@@ -36,43 +38,15 @@ extern crate ears;
 use ears::{Sound, AudioController};
 
 fn main() {
-	// Create a new Sound.
-	let mut snd = Sound::new("path/to/my/sound.ogg").unwrap();
+    // Create a new Sound.
+    let mut snd = Sound::new("path/to/my/sound.ogg").unwrap();
 
-	// Play the Sound
-	snd.play();
+    // Play the Sound
+    snd.play();
 
-	// Wait until the end of the sound
-	while snd.is_playing() {}
+    // Wait until the end of the sound
+    while snd.is_playing() {}
 }
-```
-
-# Functionnality
-
-__ears__ provide two way for play audio files.
-
-* The Sound class, which represent light sounds who can share a buffer of samples with another Sound.
-* The Music class, which is a bigger sound and who can't share sample buffer.
-
-# Use ears
-
-As said before, __ears__ require OpenAL and libsndfile, you need to install these two libraries on
-your system. Then import stuff from __ears__ in your project, you can import all the stuff:
-
-```rust
-extern crate ears;
-
-use ears::*;
-# fn main() {}
-```
-
-or a specific one:
-
-```rust
-extern crate ears;
-
-use ears::Music;
-# fn main() {}
 ```
 */
 
