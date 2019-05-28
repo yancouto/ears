@@ -71,6 +71,9 @@ pub mod ffi {
     pub const AL_BUFFERS_QUEUED:      i32         = 0x1015;
     pub const AL_DIRECT_CHANNELS_SOFT:i32         = 0x1033;
 
+    /// Source object extensions
+    pub const AL_AIR_ABSORPTION_FACTOR: i32       = 0x20007;
+
     /// Error identifiers
     pub const AL_NO_ERROR:            i32         = 0;
     pub const AL_INVALID_NAME:        i32         = 0xA001;

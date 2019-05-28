@@ -189,6 +189,39 @@ impl Sound {
 
         self.sound_data = sound_data
     }
+
+    /**
+     * This is a multiplier on the amount of Air Absorption applied to the Source.
+     * The air absorption factor is multiplied by an internal Air Absorption Gain
+     * HF value of 0.994 (-0.05dB) per meter which represents normal atmospheric
+     * humidity and temperature.
+
+     * By default the value is set to 0.0 which means that Air Absorption effects
+     * are disabled.
+     *
+     * A value of 1.0 will tell the Effects Extension engine to apply high frequency
+     * attenuation on the direct path of the Source at a rate of 0.05dB per meter.
+     *
+     * Range 0.0 to 10.0
+     */
+    pub fn set_air_absorption_factor(&mut self, factor: f32) {
+        check_openal_context!(());
+
+        al::alSourcef(self.al_source, ffi::AL_AIR_ABSORPTION_FACTOR, factor);
+    }
+
+    /**
+     * Returns the current air absorption factor for the source.
+     */
+    pub fn get_air_absorption_factor(&mut self) -> f32 {
+        check_openal_context!(0.);
+
+        let mut factor = 0.0;
+
+        al::alGetSourcef(self.al_source, ffi::AL_AIR_ABSORPTION_FACTOR, &mut factor);
+
+        factor
+    }
 }
 
 impl AudioTags for Sound {
