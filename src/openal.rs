@@ -72,7 +72,32 @@ pub mod ffi {
     pub const AL_DIRECT_CHANNELS_SOFT:i32         = 0x1033;
 
     /// Source object extensions
+    pub const AL_DIRECT_FILTER:       i32         = 0x20005;
+    pub const AL_AUXILIARY_SEND_FILTER: i32       = 0x20006;
     pub const AL_AIR_ABSORPTION_FACTOR: i32       = 0x20007;
+
+    /// Effects
+    pub const AL_EFFECT_TYPE:         i32         = 0x8001;
+    pub const AL_EFFECT_REVERB:       i32         = 0x0001;
+    pub const AL_EFFECTSLOT_NULL:     i32         = 0x0000;
+    pub const AL_EFFECTSLOT_EFFECT:   i32         = 0x0001;
+    pub const AL_EFFECTSLOT_AUXILIARY_SEND_AUTO: i32 = 0x0003;
+    pub const AL_REVERB_DENSITY:              i32 = 0x0001;
+    pub const AL_REVERB_DIFFUSION:            i32 = 0x0002;
+    pub const AL_REVERB_GAIN:                 i32 = 0x0003;
+    pub const AL_REVERB_GAINHF:               i32 = 0x0004;
+    pub const AL_REVERB_DECAY_TIME:           i32 = 0x0005;
+    pub const AL_REVERB_DECAY_HFRATIO:        i32 = 0x0006;
+    pub const AL_REVERB_REFLECTIONS_GAIN:     i32 = 0x0007;
+    pub const AL_REVERB_REFLECTIONS_DELAY:    i32 = 0x0008;
+    pub const AL_REVERB_LATE_REVERB_GAIN:     i32 = 0x0009;
+    pub const AL_REVERB_LATE_REVERB_DELAY:    i32 = 0x000A;
+    pub const AL_REVERB_AIR_ABSORPTION_GAINHF:i32 = 0x000B;
+    pub const AL_REVERB_ROOM_ROLLOFF_FACTOR:  i32 = 0x000C;
+    pub const AL_REVERB_DECAY_HFLIMIT:        i32 = 0x000D;
+
+    // Filters
+    pub const AL_FILTER_NULL:         i32         = 0x0000;
 
     /// Error identifiers
     pub const AL_NO_ERROR:            i32         = 0;
@@ -116,6 +141,7 @@ pub mod ffi {
         pub fn alGenSources(n: i32, sources: *mut u32) -> ();
         pub fn alDeleteSources(n: i32, buffers: *mut u32) -> ();
         pub fn alSourcei(source: u32, param: i32, value: i32) -> ();
+        pub fn alSource3i(source: u32, param: i32, value1: i32, value2: i32, value3: i32);
         pub fn alSourcef(source: u32, param: i32, value: f32) -> ();
         pub fn alSourcePlay(source: u32) -> ();
         pub fn alSourcePause(source: u32) -> ();
@@ -134,6 +160,13 @@ pub mod ffi {
         pub fn alcCaptureStop(devide: ALCdevicePtr);
         pub fn alcGetIntegerv(devide: ALCdevicePtr, param: i32,  size: i32, values: *mut i32);
         pub fn alcCaptureSamples(devide: ALCdevicePtr, buffer: *mut c_void,sample: i32);
+
+        /// Effects functions
+        pub fn alGenAuxiliaryEffectSlots(n: i32, effect_slots: *mut u32) -> ();
+        pub fn alGenEffects(n: i32, effects: *mut u32) -> ();
+        pub fn alAuxiliaryEffectSloti(source: u32, param: i32, value: u32) -> ();
+        pub fn alEffecti(source: u32, param: i32, value: i32);
+        pub fn alEffectf(source: u32, param: i32, value: f32);
 
         /// extension check
         pub fn alIsExtensionPresent(extension: *const c_char) -> ALboolean;
@@ -187,6 +220,10 @@ pub mod al {
 
     pub fn alSourcei(source: u32, param: i32, value: i32) -> () {
         unsafe { ffi::alSourcei(source, param, value); }
+    }
+
+    pub fn alSource3i(source: u32, param: i32, value1: i32, value2: i32, value3: i32) -> () {
+        unsafe { ffi::alSource3i(source, param, value1, value2, value3); }
     }
 
     pub fn alSourcef(source: u32, param: i32, value: f32) -> () {
@@ -243,6 +280,27 @@ pub mod al {
 
     pub fn alGetListenerfv(param: i32, values: *mut f32) -> () {
         unsafe { ffi::alGetListenerfv(param, values); }
+    }
+
+    /// Effects functions
+    pub fn alGenAuxiliaryEffectSlots(n: i32, effect_slots: *mut u32) -> () {
+        unsafe { ffi::alGenAuxiliaryEffectSlots(n, effect_slots); }
+    }
+
+    pub fn alGenEffects(n: i32, effects: *mut u32) -> () {
+        unsafe { ffi::alGenEffects(n, effects); }
+    }
+
+    pub fn alAuxiliaryEffectSloti(source: u32, param: i32, value: u32) -> () {
+        unsafe { ffi::alAuxiliaryEffectSloti(source, param, value); }
+    }
+
+    pub fn alEffecti(source: u32, param: i32, value: i32) {
+        unsafe { ffi::alEffecti(source, param, value); }
+    }
+
+    pub fn alEffectf(source: u32, param: i32, value: f32) {
+        unsafe { ffi::alEffectf(source, param, value); }
     }
 
     pub fn openal_has_error() -> Option<String> {

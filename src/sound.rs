@@ -24,6 +24,7 @@
 use std::rc::Rc;
 use std::cell::RefCell;
 
+use reverb_effect::ReverbEffect;
 use internal::OpenAlData;
 use sound_data;//::*;//{SoundData};
 use sound_data::{SoundData};
@@ -295,6 +296,31 @@ impl AudioController for Sound {
         check_openal_context!(());
 
         al::alSourceStop(self.al_source)
+    }
+
+    /**
+     * Connect a ReverbEffect to the Sound
+     *
+     * # Example
+     * ```no_run
+     * use ears::{Sound, ReverbEffect, ReverbPreset, AudioController};
+     *
+     * let reverb_effect = ReverbEffect.preset(ReverbPreset::Sewerpipe.properties()).ok();
+     * let mut snd = Sound::new("path/to/sound.ogg").unwrap();
+     * snd.connect(reverb_effect);
+     * ```
+     */
+    fn connect(&mut self, reverb_effect: &Option<ReverbEffect>) {
+      check_openal_context!(());
+
+      match reverb_effect {
+        Some(reverb_effect) => {
+          al::alSource3i(self.al_source, ffi::AL_AUXILIARY_SEND_FILTER, reverb_effect.slot() as i32, 0, ffi::AL_FILTER_NULL);
+        },
+        None => {
+          al::alSource3i(self.al_source, ffi::AL_AUXILIARY_SEND_FILTER, ffi::AL_EFFECTSLOT_NULL, 0, ffi::AL_FILTER_NULL);
+        }
+      }
     }
 
     /**

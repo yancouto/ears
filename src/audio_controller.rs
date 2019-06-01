@@ -22,6 +22,7 @@
 //! The functionnality that a Sound or a Music should provide.
 
 use states::State;
+use reverb_effect::ReverbEffect;
 
 /// The functionnality that an Audio Source should provide.
 pub trait AudioController {
@@ -33,6 +34,9 @@ pub trait AudioController {
 
     /// Stop the Audio Source.
     fn stop(&mut self) -> ();
+
+    /// Connect a ReverbEffect to the Source
+    fn connect(&mut self, reverb_effect: &Option<ReverbEffect>);
 
     /**
      * Check if the Audio Source is playing or not.

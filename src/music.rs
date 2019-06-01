@@ -29,6 +29,7 @@ use libc::c_void;
 use std::vec::Vec;
 use std::sync::mpsc::{channel, Sender, Receiver};
 
+use reverb_effect::ReverbEffect;
 use internal::OpenAlData;
 use openal::{ffi, al};
 use sndfile::{SndInfo, SndFile};
@@ -289,6 +290,22 @@ impl AudioController for Music {
         check_openal_context!(());
 
         al::alSourceStop(self.al_source);
+    }
+
+    /**
+     * Connect a ReverbEffect to the Music
+     */
+    fn connect(&mut self, reverb_effect: &Option<ReverbEffect>) {
+      check_openal_context!(());
+
+      match reverb_effect {
+        Some(reverb_effect) => {
+          al::alSource3i(self.al_source, ffi::AL_AUXILIARY_SEND_FILTER, reverb_effect.slot() as i32, 0, ffi::AL_FILTER_NULL);
+        },
+        None => {
+          al::alSource3i(self.al_source, ffi::AL_AUXILIARY_SEND_FILTER, ffi::AL_EFFECTSLOT_NULL, 0, ffi::AL_FILTER_NULL);
+        }
+      }
     }
 
     /**
