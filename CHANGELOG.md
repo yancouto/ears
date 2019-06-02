@@ -1,3 +1,9 @@
+# v0.6.0
+  - Added basic support for creating and attaching reverb effects to both Sound and Music
+  - Added ability to set the Air Absorption of a Sound
+  - Added ability to set the velocity of a Sound
+  - Added ability to set the velocity of the listener
+
 # v0.5.1
   - Improved documentation
   - Added CI badges to Cargo.toml
