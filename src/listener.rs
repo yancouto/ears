@@ -158,6 +158,36 @@ pub fn get_orientation() -> ([f32; 3], [f32; 3]) {
      [orientation[3], orientation[4], orientation[5]])
 }
 
+/**
+ * Set the velocity of the listener.
+ *
+ * Default velocity is [0.0, 0.0, 0.0].
+ *
+ * # Argument
+ * * `velocity` - A three dimensional vector of f32 containing the velocity
+ * of the sound [x, y, z].
+ */
+pub fn set_velocity(velocity: [f32; 3]) -> () {
+    check_openal_context!(());
+
+    al::alListenerfv(ffi::AL_VELOCITY, &velocity[0]);
+}
+
+/**
+ * Get the velocity of the listener.
+ *
+ * # Return
+ * A three dimensional vector of f32 containing the velocity
+ * of the sound [x, y, z].
+ */
+pub fn get_velocity() -> [f32; 3] {
+    check_openal_context!([0.0; 3]);
+
+    let mut velocity : [f32; 3] = [0.0; 3];
+    al::alGetListenerfv(ffi::AL_VELOCITY, &mut velocity[0]);
+    velocity
+}
+
 #[cfg(test)]
 mod test {
     use listener::{set_volume, set_position, set_orientation,

@@ -50,6 +50,7 @@ pub mod ffi {
     pub const AL_POSITION:            i32         = 0x1004;
     pub const AL_ORIENTATION:         i32         = 0x100F;
     pub const AL_DIRECTION:           i32         = 0x1005;
+    pub const AL_VELOCITY:            i32         = 0x1006;
     pub const AL_LOOPING:             i32         = 0x1007;
     pub const AL_MIN_GAIN:            i32         = 0x100D;
     pub const AL_MAX_GAIN:            i32         = 0x100E;

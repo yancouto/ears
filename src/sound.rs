@@ -223,6 +223,37 @@ impl Sound {
 
         factor
     }
+
+    /**
+     * Set the velocity of a Sound.
+     *
+     * Default velocity is [0.0, 0.0, 0.0].
+     *
+     * # Argument
+     * * `velocity` - A three dimensional vector of f32 containing the velocity
+     * of the sound [x, y, z].
+     */
+    pub fn set_velocity(&mut self, velocity: [f32; 3]) -> () {
+        check_openal_context!(());
+
+        al::alSourcefv(self.al_source, ffi::AL_VELOCITY, &velocity[0]);
+    }
+
+    /**
+     * Get the velocity of a Sound.
+     *
+     * # Return
+     * A three dimensional vector of f32 containing the velocity
+     * of the sound [x, y, z].
+     */
+    pub fn get_velocity(&self) -> [f32; 3] {
+        check_openal_context!([0.0; 3]);
+
+        let mut velocity : [f32; 3] = [0.0; 3];
+        al::alGetSourcefv(self.al_source, ffi::AL_VELOCITY, &mut velocity[0]);
+        velocity
+    }
+
 }
 
 impl AudioTags for Sound {
