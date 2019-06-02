@@ -49,8 +49,9 @@ impl ReverbEffect {
     pub fn new() -> Result<ReverbEffect, String> {
         check_openal_context!(Err("Invalid OpenAL context.".into()));
 
-        // TODO: check effect extension availability before bothering
-        // to do all this
+        // Can't seem to find a way to query whether or not EFX extension is available
+        // or not... or if that's even necessary, so just assume it's available
+        // and have the error checking sort the rest out.
 
         // Create the auxiliary effect slot
         let mut effect_slot_id = 0;
