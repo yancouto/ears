@@ -14,6 +14,6 @@ fn play_file(file: &str) {
 }
 
 fn main() {
-    play_file("res/shot.wav");
-    play_file("res/explosion.ogg");
+    play_file("res/shots2.ogg");
+    play_file("res/explosion.wav");
 }

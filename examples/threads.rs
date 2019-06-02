@@ -6,7 +6,7 @@ fn main() {
     let mut handles = Vec::new();
     for _ in 0..10 {
         let handle = thread::spawn(move || {
-            let mut snd = Sound::new("res/shot.wav").unwrap();
+            let mut snd = Sound::new("res/shots.ogg").unwrap();
             snd.play();
             while snd.is_playing() {}
         });
