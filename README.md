@@ -71,7 +71,7 @@ fn main() {
 
 ```
 cargo run --example basic
-cargo run --example many_sounds
+cargo run --example advanced
 cargo run --example music
 cargo run --example record
 cargo run --example simple_player

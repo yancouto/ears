@@ -70,7 +70,9 @@ extern crate lazy_static;
 
 // Reexport public API
 pub use einit::{init, init_in};
+pub use reverb_effect::ReverbEffect;
 pub use music::Music;
+pub use presets::ReverbPreset;
 pub use sound::Sound;
 pub use states::State;
 pub use sound_data::SoundData;
@@ -92,9 +94,11 @@ mod einit;
 pub mod listener;
 mod sound;
 mod music;
+mod presets;
 mod sound_data;
 mod states;
 mod audio_controller;
 mod audio_tags;
 mod recorder;
 mod record_context;
+mod reverb_effect;

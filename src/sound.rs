@@ -24,6 +24,7 @@
 use std::rc::Rc;
 use std::cell::RefCell;
 
+use reverb_effect::ReverbEffect;
 use internal::OpenAlData;
 use sound_data;//::*;//{SoundData};
 use sound_data::{SoundData};
@@ -189,6 +190,39 @@ impl Sound {
 
         self.sound_data = sound_data
     }
+
+    /**
+     * This is a multiplier on the amount of Air Absorption applied to the Source.
+     * The air absorption factor is multiplied by an internal Air Absorption Gain
+     * HF value of 0.994 (-0.05dB) per meter which represents normal atmospheric
+     * humidity and temperature.
+
+     * By default the value is set to 0.0 which means that Air Absorption effects
+     * are disabled.
+     *
+     * A value of 1.0 will tell the Effects Extension engine to apply high frequency
+     * attenuation on the direct path of the Source at a rate of 0.05dB per meter.
+     *
+     * Range 0.0 to 10.0
+     */
+    pub fn set_air_absorption_factor(&mut self, factor: f32) {
+        check_openal_context!(());
+
+        al::alSourcef(self.al_source, ffi::AL_AIR_ABSORPTION_FACTOR, factor);
+    }
+
+    /**
+     * Returns the current air absorption factor for the source.
+     */
+    pub fn get_air_absorption_factor(&mut self) -> f32 {
+        check_openal_context!(0.);
+
+        let mut factor = 0.0;
+
+        al::alGetSourcef(self.al_source, ffi::AL_AIR_ABSORPTION_FACTOR, &mut factor);
+
+        factor
+    }
 }
 
 impl AudioTags for Sound {
@@ -262,6 +296,31 @@ impl AudioController for Sound {
         check_openal_context!(());
 
         al::alSourceStop(self.al_source)
+    }
+
+    /**
+     * Connect a ReverbEffect to the Sound
+     *
+     * # Example
+     * ```no_run
+     * use ears::{Sound, ReverbEffect, ReverbPreset, AudioController};
+     *
+     * let reverb_effect = ReverbEffect.preset(ReverbPreset::Sewerpipe.properties()).ok();
+     * let mut snd = Sound::new("path/to/sound.ogg").unwrap();
+     * snd.connect(reverb_effect);
+     * ```
+     */
+    fn connect(&mut self, reverb_effect: &Option<ReverbEffect>) {
+      check_openal_context!(());
+
+      match reverb_effect {
+        Some(reverb_effect) => {
+          al::alSource3i(self.al_source, ffi::AL_AUXILIARY_SEND_FILTER, reverb_effect.slot() as i32, 0, ffi::AL_FILTER_NULL);
+        },
+        None => {
+          al::alSource3i(self.al_source, ffi::AL_AUXILIARY_SEND_FILTER, ffi::AL_EFFECTSLOT_NULL, 0, ffi::AL_FILTER_NULL);
+        }
+      }
     }
 
     /**
