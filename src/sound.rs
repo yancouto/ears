@@ -336,9 +336,9 @@ impl AudioController for Sound {
      * ```no_run
      * use ears::{Sound, ReverbEffect, ReverbPreset, AudioController};
      *
-     * let reverb_effect = ReverbEffect.preset(ReverbPreset::Sewerpipe.properties()).ok();
+     * let reverb_effect = ReverbEffect::preset(ReverbPreset::Sewerpipe.properties()).ok();
      * let mut snd = Sound::new("path/to/sound.ogg").unwrap();
-     * snd.connect(reverb_effect);
+     * snd.connect(&reverb_effect);
      * ```
      */
     fn connect(&mut self, reverb_effect: &Option<ReverbEffect>) {
