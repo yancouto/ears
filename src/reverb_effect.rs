@@ -17,11 +17,11 @@ use presets::ReverbProperties;
  * # Examples
  * ```no_run
  * extern crate ears;
- * use ears::{Effect, EffectPreset, Sound, AudioController};
+ * use ears::{ReverbEffect, ReverbPreset, Sound, AudioController};
  *
  * fn main() -> () {
  *    // Create an effect (in this case, using a preset)
- *    let effect = Effect::preset(EffectPreset::Cave);
+ *    let effect = ReverbEffect::preset(ReverbPreset::Cave.properties());
  *
  *    // Create a Sound with the path of the sound file.
  *    let mut sound = Sound::new("path/to/my/sound.ogg").unwrap();
