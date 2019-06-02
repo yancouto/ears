@@ -3,7 +3,7 @@ use internal::OpenAlData;
 use presets::ReverbProperties;
 
 /**
- * Create and configure effects.
+ * Create and configure reverb effects.
  *
  * A Sound can optionally be connected to a ReverbEffect, which can modify
  * how the user hears the Sound (through reverb, echo, frequency shift, etc)
@@ -13,6 +13,9 @@ use presets::ReverbProperties;
  *
  * Internally it creates an OpenAL Effect Object with an Auxiliary Effect
  * Slot Object pair.
+ *
+ * **Note:** the effects API may change as it's implemented fully, but I'll
+ * try not to make the changes too drastic.
  *
  * # Examples
  * ```no_run
@@ -36,7 +39,7 @@ use presets::ReverbProperties;
  *    while sound.is_playing() {}
  *
  *    // If you want to disconnect an Effect, just pass None
- *    sound.connect(None);
+ *    sound.connect(&None);
  * }
  * ```
  */
