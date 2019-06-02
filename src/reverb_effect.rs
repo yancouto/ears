@@ -175,3 +175,27 @@ impl ReverbEffect {
         al::alEffecti(self.effect_id, ffi::AL_REVERB_DECAY_HFLIMIT, decay_hflimit);
     }
 }
+
+impl Drop for ReverbEffect {
+    // Delete the Effect Object and Auxiliary Effect Slot Object
+    fn drop(&mut self) -> () {
+        check_openal_context!(());
+
+        // Disconnect the effect and slot
+        al::alAuxiliaryEffectSloti(self.effect_slot_id, ffi::AL_EFFECTSLOT_EFFECT, ffi::AL_EFFECT_NULL as u32);
+
+        unsafe {
+            ffi::alDeleteEffects(1, &mut self.effect_id);
+            ffi::alDeleteAuxiliaryEffectSlots(1, &mut self.effect_slot_id);
+        }
+
+        // Check if there is OpenAL internal error
+        //
+        // TODO: this could probably be avoided with some better design
+        if al::openal_has_error().is_some() {
+            eprintln!("Ears failed to drop ReverbEffect completely, one or more source is probably still referencing it.");
+            eprintln!("\tEffect Object: {}", self.effect_id);
+            eprintln!("\tAuxiliary Effect Slot: {}", self.effect_slot_id);
+        };
+    }
+}

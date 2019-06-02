@@ -77,6 +77,7 @@ pub mod ffi {
     pub const AL_AIR_ABSORPTION_FACTOR: i32       = 0x20007;
 
     /// Effects
+    pub const AL_EFFECT_NULL:         i32         = 0x0000;
     pub const AL_EFFECT_TYPE:         i32         = 0x8001;
     pub const AL_EFFECT_REVERB:       i32         = 0x0001;
     pub const AL_EFFECTSLOT_NULL:     i32         = 0x0000;
@@ -164,6 +165,9 @@ pub mod ffi {
         /// Effects functions
         pub fn alGenAuxiliaryEffectSlots(n: i32, effect_slots: *mut u32) -> ();
         pub fn alGenEffects(n: i32, effects: *mut u32) -> ();
+        pub fn alDeleteAuxiliaryEffectSlots(n: i32, effect_slots: *mut u32) -> ();
+        pub fn alDeleteEffects(n: i32, effects: *mut u32) -> ();
+        pub fn alIsAuxiliaryEffectSlot(source: u32) -> ALboolean;
         pub fn alAuxiliaryEffectSloti(source: u32, param: i32, value: u32) -> ();
         pub fn alEffecti(source: u32, param: i32, value: i32);
         pub fn alEffectf(source: u32, param: i32, value: f32);
