@@ -752,6 +752,19 @@ impl AudioController for Music {
             false => false,
         }
     }
+
+    /**
+     * Returns the duration of the Music.
+     */
+    fn get_duration(&self) -> Duration {
+        let frames = self.file_infos.frames as u64;
+        let sample_rate = self.file_infos.samplerate as u64;
+
+        let seconds = frames / sample_rate;
+        let nanoseconds = frames % sample_rate * 1_000_000_000 / sample_rate;
+
+        Duration::new(seconds, nanoseconds as u32)
+    }
 }
 
 
