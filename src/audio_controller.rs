@@ -21,6 +21,8 @@
 
 //! The functionnality that a Sound or a Music should provide.
 
+use std::time::Duration;
+
 use states::State;
 use reverb_effect::ReverbEffect;
 
@@ -320,4 +322,9 @@ pub trait AudioController {
      * `false` otherwise
      */
     fn get_direct_channel(&self) -> bool;
+
+    /**
+     * Returns the duration
+     */
+    fn get_duration(&self) -> Duration;
 }

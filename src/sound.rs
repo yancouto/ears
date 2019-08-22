@@ -23,6 +23,7 @@
 
 use std::rc::Rc;
 use std::cell::RefCell;
+use std::time::Duration;
 
 use reverb_effect::ReverbEffect;
 use internal::OpenAlData;
@@ -844,6 +845,22 @@ impl AudioController for Sound {
             },
             false => false,
         }
+    }
+
+    /**
+     * Returns the duration of the Sound.
+     */
+    fn get_duration(&self) -> Duration {
+        let data = self.sound_data.borrow();
+        let snd_info = sound_data::get_sndinfo(&data);
+
+        let frames = snd_info.frames as u64;
+        let sample_rate = snd_info.samplerate as u64;
+
+        let seconds = frames / sample_rate;
+        let nanoseconds = frames % sample_rate * 1_000_000_000 / sample_rate;
+
+        Duration::new(seconds, nanoseconds as u32)
     }
 }
 
