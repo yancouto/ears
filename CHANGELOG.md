@@ -1,3 +1,6 @@
+# v0.7.0
+  - Added ability to get duration of Sound and Music
+
 # v0.6.0
   - Added basic support for creating and attaching reverb effects to both Sound and Music
   - Added ability to set the Air Absorption of a Sound
