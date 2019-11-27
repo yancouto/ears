@@ -1,13 +1,22 @@
 # ears [![Build Status](https://travis-ci.org/nickbrowne/ears.svg?branch=master)](https://travis-ci.org/nickbrowne/ears) [![Build status](https://ci.appveyor.com/api/projects/status/0dhp10u9y2ivrieo/branch/master?svg=true)](https://ci.appveyor.com/project/nickbrowne/ears/branch/master) [![](http://meritbadge.herokuapp.com/ears)](https://crates.io/crates/ears)
 
-A simple library to play sounds and music in [Rust](https://www.rust-lang.org).
+Ears aims to be a convenient and easy to understand Rust interface over OpenAL.
 
-* Convenient and easy to understand interface over OpenAL.
-* Supports a wide variety of audio formats via `libsndfile`.
-* Advanced features like HRTF and spatialization for free.
-* Perfect for game developers.
+It's designed first and foremost for game development, giving you easy access to
+complex functionality like HRTF, spatialization, and environmental effects with
+almost no configuration required.
 
 **[View documentation](https://docs.rs/ears/)**
+
+Supports a wide variety of audio formats, including:
+
+* Ogg Vorbis
+* Microsoft WAV
+* RAW PCM
+* Lossless FLAC
+* AIFF
+
+For a full list please see the documentation for libsndfile here: http://www.mega-nerd.com/libsndfile/
 
 ## Before you start
 
