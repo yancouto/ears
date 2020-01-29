@@ -19,6 +19,9 @@ crate-type = ["dylib", "rlib"]
 libc = "0.2"
 lazy_static = "0.2"
 
+[build-dependencies]
+pkg-config = "0.3"
+
 [badges]
 appveyor = { repository = "nickbrowne/ears", branch = "master" }
 travis-ci = { repository = "nickbrowne/ears", branch = "master" }
