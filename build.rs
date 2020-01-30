@@ -1,7 +1,22 @@
 #[cfg(unix)]
+extern crate pkg_config;
+
+#[cfg(unix)]
 fn main() {
-    println!("cargo:rustc-link-search=native=/usr/local/opt/openal-soft/lib");
-    println!("cargo:rustc-link-search=native=/usr/local/lib");
+    for name in ["openal", "sndfile"].iter() {
+        let lib = pkg_config::Config::new()
+            .print_system_libs(false)
+            .find(name)
+            .unwrap();
+
+        for include in lib.include_paths.iter() {
+            println!("cargo:include={}", include.display());
+        }
+
+        for link in lib.link_paths.iter() {
+            println!("cargo:rustc-link-search=native={}", link.display());
+        }
+    }
 }
 
 #[cfg(all(windows, target_arch = "x86"))]
