@@ -90,7 +90,8 @@ impl Recorder {
         self.stop_sender = Some(stop_sender);
         self.data_receiver = Some(data_receiver);
 
-        thread::spawn(move || {
+        let thread = thread::Builder::new().name(String::from("ears-recorder"));
+        thread.spawn(move || {
             let mut terminate = false;
             let ctxt = record_context::get(r_c);
             unsafe { ffi::alcCaptureStart(ctxt); }
@@ -124,7 +125,7 @@ impl Recorder {
                 }
             }
             data_sender.send(samples);
-        });
+        }).unwrap();
     }
 
     pub fn stop(&mut self) -> bool {

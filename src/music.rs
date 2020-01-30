@@ -185,7 +185,8 @@ impl Music {
         self.looping_sender = Some(looping_sender);
         let is_looping_clone = self.is_looping.clone();
 
-        self.thread_handle = Some(thread::spawn(move|| {
+        let thread = thread::Builder::new().name(String::from("ears-music"));
+        self.thread_handle = Some(thread.spawn(move|| {
             match OpenAlData::check_al_context() {
                 Ok(_)       => {},
                 Err(err)    => { println!("{}", err);}
@@ -234,7 +235,7 @@ impl Music {
                 status = al::alGetState(al_source);
             }
             al::alSourcei(al_source, ffi::AL_BUFFER, 0);
-        }));
+        }).unwrap());
         let file = self.file.as_ref().unwrap().clone();
         chan.send(*file);
     }
