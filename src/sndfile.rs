@@ -370,8 +370,9 @@ impl SndFile {
      * # Argument
      * * string_type - The type of the tag to retrieve
      *
-     * Return Some(String) if the tag is found, None otherwise.
+     * Return Some(String) if the tag is found and UTF-8, None otherwise.
      */
+    // TODO: maybe integrate some encoding crate to handle non-UTF-8 someday?
     pub fn get_string(&self, string_type : StringSoundType) -> Option<String> {
         let c_string = unsafe {
             ffi::sf_get_string(self.handle, string_type as i32)
@@ -379,10 +380,8 @@ impl SndFile {
         if c_string == ptr::null_mut() {
             None
         } else {
-            Some(unsafe {
-        		from_utf8(CStr::from_ptr(c_string as *const _).to_bytes()).unwrap().to_owned()
-                //CString::new(c_string as *const i8, false).as_str().unwrap().to_string()
-            })
+            let cstr = unsafe { CStr::from_ptr(c_string as *const _) };
+            from_utf8(cstr.to_bytes()).ok().map(ToOwned::to_owned)
         }
     }
 
