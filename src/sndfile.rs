@@ -35,6 +35,7 @@
 //use std::str::from_utf8;
 use std::ffi::CStr;
 use std::ffi::CString;
+use std::fmt;
 use std::i32::*;
 use std::intrinsics::transmute;
 use std::ops::BitOr;
@@ -235,6 +236,30 @@ impl BitOr for FormatType {
     //fn bitor(self, rhs: RHS) -> Self::Output;
 }
 
+/// All possible errors when opening a SndFile.
+pub struct SndFileError(String);
+
+impl SndFileError {
+    /// Create a new SndFileError with the given error.
+    pub fn new(err: String) -> SndFileError {
+        SndFileError(err)
+    }
+}
+
+impl fmt::Display for SndFileError {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        write!(fmt, "{}", self.0)
+    }
+}
+
+impl fmt::Debug for SndFileError {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        write!(fmt, "{}", self.0)
+    }
+}
+
+impl std::error::Error for SndFileError {}
+
 /// SndFile object, used to load/store sound from a file path or an fd.
 pub struct SndFile {
     handle: ffi::SNDFILEhandle, //*const ffi::SNDFILE,
@@ -258,10 +283,10 @@ impl SndFile {
      * * path - The path to load the music
      * * mode - The mode to open the music
      *
-     * Return Ok() containing the SndFile on success, a string representation of
+     * Return Ok() containing the SndFile on success, a SndFileError representation of
      * the error otherwise.
      */
-    pub fn new(path: &str, mode: OpenMode) -> Result<SndFile, String> {
+    pub fn new(path: &str, mode: OpenMode) -> Result<SndFile, SndFileError> {
         let mut info = Box::new(SndInfo {
             frames: 0,
             samplerate: 0,
@@ -274,11 +299,11 @@ impl SndFile {
         let tmp_sndfile =
             { unsafe { ffi::sf_open(c_path.as_ptr() as *mut _, mode as i32, &mut *info) } };
         if tmp_sndfile == 0 {
-            Err(unsafe {
+            Err(SndFileError::new(unsafe {
                 from_utf8(CStr::from_ptr(ffi::sf_strerror(0) as *const _).to_bytes())
                     .unwrap()
                     .to_owned()
-            })
+            }))
         } else {
             Ok(SndFile {
                 handle: tmp_sndfile,
@@ -295,23 +320,23 @@ impl SndFile {
      * * mode - The mode to open the music
      * * info - The SndInfo to pass to the file
      *
-     * Return Ok() containing the SndFile on success, a string representation of
+     * Return Ok() containing the SndFile on success, a SndFileError representation of
      * the error otherwise.
      */
     pub fn new_with_info(
         path: &str,
         mode: OpenMode,
         mut info: Box<SndInfo>,
-    ) -> Result<SndFile, String> {
+    ) -> Result<SndFile, SndFileError> {
         let c_path = CString::new(path).unwrap();
         let tmp_sndfile =
             { unsafe { ffi::sf_open(c_path.as_ptr() as *mut _, mode as i32, &mut *info) } };
         if tmp_sndfile == 0 {
-            Err(unsafe {
+            Err(SndFileError::new(unsafe {
                 from_utf8(CStr::from_ptr(ffi::sf_strerror(0) as *const _).to_bytes())
                     .unwrap()
                     .to_owned()
-            })
+            }))
         } else {
             Ok(SndFile {
                 handle: tmp_sndfile,
@@ -329,10 +354,10 @@ impl SndFile {
      * * mode - The mode to open the music
      * * close_desc - Should SndFile close the fd at exit?
      *
-     * Return Ok() containing the SndFile on success, a string representation
+     * Return Ok() containing the SndFile on success, a SndFileError representation
      * of the error otherwise.
      */
-    pub fn new_with_fd(fd: i32, mode: OpenMode, close_desc: bool) -> Result<SndFile, String> {
+    pub fn new_with_fd(fd: i32, mode: OpenMode, close_desc: bool) -> Result<SndFile, SndFileError> {
         let mut info = Box::new(SndInfo {
             frames: 0,
             samplerate: 0,
@@ -346,11 +371,11 @@ impl SndFile {
             false => unsafe { ffi::sf_open_fd(fd, mode as i32, &mut *info, ffi::SF_FALSE) },
         };
         if tmp_sndfile == 0 {
-            Err(unsafe {
+            Err(SndFileError::new(unsafe {
                 from_utf8(CStr::from_ptr(ffi::sf_strerror(0) as *const _).to_bytes())
                     .unwrap()
                     .to_owned()
-            })
+            }))
         } else {
             Ok(SndFile {
                 handle: tmp_sndfile,
