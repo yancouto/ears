@@ -21,27 +21,27 @@
 
 //! Play Music easily.
 
-use std::convert::TryInto;
-use std::thread::sleep;
-use std::mem;
-use std::thread;
-use std::time::Duration;
 use libc::c_void;
-use std::vec::Vec;
-use std::sync::Arc;
+use std::convert::TryInto;
+use std::mem;
 use std::sync::atomic::{AtomicI64, Ordering};
-use std::sync::mpsc::{channel, Sender, Receiver};
+use std::sync::mpsc::{channel, Receiver, Sender};
+use std::sync::Arc;
+use std::thread;
+use std::thread::sleep;
+use std::time::Duration;
+use std::vec::Vec;
 
-use reverb_effect::ReverbEffect;
+use audio_controller::AudioController;
+use audio_tags::{get_sound_tags, AudioTags, Tags};
 use internal::OpenAlData;
-use openal::{ffi, al};
-use sndfile::{SndInfo, SndFile};
+use openal::{al, ffi};
+use reverb_effect::ReverbEffect;
 use sndfile::OpenMode::Read;
 use sndfile::SeekMode::SeekSet;
+use sndfile::{SndFile, SndInfo};
 use states::State;
-use states::State::{Initial, Playing, Paused, Stopped};
-use audio_controller::AudioController;
-use audio_tags::{Tags, AudioTags, get_sound_tags};
+use states::State::{Initial, Paused, Playing, Stopped};
 
 const BUFFER_COUNT: i32 = 2;
 
@@ -116,7 +116,12 @@ pub struct Music {
 // in each case.
 //
 // ref: http://www.mega-nerd.com/libsndfile/api.html#read
-fn fill_buffer(samples: &mut Vec<i16>, sndfile: &mut SndFile, cursor: Arc<AtomicI64>, is_looping: bool) {
+fn fill_buffer(
+    samples: &mut Vec<i16>,
+    sndfile: &mut SndFile,
+    cursor: Arc<AtomicI64>,
+    is_looping: bool,
+) {
     // First, find where the buffer is currently filled to
     let buffer_position = samples.len();
     let cursor_position = cursor.load(Ordering::Relaxed);
@@ -129,7 +134,9 @@ fn fill_buffer(samples: &mut Vec<i16>, sndfile: &mut SndFile, cursor: Arc<Atomic
     let read_length = sndfile.read_i16(&mut samples[buffer_position..], read_amount) as usize;
 
     // Update the vector length manually
-    unsafe { samples.set_len(buffer_position + read_length); }
+    unsafe {
+        samples.set_len(buffer_position + read_length);
+    }
 
     let channels = sndfile.get_sndinfo().channels as i64;
     let frames = sndfile.get_sndinfo().frames;
@@ -139,7 +146,9 @@ fn fill_buffer(samples: &mut Vec<i16>, sndfile: &mut SndFile, cursor: Arc<Atomic
     let mut new_cursor_position = cursor_position + read_length as i64 / channels;
 
     // Modulo on new cursor position to wrap around if we're looping
-    if is_looping { new_cursor_position = new_cursor_position % frames; }
+    if is_looping {
+        new_cursor_position = new_cursor_position % frames;
+    }
 
     cursor.store(new_cursor_position, Ordering::Relaxed);
 
@@ -151,7 +160,13 @@ fn fill_buffer(samples: &mut Vec<i16>, sndfile: &mut SndFile, cursor: Arc<Atomic
 
 // Becaused the Music source is playing buffered audio, we need to be
 // able to calculate the offset into the full file ourselves
-fn calculate_true_offset(info: &SndInfo, cursor: i64, buffer_size: i64, buffers_queued: i32, source_offset: i32) -> i32 {
+fn calculate_true_offset(
+    info: &SndInfo,
+    cursor: i64,
+    buffer_size: i64,
+    buffers_queued: i32,
+    source_offset: i32,
+) -> i32 {
     let queued_buffers_size = buffer_size / BUFFER_COUNT as i64 * buffers_queued as i64;
     let offset = cursor - queued_buffers_size + source_offset as i64;
 
@@ -172,7 +187,10 @@ fn set_cursor_from_offset(info: &SndInfo, cursor: Arc<AtomicI64>, offset: f32) {
     let sample_rate = info.samplerate as f32;
     let duration_in_seconds = frames / sample_rate;
 
-    cursor.store((frames * offset / duration_in_seconds) as i64, Ordering::Relaxed);
+    cursor.store(
+        (frames * offset / duration_in_seconds) as i64,
+        Ordering::Relaxed,
+    );
 }
 
 impl Music {
@@ -192,8 +210,8 @@ impl Music {
 
         // Retrieve File and Music datas
         let file = match SndFile::new(path, Read) {
-            Ok(file)    => Box::new(file),
-            Err(err)    => {
+            Ok(file) => Box::new(file),
+            Err(err) => {
                 return Err(format!("Error while loading music file: {}", err));
             }
         };
@@ -208,7 +226,7 @@ impl Music {
         al::alGenBuffers(BUFFER_COUNT, &mut buffer_ids[0]);
 
         // Retrieve format information
-        let format =  match al::get_channels_format(infos.channels) {
+        let format = match al::get_channels_format(infos.channels) {
             Some(fmt) => fmt,
             None => {
                 return Err("Unrecognized music format.".into());
@@ -217,7 +235,7 @@ impl Music {
 
         // Check if there is OpenAL internal error
         if let Some(err) = al::openal_has_error() {
-             return Err(format!("Internal OpenAL error: {}", err));
+            return Err(format!("Internal OpenAL error: {}", err));
         };
 
         let sound_tags = get_sound_tags(&*file);
@@ -250,23 +268,37 @@ impl Music {
         // create sample buffer and reserve the exact capacity we need
         let mut samples: Vec<i16> = Vec::with_capacity(sample_t_r as usize);
 
-        fill_buffer(&mut samples, &mut self.file.as_mut().unwrap(), self.cursor.clone(), self.is_looping);
+        fill_buffer(
+            &mut samples,
+            &mut self.file.as_mut().unwrap(),
+            self.cursor.clone(),
+            self.is_looping,
+        );
 
-        al::alBufferData(al_buffers[0],
-                         sample_format,
-                         samples.as_ptr() as *mut c_void,
-                         (mem::size_of::<i16>() * samples.len()) as i32,
-                         sample_rate);
+        al::alBufferData(
+            al_buffers[0],
+            sample_format,
+            samples.as_ptr() as *mut c_void,
+            (mem::size_of::<i16>() * samples.len()) as i32,
+            sample_rate,
+        );
 
         samples.clear();
 
-        fill_buffer(&mut samples, &mut self.file.as_mut().unwrap(), self.cursor.clone(), self.is_looping);
+        fill_buffer(
+            &mut samples,
+            &mut self.file.as_mut().unwrap(),
+            self.cursor.clone(),
+            self.is_looping,
+        );
 
-        al::alBufferData(al_buffers[1],
-                         sample_format,
-                         samples.as_ptr() as *mut c_void,
-                         (mem::size_of::<i16>() * samples.len()) as i32,
-                         sample_rate);
+        al::alBufferData(
+            al_buffers[1],
+            sample_format,
+            samples.as_ptr() as *mut c_void,
+            (mem::size_of::<i16>() * samples.len()) as i32,
+            sample_rate,
+        );
 
         // Queue the buffers
         al::alSourceQueueBuffers(al_source, 2, &al_buffers[0]);
@@ -284,73 +316,84 @@ impl Music {
         let is_looping_clone = self.is_looping.clone();
 
         let thread = thread::Builder::new().name(String::from("ears-music"));
-        self.thread_handle = Some(thread.spawn(move|| {
-            match OpenAlData::check_al_context() {
-                Ok(_)       => {},
-                Err(err)    => { println!("{}", err);}
-            };
-            let mut file : SndFile = port.recv().ok().unwrap();
-            let mut status = ffi::AL_PLAYING;
-            let mut buffers_processed = 0;
-            let mut buffers_queued = 0;
-            let mut buf = 0;
-            let mut is_looping = is_looping_clone;
-            let mut offset_shift_restart = false;
+        self.thread_handle = Some(
+            thread
+                .spawn(move || {
+                    match OpenAlData::check_al_context() {
+                        Ok(_) => {}
+                        Err(err) => {
+                            println!("{}", err);
+                        }
+                    };
+                    let mut file: SndFile = port.recv().ok().unwrap();
+                    let mut status = ffi::AL_PLAYING;
+                    let mut buffers_processed = 0;
+                    let mut buffers_queued = 0;
+                    let mut buf = 0;
+                    let mut is_looping = is_looping_clone;
+                    let mut offset_shift_restart = false;
 
-            while status != ffi::AL_STOPPED {
-                // wait a bit
-                sleep(Duration::from_millis(50));
-                if status == ffi::AL_PLAYING {
-                    if let Ok(new_is_looping) = looping_receiver.try_recv() {
-                        is_looping = new_is_looping;
+                    while status != ffi::AL_STOPPED {
+                        // wait a bit
+                        sleep(Duration::from_millis(50));
+                        if status == ffi::AL_PLAYING {
+                            if let Ok(new_is_looping) = looping_receiver.try_recv() {
+                                is_looping = new_is_looping;
+                            }
+
+                            if let Ok(offset) = offset_receiver.try_recv() {
+                                // If we shift the offset, we need to stop and restart the source
+                                // so that we can swap out the buffers in an instantaneous manner
+                                al::alSourceStop(al_source);
+                                offset_shift_restart = true;
+                                cursor.store(offset.into(), Ordering::Relaxed);
+                            }
+
+                            al::alGetSourcei(
+                                al_source,
+                                ffi::AL_BUFFERS_QUEUED,
+                                &mut buffers_queued,
+                            );
+
+                            al::alGetSourcei(
+                                al_source,
+                                ffi::AL_BUFFERS_PROCESSED,
+                                &mut buffers_processed,
+                            );
+
+                            for _ in 0..buffers_processed {
+                                al::alSourceUnqueueBuffers(al_source, 1, &mut buf);
+
+                                samples.clear();
+
+                                fill_buffer(&mut samples, &mut file, cursor.clone(), is_looping);
+
+                                al::alBufferData(
+                                    buf,
+                                    sample_format,
+                                    samples.as_ptr() as *mut c_void,
+                                    (mem::size_of::<i16>() * samples.len()) as i32,
+                                    sample_rate,
+                                );
+                                al::alSourceQueueBuffers(al_source, 1, &buf);
+                            }
+
+                            // After buffer refill restart
+                            if offset_shift_restart {
+                                al::alSourcePlay(al_source);
+                                offset_shift_restart = false;
+                            }
+                        }
+                        // Get source status
+                        status = al::alGetState(al_source);
                     }
-
-                    if let Ok(offset) = offset_receiver.try_recv() {
-                        // If we shift the offset, we need to stop and restart the source
-                        // so that we can swap out the buffers in an instantaneous manner
-                        al::alSourceStop(al_source);
-                        offset_shift_restart = true;
-                        cursor.store(offset.into(), Ordering::Relaxed);
-                    }
-
-                    al::alGetSourcei(al_source,
-                                     ffi::AL_BUFFERS_QUEUED,
-                                     &mut buffers_queued);
-
-                    al::alGetSourcei(al_source,
-                                     ffi::AL_BUFFERS_PROCESSED,
-                                     &mut buffers_processed);
-
-                    for _ in 0..buffers_processed {
-                        al::alSourceUnqueueBuffers(al_source, 1, &mut buf);
-
-                        samples.clear();
-
-                        fill_buffer(&mut samples, &mut file, cursor.clone(), is_looping);
-
-                        al::alBufferData(buf,
-                                         sample_format,
-                                         samples.as_ptr() as *mut c_void,
-                                         (mem::size_of::<i16>() * samples.len()) as i32,
-                                         sample_rate);
-                        al::alSourceQueueBuffers(al_source, 1, &buf);
-                    }
-
-                    // After buffer refill restart
-                    if offset_shift_restart {
-                        al::alSourcePlay(al_source);
-                        offset_shift_restart = false;
-                    }
-                }
-                // Get source status
-                status = al::alGetState(al_source);
-            }
-            al::alSourcei(al_source, ffi::AL_BUFFER, 0);
-        }).unwrap());
+                    al::alSourcei(al_source, ffi::AL_BUFFER, 0);
+                })
+                .unwrap(),
+        );
         let file = self.file.as_ref().unwrap().clone();
         chan.send(*file);
     }
-
 }
 
 impl AudioTags for Music {
@@ -373,8 +416,11 @@ impl AudioController for Music {
         check_openal_context!(());
 
         match self.get_state() {
-            Paused   => { al::alSourcePlay(self.al_source); return; },
-            _       => {
+            Paused => {
+                al::alSourcePlay(self.al_source);
+                return;
+            }
+            _ => {
                 if self.is_playing() {
                     al::alSourceStop(self.al_source);
                     // wait a bit for openal terminate
@@ -408,16 +454,28 @@ impl AudioController for Music {
      * Connect a ReverbEffect to the Music
      */
     fn connect(&mut self, reverb_effect: &Option<ReverbEffect>) {
-      check_openal_context!(());
+        check_openal_context!(());
 
-      match reverb_effect {
-        Some(reverb_effect) => {
-          al::alSource3i(self.al_source, ffi::AL_AUXILIARY_SEND_FILTER, reverb_effect.slot() as i32, 0, ffi::AL_FILTER_NULL);
-        },
-        None => {
-          al::alSource3i(self.al_source, ffi::AL_AUXILIARY_SEND_FILTER, ffi::AL_EFFECTSLOT_NULL, 0, ffi::AL_FILTER_NULL);
+        match reverb_effect {
+            Some(reverb_effect) => {
+                al::alSource3i(
+                    self.al_source,
+                    ffi::AL_AUXILIARY_SEND_FILTER,
+                    reverb_effect.slot() as i32,
+                    0,
+                    ffi::AL_FILTER_NULL,
+                );
+            }
+            None => {
+                al::alSource3i(
+                    self.al_source,
+                    ffi::AL_AUXILIARY_SEND_FILTER,
+                    ffi::AL_EFFECTSLOT_NULL,
+                    0,
+                    ffi::AL_FILTER_NULL,
+                );
+            }
         }
-      }
     }
 
     /**
@@ -428,8 +486,8 @@ impl AudioController for Music {
      */
     fn is_playing(&self) -> bool {
         match self.get_state() {
-            Playing     => true,
-            _           => false
+            Playing => true,
+            _ => false,
         }
     }
 
@@ -442,14 +500,14 @@ impl AudioController for Music {
     fn get_state(&self) -> State {
         check_openal_context!(Initial);
 
-        let state  = al::alGetState(self.al_source);
+        let state = al::alGetState(self.al_source);
 
         match state {
             ffi::AL_INITIAL => Initial,
             ffi::AL_PLAYING => Playing,
-            ffi::AL_PAUSED  => Paused,
+            ffi::AL_PAUSED => Paused,
             ffi::AL_STOPPED => Stopped,
-            _               => unreachable!()
+            _ => unreachable!(),
         }
     }
 
@@ -461,7 +519,9 @@ impl AudioController for Music {
      */
     fn set_offset(&mut self, offset: i32) -> () {
         match self.offset_sender {
-            Some(ref sender) => { sender.send(offset); },
+            Some(ref sender) => {
+                sender.send(offset);
+            }
             None => self.cursor.store(offset.into(), Ordering::Relaxed),
         }
     }
@@ -484,7 +544,13 @@ impl AudioController for Music {
         let cursor = self.cursor.load(Ordering::Relaxed);
         let buffer_size = self.sample_to_read;
 
-        calculate_true_offset(&self.file_infos, cursor, buffer_size, buffers_queued, sample_offset)
+        calculate_true_offset(
+            &self.file_infos,
+            cursor,
+            buffer_size,
+            buffers_queued,
+            sample_offset,
+        )
     }
 
     /**
@@ -512,7 +578,7 @@ impl AudioController for Music {
     fn get_volume(&self) -> f32 {
         check_openal_context!(0.);
 
-        let mut volume : f32 = 0.;
+        let mut volume: f32 = 0.;
         al::alGetSourcef(self.al_source, ffi::AL_GAIN, &mut volume);
         volume
     }
@@ -542,7 +608,7 @@ impl AudioController for Music {
     fn get_min_volume(&self) -> f32 {
         check_openal_context!(0.);
 
-        let mut volume : f32 = 0.;
+        let mut volume: f32 = 0.;
         al::alGetSourcef(self.al_source, ffi::AL_MIN_GAIN, &mut volume);
         volume
     }
@@ -572,7 +638,7 @@ impl AudioController for Music {
     fn get_max_volume(&self) -> f32 {
         check_openal_context!(0.);
 
-        let mut volume : f32 = 0.;
+        let mut volume: f32 = 0.;
         al::alGetSourcef(self.al_source, ffi::AL_MAX_GAIN, &mut volume);
         volume
     }
@@ -645,12 +711,16 @@ impl AudioController for Music {
         check_openal_context!(());
 
         match relative {
-            true    => al::alSourcei(self.al_source,
-                                     ffi::AL_SOURCE_RELATIVE,
-                                     ffi::ALC_TRUE as i32),
-            false   => al::alSourcei(self.al_source,
-                                     ffi::AL_SOURCE_RELATIVE,
-                                     ffi::ALC_FALSE as i32)
+            true => al::alSourcei(
+                self.al_source,
+                ffi::AL_SOURCE_RELATIVE,
+                ffi::ALC_TRUE as i32,
+            ),
+            false => al::alSourcei(
+                self.al_source,
+                ffi::AL_SOURCE_RELATIVE,
+                ffi::ALC_FALSE as i32,
+            ),
         };
     }
 
@@ -666,9 +736,9 @@ impl AudioController for Music {
         let mut boolean = 0;
         al::alGetSourcei(self.al_source, ffi::AL_SOURCE_RELATIVE, &mut boolean);
         match boolean as _ {
-            ffi::ALC_TRUE  => true,
+            ffi::ALC_TRUE => true,
             ffi::ALC_FALSE => false,
-            _              => unreachable!()
+            _ => unreachable!(),
         }
     }
 
@@ -703,7 +773,7 @@ impl AudioController for Music {
     fn get_position(&self) -> [f32; 3] {
         check_openal_context!([0.; 3]);
 
-        let mut position : [f32; 3] = [0.; 3];
+        let mut position: [f32; 3] = [0.; 3];
         al::alGetSourcefv(self.al_source, ffi::AL_POSITION, &mut position[0]);
         position
     }
@@ -730,10 +800,10 @@ impl AudioController for Music {
      * # Return
      * The current direction of the Music.
      */
-    fn get_direction(&self)  -> [f32; 3] {
+    fn get_direction(&self) -> [f32; 3] {
         check_openal_context!([0.; 3]);
 
-        let mut direction : [f32; 3] = [0.; 3];
+        let mut direction: [f32; 3] = [0.; 3];
         al::alGetSourcefv(self.al_source, ffi::AL_DIRECTION, &mut direction[0]);
         direction
     }
@@ -798,9 +868,11 @@ impl AudioController for Music {
         check_openal_context!(1.);
 
         let mut ref_distance = 0.;
-        al::alGetSourcef(self.al_source,
-                         ffi::AL_REFERENCE_DISTANCE,
-                         &mut ref_distance);
+        al::alGetSourcef(
+            self.al_source,
+            ffi::AL_REFERENCE_DISTANCE,
+            &mut ref_distance,
+        );
         ref_distance
     }
 
@@ -831,9 +903,7 @@ impl AudioController for Music {
         check_openal_context!(1.);
 
         let mut attenuation = 0.;
-        al::alGetSourcef(self.al_source,
-                         ffi::AL_ROLLOFF_FACTOR,
-                         &mut attenuation);
+        al::alGetSourcef(self.al_source, ffi::AL_ROLLOFF_FACTOR, &mut attenuation);
         attenuation
     }
 
@@ -863,7 +933,7 @@ impl AudioController for Music {
     fn set_direct_channel(&mut self, enabled: bool) -> () {
         if OpenAlData::direct_channel_capable() {
             let value = match enabled {
-                true  => ffi::AL_TRUE,
+                true => ffi::AL_TRUE,
                 false => ffi::AL_FALSE,
             };
 
@@ -885,16 +955,14 @@ impl AudioController for Music {
         match OpenAlData::direct_channel_capable() {
             true => {
                 let mut boolean = 0;
-                al::alGetSourcei(self.al_source,
-                                 ffi::AL_DIRECT_CHANNELS_SOFT,
-                                 &mut boolean);
+                al::alGetSourcei(self.al_source, ffi::AL_DIRECT_CHANNELS_SOFT, &mut boolean);
 
                 match boolean as _ {
-                    ffi::ALC_TRUE  => true,
+                    ffi::ALC_TRUE => true,
                     ffi::ALC_FALSE => false,
-                    _              => unreachable!()
+                    _ => unreachable!(),
                 }
-            },
+            }
             false => false,
         }
     }
@@ -912,7 +980,6 @@ impl AudioController for Music {
         Duration::new(seconds, nanoseconds as u32)
     }
 }
-
 
 impl Drop for Music {
     /// Destroy all the resources of the Music.
@@ -933,9 +1000,9 @@ impl Drop for Music {
 mod test {
     #![allow(non_snake_case)]
 
-    use music::Music;
-    use states::State::{Playing, Paused, Stopped};
     use audio_controller::AudioController;
+    use music::Music;
+    use states::State::{Paused, Playing, Stopped};
 
     #[test]
     #[ignore]
@@ -983,7 +1050,6 @@ mod test {
         assert_eq!(msc.get_state() as i32, Stopped as i32);
         msc.stop();
     }
-
 
     #[test]
     #[ignore]

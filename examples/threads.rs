@@ -1,5 +1,5 @@
 extern crate ears;
-use ears::{Sound, AudioController};
+use ears::{AudioController, Sound};
 use std::thread;
 
 fn main() {
@@ -15,7 +15,7 @@ fn main() {
 
     for h in handles {
         match h.join() {
-            Ok(_)  => println!("Thread exited successfully"),
+            Ok(_) => println!("Thread exited successfully"),
             Err(_) => println!("Thread died"),
         };
     }

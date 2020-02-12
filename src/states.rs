@@ -31,5 +31,5 @@ pub enum State {
     /// The sound or music is paused
     Paused,
     /// The sound or music is stopped
-    Stopped
+    Stopped,
 }

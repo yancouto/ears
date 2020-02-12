@@ -21,16 +21,16 @@
 
 //! Record audio
 
-use std::{thread, mem};
+use std::sync::mpsc::{channel, Receiver, Sender};
 use std::vec::Vec;
-use std::sync::mpsc::{channel, Sender, Receiver};
+use std::{mem, thread};
 
-use record_context::RecordContext;
-use record_context;
 use openal::ffi;
-use sndfile::{SndInfo, SndFile};
+use record_context;
+use record_context::RecordContext;
+use sndfile::FormatType::{FormatPcm16, FormatWav};
 use sndfile::OpenMode::Write;
-use sndfile::FormatType::{FormatWav, FormatPcm16};
+use sndfile::{SndFile, SndInfo};
 use std::intrinsics::transmute;
 
 /**
@@ -67,7 +67,7 @@ pub struct Recorder {
     ctxt: RecordContext,
     stop_sender: Option<Sender<bool>>,
     data_receiver: Option<Receiver<Vec<i16>>>,
-    samples: Vec<i16>
+    samples: Vec<i16>,
 }
 
 impl Recorder {
@@ -77,8 +77,7 @@ impl Recorder {
             ctxt: record_context,
             stop_sender: None,
             data_receiver: None,
-            samples: Vec::new()
-
+            samples: Vec::new(),
         }
     }
 
@@ -91,41 +90,47 @@ impl Recorder {
         self.data_receiver = Some(data_receiver);
 
         let thread = thread::Builder::new().name(String::from("ears-recorder"));
-        thread.spawn(move || {
-            let mut terminate = false;
-            let ctxt = record_context::get(r_c);
-            unsafe { ffi::alcCaptureStart(ctxt); }
-            let mut available_samples = 0;
-            let mut samples: Vec<i16> = Vec::new();
-
-            while !terminate {
+        thread
+            .spawn(move || {
+                let mut terminate = false;
+                let ctxt = record_context::get(r_c);
                 unsafe {
-                    ffi::alcGetIntegerv(ctxt,
-                                        ffi::ALC_CAPTURE_SAMPLES,
-                                        1,
-                                        &mut available_samples)
-                };
+                    ffi::alcCaptureStart(ctxt);
+                }
+                let mut available_samples = 0;
+                let mut samples: Vec<i16> = Vec::new();
 
-                if available_samples != 0 {
-                    let tmp_buf = vec![0i16; available_samples as usize];
+                while !terminate {
                     unsafe {
-                        ffi::alcCaptureSamples(ctxt,
-                                               transmute(&tmp_buf[0]),
-                                               available_samples);
-                    }
-                    samples.extend(tmp_buf.into_iter());
-                }
+                        ffi::alcGetIntegerv(
+                            ctxt,
+                            ffi::ALC_CAPTURE_SAMPLES,
+                            1,
+                            &mut available_samples,
+                        )
+                    };
 
-                match stop_receiver.try_recv() {
-                    Ok(_) => {
-                        unsafe { ffi::alcCaptureStop(ctxt); }
-                        terminate = true;
-                    },
-                    _ => {}
+                    if available_samples != 0 {
+                        let tmp_buf = vec![0i16; available_samples as usize];
+                        unsafe {
+                            ffi::alcCaptureSamples(ctxt, transmute(&tmp_buf[0]), available_samples);
+                        }
+                        samples.extend(tmp_buf.into_iter());
+                    }
+
+                    match stop_receiver.try_recv() {
+                        Ok(_) => {
+                            unsafe {
+                                ffi::alcCaptureStop(ctxt);
+                            }
+                            terminate = true;
+                        }
+                        _ => {}
+                    }
                 }
-            }
-            data_sender.send(samples);
-        }).unwrap();
+                data_sender.send(samples);
+            })
+            .unwrap();
     }
 
     pub fn stop(&mut self) -> bool {
@@ -136,11 +141,11 @@ impl Recorder {
                     Some(ref d_p) => {
                         self.samples = d_p.recv().ok().unwrap();
                         true
-                    },
-                    None          => false
+                    }
+                    None => false,
                 }
-            },
-            None      => false
+            }
+            None => false,
         }
     }
 
@@ -149,14 +154,13 @@ impl Recorder {
             false
         } else {
             let infos = Box::new(SndInfo {
-                frames : self.samples.len() as i64,
-                samplerate : 44100,
-                channels : 1,
-                format : (FormatPcm16 | FormatWav) as i32,
-                sections : 0,
-                seekable : 0
+                frames: self.samples.len() as i64,
+                samplerate: 44100,
+                channels: 1,
+                format: (FormatPcm16 | FormatWav) as i32,
+                sections: 0,
+                seekable: 0,
             });
-
 
             let mut file_ext = String::new();
             file_ext.push_str(filename);
@@ -167,8 +171,11 @@ impl Recorder {
                     f.write_i16(&mut self.samples[..], len);
                     f.close();
                     true
-                },
-                Err(e) => { println!("{}", e); false }
+                }
+                Err(e) => {
+                    println!("{}", e);
+                    false
+                }
             }
         }
     }

@@ -21,9 +21,9 @@
 
 extern crate ears;
 
+use ears::AudioController;
 use std::thread::sleep;
 use std::time::Duration;
-use ears::AudioController;
 
 fn main() {
     // initialize the RecordContext
@@ -37,7 +37,7 @@ fn main() {
     recorder.stop();
     match recorder.save_to_file("hello") {
         true => println!("Save okay!"),
-        false => println!("Cannot save ...")
+        false => println!("Cannot save ..."),
     }
 
     println!("Playing hello.wav");

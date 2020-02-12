@@ -1,8 +1,8 @@
 extern crate ears;
 
-use ears::{ReverbEffect, ReverbPreset, Sound, AudioController};
-use std::time::Duration;
+use ears::{AudioController, ReverbEffect, ReverbPreset, Sound};
 use std::thread::sleep;
+use std::time::Duration;
 
 // Demonstrates setting up a ReverbEffect and playing multiple
 // connected Sounds with different positions and various other settings.
@@ -35,7 +35,7 @@ fn main() {
     for i in 0..600 {
         let z = i as f32 / 200.0;
 
-        sound.set_position([3.0 -z, (3.0 - z).max(0.0), 3.0 - z]);
+        sound.set_position([3.0 - z, (3.0 - z).max(0.0), 3.0 - z]);
         sleep(Duration::from_millis(1));
     }
 

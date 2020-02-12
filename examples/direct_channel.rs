@@ -4,7 +4,7 @@ use std::io::stdin;
 use std::io::stdout;
 use std::io::Write;
 
-use ears::{Music, AudioController};
+use ears::{AudioController, Music};
 
 fn main() {
     // Read the inputs
@@ -16,10 +16,18 @@ fn main() {
     let mut line = String::new();
     stdin.read_line(&mut line).ok();
     loop {
-        match &line[line.len()-1..] {
-            "\n" => { line.pop(); () },
-            "\r" => { line.pop(); () },
-            _ => { break; },
+        match &line[line.len() - 1..] {
+            "\n" => {
+                line.pop();
+                ()
+            }
+            "\r" => {
+                line.pop();
+                ()
+            }
+            _ => {
+                break;
+            }
         }
     }
 
@@ -52,7 +60,10 @@ fn main() {
         stdin.read_line(&mut cmd).ok();
 
         match &cmd[..1] {
-            "x" => { music.stop(); break },
+            "x" => {
+                music.stop();
+                break;
+            }
             _ => toggle = !toggle,
         };
     }

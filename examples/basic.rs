@@ -1,6 +1,6 @@
 extern crate ears;
 
-use ears::{Sound, AudioController};
+use ears::{AudioController, Sound};
 
 fn play_file(file: &str) {
     // Create a new Sound.

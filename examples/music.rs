@@ -1,8 +1,8 @@
 extern crate ears;
 
-use ears::{Music, AudioController};
-use std::time::Duration;
+use ears::{AudioController, Music};
 use std::thread::sleep;
+use std::time::Duration;
 
 fn main() {
     let mut music = Music::new("res/music.ogg").unwrap();

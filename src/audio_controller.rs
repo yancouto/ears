@@ -23,8 +23,8 @@
 
 use std::time::Duration;
 
-use states::State;
 use reverb_effect::ReverbEffect;
+use states::State;
 
 /// The functionnality that an Audio Source should provide.
 pub trait AudioController {
@@ -234,7 +234,7 @@ pub trait AudioController {
      * # Return
      * The current direction of the Audio Source.
      */
-    fn get_direction(&self)  -> [f32; 3];
+    fn get_direction(&self) -> [f32; 3];
 
     /**
      * Set the maximum distance of the Audio Source.

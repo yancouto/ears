@@ -1,5 +1,5 @@
-use openal::{ffi, al};
 use internal::OpenAlData;
+use openal::{al, ffi};
 use presets::ReverbProperties;
 
 /**
@@ -72,7 +72,10 @@ impl ReverbEffect {
             return Err(format!("ReverbEffect::new - OpenAL error: {}", err));
         };
 
-        Ok(ReverbEffect { effect_id, effect_slot_id })
+        Ok(ReverbEffect {
+            effect_id,
+            effect_slot_id,
+        })
     }
 
     pub fn preset(reverb_properties: ReverbProperties) -> Result<ReverbEffect, String> {
@@ -100,18 +103,22 @@ impl ReverbEffect {
                 effect.update_slot();
 
                 Ok(effect)
-            },
-            Err(e) => Err(e)
+            }
+            Err(e) => Err(e),
         }
     }
 
     pub fn slot(&self) -> u32 {
-      self.effect_slot_id
+        self.effect_slot_id
     }
 
     fn update_slot(&mut self) {
         check_openal_context!(());
-        al::alAuxiliaryEffectSloti(self.effect_slot_id, ffi::AL_EFFECTSLOT_EFFECT, self.effect_id);
+        al::alAuxiliaryEffectSloti(
+            self.effect_slot_id,
+            ffi::AL_EFFECTSLOT_EFFECT,
+            self.effect_id,
+        );
     }
 
     fn set_density(&mut self, density: f32) {
@@ -146,32 +153,56 @@ impl ReverbEffect {
 
     fn set_reflections_gain(&mut self, reflections_gain: f32) {
         check_openal_context!(());
-        al::alEffectf(self.effect_id, ffi::AL_REVERB_REFLECTIONS_GAIN, reflections_gain);
+        al::alEffectf(
+            self.effect_id,
+            ffi::AL_REVERB_REFLECTIONS_GAIN,
+            reflections_gain,
+        );
     }
 
     fn set_reflections_delay(&mut self, reflections_delay: f32) {
         check_openal_context!(());
-        al::alEffectf(self.effect_id, ffi::AL_REVERB_REFLECTIONS_DELAY, reflections_delay);
+        al::alEffectf(
+            self.effect_id,
+            ffi::AL_REVERB_REFLECTIONS_DELAY,
+            reflections_delay,
+        );
     }
 
     fn set_late_reverb_gain(&mut self, late_reverb_gain: f32) {
         check_openal_context!(());
-        al::alEffectf(self.effect_id, ffi::AL_REVERB_LATE_REVERB_GAIN, late_reverb_gain);
+        al::alEffectf(
+            self.effect_id,
+            ffi::AL_REVERB_LATE_REVERB_GAIN,
+            late_reverb_gain,
+        );
     }
 
     fn set_late_reverb_delay(&mut self, late_reverb_delay: f32) {
         check_openal_context!(());
-        al::alEffectf(self.effect_id, ffi::AL_REVERB_LATE_REVERB_DELAY, late_reverb_delay);
+        al::alEffectf(
+            self.effect_id,
+            ffi::AL_REVERB_LATE_REVERB_DELAY,
+            late_reverb_delay,
+        );
     }
 
     fn set_air_absorption_gainhf(&mut self, air_absorption_gainhf: f32) {
         check_openal_context!(());
-        al::alEffectf(self.effect_id, ffi::AL_REVERB_AIR_ABSORPTION_GAINHF, air_absorption_gainhf);
+        al::alEffectf(
+            self.effect_id,
+            ffi::AL_REVERB_AIR_ABSORPTION_GAINHF,
+            air_absorption_gainhf,
+        );
     }
 
     fn set_room_rolloff_factor(&mut self, room_rolloff_factor: f32) {
         check_openal_context!(());
-        al::alEffectf(self.effect_id, ffi::AL_REVERB_ROOM_ROLLOFF_FACTOR, room_rolloff_factor);
+        al::alEffectf(
+            self.effect_id,
+            ffi::AL_REVERB_ROOM_ROLLOFF_FACTOR,
+            room_rolloff_factor,
+        );
     }
 
     fn set_decay_hflimit(&mut self, decay_hflimit: i32) {
@@ -186,7 +217,11 @@ impl Drop for ReverbEffect {
         check_openal_context!(());
 
         // Disconnect the effect and slot
-        al::alAuxiliaryEffectSloti(self.effect_slot_id, ffi::AL_EFFECTSLOT_EFFECT, ffi::AL_EFFECT_NULL as u32);
+        al::alAuxiliaryEffectSloti(
+            self.effect_slot_id,
+            ffi::AL_EFFECTSLOT_EFFECT,
+            ffi::AL_EFFECT_NULL as u32,
+        );
 
         unsafe {
             ffi::alDeleteEffects(1, &mut self.effect_id);

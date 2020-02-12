@@ -58,7 +58,6 @@ fn main() {
 #![allow(dead_code, unused_attributes)]
 //#![feature(macro_rules)]
 //#![feature(unsafe_destructor)]
-
 #![allow(unused_imports)]
 //#![allow(raw_pointer_derive)]
 #![allow(unused_must_use)]
@@ -69,18 +68,17 @@ extern crate libc;
 extern crate lazy_static;
 
 // Reexport public API
-pub use einit::{init, init_in};
-pub use reverb_effect::ReverbEffect;
-pub use music::Music;
-pub use presets::ReverbPreset;
-pub use sound::Sound;
-pub use states::State;
-pub use sound_data::SoundData;
 pub use audio_controller::AudioController;
 pub use audio_tags::{AudioTags, Tags};
-pub use recorder::Recorder;
+pub use einit::{init, init_in};
+pub use music::Music;
+pub use presets::ReverbPreset;
 pub use record_context::RecordContext;
-
+pub use recorder::Recorder;
+pub use reverb_effect::ReverbEffect;
+pub use sound::Sound;
+pub use sound_data::SoundData;
+pub use states::State;
 
 // Hidden internal bindings
 mod internal;
@@ -89,16 +87,16 @@ mod sndfile;
 
 // The public ears API
 
+mod audio_controller;
+mod audio_tags;
 #[path = "init.rs"]
 mod einit;
 pub mod listener;
-mod sound;
 mod music;
 mod presets;
+mod record_context;
+mod recorder;
+mod reverb_effect;
+mod sound;
 mod sound_data;
 mod states;
-mod audio_controller;
-mod audio_tags;
-mod recorder;
-mod record_context;
-mod reverb_effect;
