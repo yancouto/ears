@@ -1,3 +1,8 @@
+# v0.8.0
+  - Added ability to get and set offset of Sound and Music (at sample/frame level accuracy)
+  - Prevent a panic that could occur when reading a file that had non-UTF-8 tags
+  - Deprecated audio_tags::empty()
+
 # v0.7.0
   - Added ability to get duration of Sound and Music
 
