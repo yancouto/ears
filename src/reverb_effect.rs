@@ -231,8 +231,8 @@ impl Drop for ReverbEffect {
         // Check if there is OpenAL internal error
         //
         // TODO: this could probably be avoided with some better design
-        if al::openal_has_error().is_some() {
-            eprintln!("Ears failed to drop ReverbEffect completely, one or more source is probably still referencing it.");
+        if let Some(err) = al::openal_has_error() {
+            eprintln!("Ears failed to drop ReverbEffect completely, one or more source is probably still referencing it: {}", err);
             eprintln!("\tEffect Object: {}", self.effect_id);
             eprintln!("\tAuxiliary Effect Slot: {}", self.effect_slot_id);
         };

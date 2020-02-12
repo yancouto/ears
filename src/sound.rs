@@ -288,7 +288,7 @@ impl AudioController for Sound {
 
         match al::openal_has_error() {
             None => {}
-            Some(err) => println!("{}", err),
+            Some(err) => println!("Internal OpenAL error: {}", err),
         }
     }
 
