@@ -56,7 +56,7 @@ Include `ears` in your `Cargo.toml` dependencies.
 
 ```toml
 [dependencies]
-ears = "0.7.0"
+ears = "0.8.0"
 ```
 
 Playing a sound effect while simultaneously streaming music off disk is as simple as it gets.
