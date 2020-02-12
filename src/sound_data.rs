@@ -21,15 +21,15 @@
 
 //! The datas extracted from a sound file.
 
-use std::mem;
 use libc::c_void;
+use std::mem;
 use std::vec::Vec;
 
-use openal::{ffi, al};
-use sndfile::{SndFile, SndInfo};
-use sndfile::OpenMode::Read;
+use audio_tags::{get_sound_tags, AudioTags, Tags};
 use internal::OpenAlData;
-use audio_tags::{Tags, AudioTags, get_sound_tags};
+use openal::{al, ffi};
+use sndfile::OpenMode::Read;
+use sndfile::{SndFile, SndInfo};
 
 /**
  * Samples extracted from a file.
@@ -69,7 +69,7 @@ pub struct SoundData {
     /// The total samples count of the Sound
     nb_sample: i64,
     /// The OpenAl internal identifier for the buffer
-    al_buffer: u32
+    al_buffer: u32,
 }
 
 impl SoundData {
@@ -108,7 +108,7 @@ impl SoundData {
         let len = mem::size_of::<i16>() * (samples.len());
 
         // Retrieve format informations
-        let format =  match al::get_channels_format(infos.channels) {
+        let format = match al::get_channels_format(infos.channels) {
             Some(fmt) => fmt,
             None => {
                 return Err("Unrecognized sound format.".into());
@@ -116,28 +116,29 @@ impl SoundData {
         };
 
         al::alGenBuffers(1, &mut buffer_id);
-        al::alBufferData(buffer_id,
-                         format,
-                         samples.as_ptr() as *mut c_void,
-                         len as i32,
-                         infos.samplerate);
+        al::alBufferData(
+            buffer_id,
+            format,
+            samples.as_ptr() as *mut c_void,
+            len as i32,
+            infos.samplerate,
+        );
 
         if let Some(err) = al::openal_has_error() {
-             return Err(format!("Internal OpenAL error: {}", err));
+            return Err(format!("Internal OpenAL error: {}", err));
         };
 
         let sound_data = SoundData {
             sound_tags: get_sound_tags(&file),
             snd_info: infos,
             nb_sample: nb_sample,
-            al_buffer: buffer_id
+            al_buffer: buffer_id,
         };
         file.close();
 
         Ok(sound_data)
     }
 }
-
 
 /**
  * Get the sound file infos.
@@ -155,7 +156,7 @@ pub fn get_sndinfo<'r>(s_data: &'r SoundData) -> &'r SndInfo {
  * # Return
  * The OpenAL internal identifier for the samples buffer of the sound.
  */
- #[doc(hidden)]
+#[doc(hidden)]
 pub fn get_buffer(s_data: &SoundData) -> u32 {
     s_data.al_buffer
 }
@@ -193,7 +194,6 @@ mod test {
     fn sounddata_create_OK() -> () {
         #![allow(unused_variables)]
         let snd_data = SoundData::new("res/shot.wav").unwrap();
-
     }
 
     #[test]

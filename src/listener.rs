@@ -22,7 +22,7 @@
 //! Module for manage the listener in the scene.
 
 use internal::OpenAlData;
-use openal::{ffi, al};
+use openal::{al, ffi};
 
 /**
  * Set the global volume of the scene.
@@ -61,7 +61,7 @@ pub fn set_volume(volume: f32) -> () {
 pub fn get_volume() -> f32 {
     check_openal_context!(0.);
 
-    let mut volume : f32 = 0.;
+    let mut volume: f32 = 0.;
     al::alGetListenerf(ffi::AL_GAIN, &mut volume);
     volume
 }
@@ -128,11 +128,16 @@ pub fn get_position() -> [f32; 3] {
  * listener::set_orientation([0.3f32, -0.4f32, 0.9f32], [0.7f32, 0.3f32, 0.8f32]);
  * ```
  */
-pub fn set_orientation(orientation_at: [f32; 3], orientation_up : [f32; 3]) {
+pub fn set_orientation(orientation_at: [f32; 3], orientation_up: [f32; 3]) {
     check_openal_context!(());
-    let orientation: [f32; 6] = [orientation_at[0], orientation_at[1],
-                                    orientation_at[2], orientation_up[0],
-                                    orientation_up[1], orientation_up[2]];
+    let orientation: [f32; 6] = [
+        orientation_at[0],
+        orientation_at[1],
+        orientation_at[2],
+        orientation_up[0],
+        orientation_up[1],
+        orientation_up[2],
+    ];
     al::alListenerfv(ffi::AL_ORIENTATION, &orientation[0]);
 }
 
@@ -154,8 +159,10 @@ pub fn get_orientation() -> ([f32; 3], [f32; 3]) {
     check_openal_context!(([0.; 3], [0.; 3]));
     let mut orientation: [f32; 6] = [0.; 6];
     al::alGetListenerfv(ffi::AL_ORIENTATION, &mut orientation[0]);
-    ([orientation[0], orientation[1], orientation[2]],
-     [orientation[3], orientation[4], orientation[5]])
+    (
+        [orientation[0], orientation[1], orientation[2]],
+        [orientation[3], orientation[4], orientation[5]],
+    )
 }
 
 /**
@@ -183,15 +190,16 @@ pub fn set_velocity(velocity: [f32; 3]) -> () {
 pub fn get_velocity() -> [f32; 3] {
     check_openal_context!([0.0; 3]);
 
-    let mut velocity : [f32; 3] = [0.0; 3];
+    let mut velocity: [f32; 3] = [0.0; 3];
     al::alGetListenerfv(ffi::AL_VELOCITY, &mut velocity[0]);
     velocity
 }
 
 #[cfg(test)]
 mod test {
-    use listener::{set_volume, set_position, set_orientation,
-                   get_volume, get_position, get_orientation};
+    use listener::{
+        get_orientation, get_position, get_volume, set_orientation, set_position, set_volume,
+    };
 
     #[test]
     #[ignore]
@@ -214,8 +222,8 @@ mod test {
     #[ignore]
     pub fn listener_set_orientation() -> () {
         set_orientation([50., 150., 234.], [277., 125., 71.]);
-        let (s1, s2) = get_orientation() ;
-		assert_eq!(s1, [50f32, 150f32, 234f32]);
-		assert_eq!(s2, [277f32, 125f32, 71f32])
+        let (s1, s2) = get_orientation();
+        assert_eq!(s1, [50f32, 150f32, 234f32]);
+        assert_eq!(s2, [277f32, 125f32, 71f32])
     }
 }

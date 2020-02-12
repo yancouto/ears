@@ -33,18 +33,18 @@
 #![allow(dead_code)]
 
 //use std::str::from_utf8;
-use std::str::*;
-use std::ptr;
-use std::ffi::CString;
 use std::ffi::CStr;
-use std::ops::BitOr;
+use std::ffi::CString;
 use std::i32::*;
 use std::intrinsics::transmute;
+use std::ops::BitOr;
+use std::ptr;
+use std::str::*;
 
 #[doc(hidden)]
 mod libsndfile {
     #[link(name = "sndfile")]
-    extern {}
+    extern "C" {}
 }
 
 #[doc(hidden)]
@@ -56,12 +56,12 @@ mod ffi;
 #[repr(C)]
 #[derive(Clone)]
 pub struct SndInfo {
-    pub frames : i64,
-    pub samplerate : i32,
-    pub channels : i32,
-    pub format : i32,
-    pub sections : i32,
-    pub seekable : i32
+    pub frames: i64,
+    pub samplerate: i32,
+    pub channels: i32,
+    pub format: i32,
+    pub sections: i32,
+    pub seekable: i32,
 }
 
 /// Modes availables for the open function.
@@ -71,37 +71,36 @@ pub struct SndInfo {
 /// * ReadWrite - Read and Write mode
 #[derive(Copy, Clone)]
 pub enum OpenMode {
-    Read       = ffi::SFM_READ as isize,
-    Write      = ffi::SFM_WRITE as isize,
-    ReadWrite  = ffi::SFM_RDWR as isize
+    Read = ffi::SFM_READ as isize,
+    Write = ffi::SFM_WRITE as isize,
+    ReadWrite = ffi::SFM_RDWR as isize,
 }
 
 /// Type of strings available for method get_string()
 #[derive(Copy, Clone)]
 pub enum StringSoundType {
-    Title       = ffi::SF_STR_TITLE as isize,
-    Copyright   = ffi::SF_STR_COPYRIGHT as isize,
-    Software    = ffi::SF_STR_SOFTWARE as isize,
-    Artist      = ffi::SF_STR_ARTIST as isize,
-    Comment     = ffi::SF_STR_COMMENT as isize,
-    Date        = ffi::SF_STR_DATE as isize,
-    Album       = ffi::SF_STR_ALBUM as isize,
-    License     = ffi::SF_STR_LICENSE as isize,
+    Title = ffi::SF_STR_TITLE as isize,
+    Copyright = ffi::SF_STR_COPYRIGHT as isize,
+    Software = ffi::SF_STR_SOFTWARE as isize,
+    Artist = ffi::SF_STR_ARTIST as isize,
+    Comment = ffi::SF_STR_COMMENT as isize,
+    Date = ffi::SF_STR_DATE as isize,
+    Album = ffi::SF_STR_ALBUM as isize,
+    License = ffi::SF_STR_LICENSE as isize,
     TrackNumber = ffi::SF_STR_TRACKNUMBER as isize,
-    Genre       = ffi::SF_STR_GENRE as isize
+    Genre = ffi::SF_STR_GENRE as isize,
 }
 
 /// Types of error who can be return by API functions
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub enum Error {
-    NoError             = ffi::SF_ERR_NO_ERROR as isize,
-    UnrecognizedFormat  = ffi::SF_ERR_UNRECOGNISED_FORMAT as isize,
-    SystemError         = ffi::SF_ERR_SYSTEM as isize,
-    MalformedFile       = ffi::SF_ERR_MALFORMED_FILE as isize,
+    NoError = ffi::SF_ERR_NO_ERROR as isize,
+    UnrecognizedFormat = ffi::SF_ERR_UNRECOGNISED_FORMAT as isize,
+    SystemError = ffi::SF_ERR_SYSTEM as isize,
+    MalformedFile = ffi::SF_ERR_MALFORMED_FILE as isize,
     UnsupportedEncoding = ffi::SF_ERR_UNSUPPORTED_ENCODING as isize,
 }
-
 
 /// Enum to set the offset with method seek
 ///
@@ -112,7 +111,7 @@ pub enum Error {
 pub enum SeekMode {
     SeekSet = ffi::SEEK_SET as isize,
     SeekCur = ffi::SEEK_CUR as isize,
-    SeekEnd = ffi::SEEK_END as isize
+    SeekEnd = ffi::SEEK_END as isize,
 }
 
 /// Enum who contains the list of the supported audio format
@@ -207,7 +206,7 @@ pub enum FormatType {
     FormatUlaw = ffi::SF_FORMAT_ULAW as isize,
     FormatAlaw = ffi::SF_FORMAT_ALAW as isize,
     FormatImaAdpcm = ffi::SF_FORMAT_IMA_ADPCM as isize,
-    FormatApcm = ffi::SF_FORMAT_MS_ADPCM  as isize,
+    FormatApcm = ffi::SF_FORMAT_MS_ADPCM as isize,
     FormatGsm610 = ffi::SF_FORMAT_GSM610 as isize,
     FormatVoxAdpcm = ffi::SF_FORMAT_VOX_ADPCM as isize,
     FormatG72132 = ffi::SF_FORMAT_G721_32 as isize,
@@ -231,22 +230,22 @@ pub enum FormatType {
 impl BitOr for FormatType {
     type Output = FormatType;
     fn bitor(self, _rhs: FormatType) -> Self::Output {
-         unsafe { transmute((self as i32) | (_rhs as i32)) }
+        unsafe { transmute((self as i32) | (_rhs as i32)) }
     }
     //fn bitor(self, rhs: RHS) -> Self::Output;
 }
 
 /// SndFile object, used to load/store sound from a file path or an fd.
 pub struct SndFile {
-    handle : ffi::SNDFILEhandle, //*const ffi::SNDFILE,
-    info : Box<SndInfo>
+    handle: ffi::SNDFILEhandle, //*const ffi::SNDFILE,
+    info: Box<SndInfo>,
 }
 
 impl Clone for SndFile {
     fn clone(&self) -> SndFile {
         SndFile {
-            handle : self.handle,
-            info : self.info.clone()
+            handle: self.handle,
+            info: self.info.clone(),
         }
     }
 }
@@ -262,27 +261,28 @@ impl SndFile {
      * Return Ok() containing the SndFile on success, a string representation of
      * the error otherwise.
      */
-    pub fn new(path : &str, mode : OpenMode) -> Result<SndFile, String> {
+    pub fn new(path: &str, mode: OpenMode) -> Result<SndFile, String> {
         let mut info = Box::new(SndInfo {
-            frames : 0,
-            samplerate : 0,
-            channels : 0,
-            format : 0,
-            sections : 0,
-            seekable : 0
+            frames: 0,
+            samplerate: 0,
+            channels: 0,
+            format: 0,
+            sections: 0,
+            seekable: 0,
         });
-		let c_path = CString::new(path).unwrap();
-        let tmp_sndfile = {
-            unsafe {ffi::sf_open(c_path.as_ptr() as *mut _, mode as i32, &mut *info) }
-        };
+        let c_path = CString::new(path).unwrap();
+        let tmp_sndfile =
+            { unsafe { ffi::sf_open(c_path.as_ptr() as *mut _, mode as i32, &mut *info) } };
         if tmp_sndfile == 0 {
             Err(unsafe {
-                from_utf8(CStr::from_ptr(ffi::sf_strerror(0) as *const _).to_bytes()).unwrap().to_owned()
+                from_utf8(CStr::from_ptr(ffi::sf_strerror(0) as *const _).to_bytes())
+                    .unwrap()
+                    .to_owned()
             })
         } else {
             Ok(SndFile {
-                handle :    tmp_sndfile,
-                info :      info
+                handle: tmp_sndfile,
+                info: info,
             })
         }
     }
@@ -298,19 +298,24 @@ impl SndFile {
      * Return Ok() containing the SndFile on success, a string representation of
      * the error otherwise.
      */
-    pub fn new_with_info(path : &str, mode : OpenMode, mut info: Box<SndInfo>) -> Result<SndFile, String> {
-		let c_path = CString::new(path).unwrap();
-        let tmp_sndfile = {
-            unsafe {ffi::sf_open(c_path.as_ptr() as *mut _, mode as i32, &mut *info) }
-        };
+    pub fn new_with_info(
+        path: &str,
+        mode: OpenMode,
+        mut info: Box<SndInfo>,
+    ) -> Result<SndFile, String> {
+        let c_path = CString::new(path).unwrap();
+        let tmp_sndfile =
+            { unsafe { ffi::sf_open(c_path.as_ptr() as *mut _, mode as i32, &mut *info) } };
         if tmp_sndfile == 0 {
             Err(unsafe {
-                from_utf8(CStr::from_ptr(ffi::sf_strerror(0) as *const _).to_bytes()).unwrap().to_owned()
+                from_utf8(CStr::from_ptr(ffi::sf_strerror(0) as *const _).to_bytes())
+                    .unwrap()
+                    .to_owned()
             })
         } else {
             Ok(SndFile {
-                handle :    tmp_sndfile,
-                info :      info
+                handle: tmp_sndfile,
+                info: info,
             })
         }
     }
@@ -327,34 +332,29 @@ impl SndFile {
      * Return Ok() containing the SndFile on success, a string representation
      * of the error otherwise.
      */
-    pub fn new_with_fd(fd : i32,
-                       mode : OpenMode,
-                       close_desc : bool)
-                       -> Result<SndFile, String> {
+    pub fn new_with_fd(fd: i32, mode: OpenMode, close_desc: bool) -> Result<SndFile, String> {
         let mut info = Box::new(SndInfo {
-            frames : 0,
-            samplerate : 0,
-            channels : 0,
-            format : 0,
-            sections : 0,
-            seekable : 0
+            frames: 0,
+            samplerate: 0,
+            channels: 0,
+            format: 0,
+            sections: 0,
+            seekable: 0,
         });
         let tmp_sndfile = match close_desc {
-            true    => unsafe {
-                ffi::sf_open_fd(fd, mode as i32, &mut *info, ffi::SF_TRUE)
-            },
-            false   => unsafe {
-                ffi::sf_open_fd(fd, mode as i32, &mut *info, ffi::SF_FALSE)
-            }
+            true => unsafe { ffi::sf_open_fd(fd, mode as i32, &mut *info, ffi::SF_TRUE) },
+            false => unsafe { ffi::sf_open_fd(fd, mode as i32, &mut *info, ffi::SF_FALSE) },
         };
         if tmp_sndfile == 0 {
             Err(unsafe {
-                from_utf8(CStr::from_ptr(ffi::sf_strerror(0) as *const _).to_bytes()).unwrap().to_owned()
+                from_utf8(CStr::from_ptr(ffi::sf_strerror(0) as *const _).to_bytes())
+                    .unwrap()
+                    .to_owned()
             })
         } else {
             Ok(SndFile {
-                handle :    tmp_sndfile,
-                info :      info
+                handle: tmp_sndfile,
+                info: info,
             })
         }
     }
@@ -373,10 +373,8 @@ impl SndFile {
      * Return Some(String) if the tag is found and UTF-8, None otherwise.
      */
     // TODO: maybe integrate some encoding crate to handle non-UTF-8 someday?
-    pub fn get_string(&self, string_type : StringSoundType) -> Option<String> {
-        let c_string = unsafe {
-            ffi::sf_get_string(self.handle, string_type as i32)
-        };
+    pub fn get_string(&self, string_type: StringSoundType) -> Option<String> {
+        let c_string = unsafe { ffi::sf_get_string(self.handle, string_type as i32) };
         if c_string == ptr::null_mut() {
             None
         } else {
@@ -393,16 +391,10 @@ impl SndFile {
      * * string - The string to set.
      *
      * Return NoError on success, an other error code otherwise
-    */
-    pub fn set_string(&mut self,
-                      string_type : StringSoundType,
-                      string : String) -> Error {
-  		//let c_string = CString::new(string).unwrap();
-        unsafe {
-            ffi::sf_set_string(self.handle,
-                               string_type as i32,
-                               string.as_ptr() as *mut _)
-        }
+     */
+    pub fn set_string(&mut self, string_type: StringSoundType, string: String) -> Error {
+        //let c_string = CString::new(string).unwrap();
+        unsafe { ffi::sf_set_string(self.handle, string_type as i32, string.as_ptr() as *mut _) }
     }
 
     /**
@@ -413,14 +405,13 @@ impl SndFile {
      *
      * Return true if the struct is valid, false otherwise.
      */
-    pub fn check_format<'r>(info : &'r mut SndInfo) -> bool {
-        match unsafe {ffi::sf_format_check(info) } {
-            ffi::SF_TRUE    => true,
-            ffi::SF_FALSE   => false,
-            _               => unreachable!()
+    pub fn check_format<'r>(info: &'r mut SndInfo) -> bool {
+        match unsafe { ffi::sf_format_check(info) } {
+            ffi::SF_TRUE => true,
+            ffi::SF_FALSE => false,
+            _ => unreachable!(),
         }
     }
-
 
     /**
      * Close the SndFile object.
@@ -431,9 +422,7 @@ impl SndFile {
      * Return NoError if destruction success, an other error code otherwise.
      */
     pub fn close(&self) -> Error {
-        unsafe {
-            ffi::sf_close(self.handle)
-        }
+        unsafe { ffi::sf_close(self.handle) }
     }
 
     /**
@@ -442,15 +431,11 @@ impl SndFile {
      * If the file is opened Read no action is taken.
      */
     pub fn write_sync(&mut self) -> () {
-        unsafe {
-            ffi::sf_write_sync(self.handle)
-        }
+        unsafe { ffi::sf_write_sync(self.handle) }
     }
 
-    pub fn seek(&mut self, frames : i64, whence : SeekMode) -> i64{
-        unsafe {
-            ffi::sf_seek(self.handle, frames, whence as i32)
-        }
+    pub fn seek(&mut self, frames: i64, whence: SeekMode) -> i64 {
+        unsafe { ffi::sf_seek(self.handle, frames, whence as i32) }
     }
 
     /**
@@ -462,10 +447,8 @@ impl SndFile {
      *
      * Return the count of items.
      */
-    pub fn read_i16<'r>(&'r mut self, array : &'r mut [i16], items : i64) -> i64 {
-        unsafe {
-            ffi::sf_read_short(self.handle, array.as_mut_ptr(), items)
-        }
+    pub fn read_i16<'r>(&'r mut self, array: &'r mut [i16], items: i64) -> i64 {
+        unsafe { ffi::sf_read_short(self.handle, array.as_mut_ptr(), items) }
     }
 
     /**
@@ -477,10 +460,8 @@ impl SndFile {
      *
      * Return the count of items.
      */
-    pub fn read_int<'r>(&'r mut self, array : &'r mut [i32], items : i64) -> i64 {
-        unsafe {
-            ffi::sf_read_int(self.handle, array.as_mut_ptr(), items)
-        }
+    pub fn read_int<'r>(&'r mut self, array: &'r mut [i32], items: i64) -> i64 {
+        unsafe { ffi::sf_read_int(self.handle, array.as_mut_ptr(), items) }
     }
 
     /**
@@ -492,10 +473,8 @@ impl SndFile {
      *
      * Return the count of items.
      */
-    pub fn read_f32<'r>(&'r mut self, array : &'r mut [f32], items : i64) -> i64 {
-        unsafe {
-            ffi::sf_read_float(self.handle, array.as_mut_ptr(), items)
-        }
+    pub fn read_f32<'r>(&'r mut self, array: &'r mut [f32], items: i64) -> i64 {
+        unsafe { ffi::sf_read_float(self.handle, array.as_mut_ptr(), items) }
     }
 
     /**
@@ -507,10 +486,8 @@ impl SndFile {
      *
      * Return the count of items.
      */
-    pub fn read_f64<'r>(&'r mut self, array : &'r mut [f64], items : i64) -> i64 {
-        unsafe {
-            ffi::sf_read_double(self.handle, array.as_mut_ptr(), items)
-        }
+    pub fn read_f64<'r>(&'r mut self, array: &'r mut [f64], items: i64) -> i64 {
+        unsafe { ffi::sf_read_double(self.handle, array.as_mut_ptr(), items) }
     }
 
     /**
@@ -522,10 +499,8 @@ impl SndFile {
      *
      * Return the count of frames.
      */
-    pub fn readf_i16<'r>(&'r mut self, array : &'r mut [i16], frames : i64) -> i64 {
-        unsafe {
-            ffi::sf_readf_short(self.handle, array.as_mut_ptr(), frames)
-        }
+    pub fn readf_i16<'r>(&'r mut self, array: &'r mut [i16], frames: i64) -> i64 {
+        unsafe { ffi::sf_readf_short(self.handle, array.as_mut_ptr(), frames) }
     }
 
     /**
@@ -537,10 +512,8 @@ impl SndFile {
      *
      * Return the count of frames.
      */
-    pub fn readf_int<'r>(&'r mut self, array : &'r mut [i32], frames : i64) -> i64 {
-        unsafe {
-            ffi::sf_readf_int(self.handle, array.as_mut_ptr(), frames)
-        }
+    pub fn readf_int<'r>(&'r mut self, array: &'r mut [i32], frames: i64) -> i64 {
+        unsafe { ffi::sf_readf_int(self.handle, array.as_mut_ptr(), frames) }
     }
 
     /**
@@ -552,10 +525,8 @@ impl SndFile {
      *
      * Return the count of frames.
      */
-    pub fn readf_f32<'r>(&'r mut self, array : &'r mut [f32], frames : i64) -> i64 {
-        unsafe {
-            ffi::sf_readf_float(self.handle, array.as_mut_ptr(), frames)
-        }
+    pub fn readf_f32<'r>(&'r mut self, array: &'r mut [f32], frames: i64) -> i64 {
+        unsafe { ffi::sf_readf_float(self.handle, array.as_mut_ptr(), frames) }
     }
 
     /**
@@ -567,10 +538,8 @@ impl SndFile {
      *
      * Return the count of frames.
      */
-    pub fn readf_f64<'r>(&'r mut self, array : &'r mut [f64], frames : i64) -> i64 {
-        unsafe {
-            ffi::sf_readf_double(self.handle, array.as_mut_ptr(), frames)
-        }
+    pub fn readf_f64<'r>(&'r mut self, array: &'r mut [f64], frames: i64) -> i64 {
+        unsafe { ffi::sf_readf_double(self.handle, array.as_mut_ptr(), frames) }
     }
 
     /**
@@ -582,10 +551,8 @@ impl SndFile {
      *
      * Return the count of wrote items.
      */
-    pub fn write_i16<'r>(&'r mut self, array : &'r mut [i16], items : i64) -> i64 {
-        unsafe {
-            ffi::sf_write_short(self.handle, array.as_mut_ptr(), items)
-        }
+    pub fn write_i16<'r>(&'r mut self, array: &'r mut [i16], items: i64) -> i64 {
+        unsafe { ffi::sf_write_short(self.handle, array.as_mut_ptr(), items) }
     }
 
     /**
@@ -597,10 +564,8 @@ impl SndFile {
      *
      * Return the count of wrote items.
      */
-    pub fn write_int<'r>(&'r mut self, array : &'r mut [i32], items : i64) -> i64 {
-        unsafe {
-            ffi::sf_write_int(self.handle, array.as_mut_ptr(), items)
-        }
+    pub fn write_int<'r>(&'r mut self, array: &'r mut [i32], items: i64) -> i64 {
+        unsafe { ffi::sf_write_int(self.handle, array.as_mut_ptr(), items) }
     }
 
     /**
@@ -612,10 +577,8 @@ impl SndFile {
      *
      * Return the count of wrote items.
      */
-    pub fn write_f32<'r>(&'r mut self, array : &'r mut [f32], items : i64) -> i64 {
-        unsafe {
-            ffi::sf_write_float(self.handle, array.as_mut_ptr(), items)
-        }
+    pub fn write_f32<'r>(&'r mut self, array: &'r mut [f32], items: i64) -> i64 {
+        unsafe { ffi::sf_write_float(self.handle, array.as_mut_ptr(), items) }
     }
 
     /**
@@ -627,10 +590,8 @@ impl SndFile {
      *
      * Return the count of wrote items.
      */
-    pub fn write_f64<'r>(&'r mut self, array : &'r mut [f64], items : i64) -> i64 {
-        unsafe {
-            ffi::sf_write_double(self.handle, array.as_mut_ptr(), items)
-        }
+    pub fn write_f64<'r>(&'r mut self, array: &'r mut [f64], items: i64) -> i64 {
+        unsafe { ffi::sf_write_double(self.handle, array.as_mut_ptr(), items) }
     }
 
     /**
@@ -642,10 +603,8 @@ impl SndFile {
      *
      * Return the count of wrote frames.
      */
-    pub fn writef_i16<'r>(&'r mut self, array : &'r mut [i16], frames : i64) -> i64 {
-        unsafe {
-            ffi::sf_writef_short(self.handle, array.as_mut_ptr(), frames)
-        }
+    pub fn writef_i16<'r>(&'r mut self, array: &'r mut [i16], frames: i64) -> i64 {
+        unsafe { ffi::sf_writef_short(self.handle, array.as_mut_ptr(), frames) }
     }
 
     /**
@@ -657,10 +616,8 @@ impl SndFile {
      *
      * Return the count of wrote frames.
      */
-    pub fn writef_int<'r>(&'r mut self, array : &'r mut [i32], frames : i64) -> i64 {
-        unsafe {
-            ffi::sf_writef_int(self.handle, array.as_mut_ptr(), frames)
-        }
+    pub fn writef_int<'r>(&'r mut self, array: &'r mut [i32], frames: i64) -> i64 {
+        unsafe { ffi::sf_writef_int(self.handle, array.as_mut_ptr(), frames) }
     }
 
     /**
@@ -672,10 +629,8 @@ impl SndFile {
      *
      * Return the count of wrote frames.
      */
-    pub fn writef_f32<'r>(&'r mut self, array : &'r mut [f32], frames : i64) -> i64 {
-        unsafe {
-            ffi::sf_writef_float(self.handle, array.as_mut_ptr(), frames)
-        }
+    pub fn writef_f32<'r>(&'r mut self, array: &'r mut [f32], frames: i64) -> i64 {
+        unsafe { ffi::sf_writef_float(self.handle, array.as_mut_ptr(), frames) }
     }
 
     /**
@@ -687,10 +642,8 @@ impl SndFile {
      *
      * Return the count of wrote frames.
      */
-    pub fn writef_f64<'r>(&'r mut self, array : &'r mut [f64], frames : i64) -> i64 {
-        unsafe {
-            ffi::sf_writef_double(self.handle, array.as_mut_ptr(), frames)
-        }
+    pub fn writef_f64<'r>(&'r mut self, array: &'r mut [f64], frames: i64) -> i64 {
+        unsafe { ffi::sf_writef_double(self.handle, array.as_mut_ptr(), frames) }
     }
 
     /**
@@ -699,9 +652,7 @@ impl SndFile {
      * Return the last error as a variant of the enum Error.
      */
     pub fn error(&self) -> Error {
-        unsafe {
-            ffi::sf_error(self.handle)
-        }
+        unsafe { ffi::sf_error(self.handle) }
     }
 
     /**
@@ -711,7 +662,9 @@ impl SndFile {
      */
     pub fn string_error(&self) -> String {
         unsafe {
-			from_utf8(CStr::from_ptr(ffi::sf_strerror(self.handle) as *const _).to_bytes()).unwrap().to_owned()
+            from_utf8(CStr::from_ptr(ffi::sf_strerror(self.handle) as *const _).to_bytes())
+                .unwrap()
+                .to_owned()
             //CString::new(ffi::sf_strerror(self.handle) as *const i8).as_str().unwrap().to_string()
         }
     }
@@ -721,11 +674,12 @@ impl SndFile {
      *
      * Return an owned str containing the error.
      */
-    pub fn error_number(error_num : Error) -> String {
+    pub fn error_number(error_num: Error) -> String {
         unsafe {
-			from_utf8(CStr::from_ptr(ffi::sf_error_number(error_num as i32) as *const _).to_bytes()).unwrap().to_owned()
+            from_utf8(CStr::from_ptr(ffi::sf_error_number(error_num as i32) as *const _).to_bytes())
+                .unwrap()
+                .to_owned()
             //CString::new(ffi::sf_error_number(error_num as i32) as *const i8, false).as_str().unwrap().to_string()
         }
     }
-
 }

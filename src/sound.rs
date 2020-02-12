@@ -21,20 +21,19 @@
 
 //! Play Sounds easily.
 
-use std::rc::Rc;
 use std::cell::RefCell;
+use std::rc::Rc;
 use std::time::Duration;
 
-use reverb_effect::ReverbEffect;
-use internal::OpenAlData;
-use sound_data;//::*;//{SoundData};
-use sound_data::{SoundData};
-use openal::{ffi, al};
-use states::State;
-use states::State::{Initial, Playing, Paused, Stopped};
 use audio_controller::AudioController;
 use audio_tags::{AudioTags, Tags};
-
+use internal::OpenAlData;
+use openal::{al, ffi};
+use reverb_effect::ReverbEffect;
+use sound_data; //::*;//{SoundData};
+use sound_data::SoundData;
+use states::State;
+use states::State::{Initial, Paused, Playing, Stopped};
 
 /**
  * Play Sounds easily.
@@ -64,7 +63,7 @@ pub struct Sound {
     /// The internal OpenAl source identifier
     al_source: u32,
     /// The SoundData associated to the Sound.
-    sound_data: Rc<RefCell<SoundData>>
+    sound_data: Rc<RefCell<SoundData>>,
 }
 
 impl Sound {
@@ -128,19 +127,20 @@ impl Sound {
         // create the source
         al::alGenSources(1, &mut source_id);
         // set the buffer
-        al::alSourcei(source_id,
-                      ffi::AL_BUFFER,
-                      sound_data::get_buffer(&*sound_data
-                                             .borrow_mut()) as i32);
+        al::alSourcei(
+            source_id,
+            ffi::AL_BUFFER,
+            sound_data::get_buffer(&*sound_data.borrow_mut()) as i32,
+        );
 
         // Check if there is OpenAL internal error
         if let Some(err) = al::openal_has_error() {
-             return Err(format!("Internal OpenAL error: {}", err));
+            return Err(format!("Internal OpenAL error: {}", err));
         };
 
         Ok(Sound {
             al_source: source_id,
-            sound_data: sound_data
+            sound_data: sound_data,
         })
     }
 
@@ -184,28 +184,29 @@ impl Sound {
         }
 
         // set the buffer
-        al::alSourcei(self.al_source,
-                      ffi::AL_BUFFER,
-                        sound_data::get_buffer(&*sound_data
-                                               .borrow()) as i32);
+        al::alSourcei(
+            self.al_source,
+            ffi::AL_BUFFER,
+            sound_data::get_buffer(&*sound_data.borrow()) as i32,
+        );
 
         self.sound_data = sound_data
     }
 
     /**
-     * This is a multiplier on the amount of Air Absorption applied to the Source.
-     * The air absorption factor is multiplied by an internal Air Absorption Gain
-     * HF value of 0.994 (-0.05dB) per meter which represents normal atmospheric
-     * humidity and temperature.
+    * This is a multiplier on the amount of Air Absorption applied to the Source.
+    * The air absorption factor is multiplied by an internal Air Absorption Gain
+    * HF value of 0.994 (-0.05dB) per meter which represents normal atmospheric
+    * humidity and temperature.
 
-     * By default the value is set to 0.0 which means that Air Absorption effects
-     * are disabled.
-     *
-     * A value of 1.0 will tell the Effects Extension engine to apply high frequency
-     * attenuation on the direct path of the Source at a rate of 0.05dB per meter.
-     *
-     * Range 0.0 to 10.0
-     */
+    * By default the value is set to 0.0 which means that Air Absorption effects
+    * are disabled.
+    *
+    * A value of 1.0 will tell the Effects Extension engine to apply high frequency
+    * attenuation on the direct path of the Source at a rate of 0.05dB per meter.
+    *
+    * Range 0.0 to 10.0
+    */
     pub fn set_air_absorption_factor(&mut self, factor: f32) {
         check_openal_context!(());
 
@@ -250,11 +251,10 @@ impl Sound {
     pub fn get_velocity(&self) -> [f32; 3] {
         check_openal_context!([0.0; 3]);
 
-        let mut velocity : [f32; 3] = [0.0; 3];
+        let mut velocity: [f32; 3] = [0.0; 3];
         al::alGetSourcefv(self.al_source, ffi::AL_VELOCITY, &mut velocity[0]);
         velocity
     }
-
 }
 
 impl AudioTags for Sound {
@@ -287,24 +287,24 @@ impl AudioController for Sound {
         al::alSourcePlay(self.al_source);
 
         match al::openal_has_error() {
-            None => {},
-            Some(err) => println!("{}", err)
+            None => {}
+            Some(err) => println!("{}", err),
         }
     }
 
-     /**
-      * Pause the Sound.
-      *
-      * # Example
-      * ```no_run
-      * use ears::{Sound, AudioController};
-      *
-      * let mut snd = Sound::new("path/to/the/sound.ogg").unwrap();
-      * snd.play();
-      * snd.pause();
-      * snd.play(); // the sound restarts at the moment of the pause
-      * ```
-      */
+    /**
+     * Pause the Sound.
+     *
+     * # Example
+     * ```no_run
+     * use ears::{Sound, AudioController};
+     *
+     * let mut snd = Sound::new("path/to/the/sound.ogg").unwrap();
+     * snd.play();
+     * snd.pause();
+     * snd.play(); // the sound restarts at the moment of the pause
+     * ```
+     */
     fn pause(&mut self) -> () {
         check_openal_context!(());
 
@@ -343,16 +343,28 @@ impl AudioController for Sound {
      * ```
      */
     fn connect(&mut self, reverb_effect: &Option<ReverbEffect>) {
-      check_openal_context!(());
+        check_openal_context!(());
 
-      match reverb_effect {
-        Some(reverb_effect) => {
-          al::alSource3i(self.al_source, ffi::AL_AUXILIARY_SEND_FILTER, reverb_effect.slot() as i32, 0, ffi::AL_FILTER_NULL);
-        },
-        None => {
-          al::alSource3i(self.al_source, ffi::AL_AUXILIARY_SEND_FILTER, ffi::AL_EFFECTSLOT_NULL, 0, ffi::AL_FILTER_NULL);
+        match reverb_effect {
+            Some(reverb_effect) => {
+                al::alSource3i(
+                    self.al_source,
+                    ffi::AL_AUXILIARY_SEND_FILTER,
+                    reverb_effect.slot() as i32,
+                    0,
+                    ffi::AL_FILTER_NULL,
+                );
+            }
+            None => {
+                al::alSource3i(
+                    self.al_source,
+                    ffi::AL_AUXILIARY_SEND_FILTER,
+                    ffi::AL_EFFECTSLOT_NULL,
+                    0,
+                    ffi::AL_FILTER_NULL,
+                );
+            }
         }
-      }
     }
 
     /**
@@ -376,8 +388,8 @@ impl AudioController for Sound {
      */
     fn is_playing(&self) -> bool {
         match self.get_state() {
-            Playing     => true,
-            _           => false
+            Playing => true,
+            _ => false,
         }
     }
 
@@ -404,17 +416,16 @@ impl AudioController for Sound {
         check_openal_context!(Initial);
 
         // Get the source state
-        let mut state : i32 = 0;
+        let mut state: i32 = 0;
         al::alGetSourcei(self.al_source, ffi::AL_SOURCE_STATE, &mut state);
 
         match state {
             ffi::AL_INITIAL => Initial,
             ffi::AL_PLAYING => Playing,
-            ffi::AL_PAUSED  => Paused,
+            ffi::AL_PAUSED => Paused,
             ffi::AL_STOPPED => Stopped,
-            _               => panic!(format!("AL_SOURCE_STATE == {}", state))
+            _ => panic!(format!("AL_SOURCE_STATE == {}", state)),
         }
-
     }
 
     /**
@@ -438,7 +449,7 @@ impl AudioController for Sound {
     fn get_offset(&self) -> i32 {
         check_openal_context!(0);
 
-        let mut offset : i32 = 0;
+        let mut offset: i32 = 0;
         al::alGetSourcei(self.al_source, ffi::AL_SAMPLE_OFFSET, &mut offset);
         offset
     }
@@ -468,7 +479,7 @@ impl AudioController for Sound {
     fn get_volume(&self) -> f32 {
         check_openal_context!(0.);
 
-        let mut volume : f32 = 0.;
+        let mut volume: f32 = 0.;
         al::alGetSourcef(self.al_source, ffi::AL_GAIN, &mut volume);
         volume
     }
@@ -498,7 +509,7 @@ impl AudioController for Sound {
     fn get_min_volume(&self) -> f32 {
         check_openal_context!(0.);
 
-        let mut volume : f32 = 0.;
+        let mut volume: f32 = 0.;
         al::alGetSourcef(self.al_source, ffi::AL_MIN_GAIN, &mut volume);
         volume
     }
@@ -528,7 +539,7 @@ impl AudioController for Sound {
     fn get_max_volume(&self) -> f32 {
         check_openal_context!(0.);
 
-        let mut volume : f32 = 0.;
+        let mut volume: f32 = 0.;
         al::alGetSourcef(self.al_source, ffi::AL_MAX_GAIN, &mut volume);
         volume
     }
@@ -545,12 +556,8 @@ impl AudioController for Sound {
         check_openal_context!(());
 
         match looping {
-            true    => al::alSourcei(self.al_source,
-                                     ffi::AL_LOOPING,
-                                     ffi::ALC_TRUE as i32),
-            false   => al::alSourcei(self.al_source,
-                                     ffi::AL_LOOPING,
-                                     ffi::ALC_FALSE as i32)
+            true => al::alSourcei(self.al_source, ffi::AL_LOOPING, ffi::ALC_TRUE as i32),
+            false => al::alSourcei(self.al_source, ffi::AL_LOOPING, ffi::ALC_FALSE as i32),
         };
     }
 
@@ -567,9 +574,9 @@ impl AudioController for Sound {
         al::alGetSourcei(self.al_source, ffi::AL_LOOPING, &mut boolean);
 
         match boolean as _ {
-            ffi::ALC_TRUE  => true,
+            ffi::ALC_TRUE => true,
             ffi::ALC_FALSE => false,
-            _              => unreachable!()
+            _ => unreachable!(),
         }
     }
 
@@ -616,12 +623,16 @@ impl AudioController for Sound {
         check_openal_context!(());
 
         match relative {
-            true    => al::alSourcei(self.al_source,
-                                     ffi::AL_SOURCE_RELATIVE,
-                                     ffi::ALC_TRUE as i32),
-            false   => al::alSourcei(self.al_source,
-                                     ffi::AL_SOURCE_RELATIVE,
-                                     ffi::ALC_FALSE as i32)
+            true => al::alSourcei(
+                self.al_source,
+                ffi::AL_SOURCE_RELATIVE,
+                ffi::ALC_TRUE as i32,
+            ),
+            false => al::alSourcei(
+                self.al_source,
+                ffi::AL_SOURCE_RELATIVE,
+                ffi::ALC_FALSE as i32,
+            ),
         };
     }
 
@@ -638,9 +649,9 @@ impl AudioController for Sound {
         al::alGetSourcei(self.al_source, ffi::AL_SOURCE_RELATIVE, &mut boolean);
 
         match boolean as _ {
-            ffi::ALC_TRUE  => true,
+            ffi::ALC_TRUE => true,
             ffi::ALC_FALSE => false,
-            _              => unreachable!()
+            _ => unreachable!(),
         }
     }
 
@@ -675,7 +686,7 @@ impl AudioController for Sound {
     fn get_position(&self) -> [f32; 3] {
         check_openal_context!([0.; 3]);
 
-        let mut position : [f32; 3] = [0.; 3];
+        let mut position: [f32; 3] = [0.; 3];
         al::alGetSourcefv(self.al_source, ffi::AL_POSITION, &mut position[0]);
         position
     }
@@ -702,10 +713,10 @@ impl AudioController for Sound {
      * # Return
      * The current direction of the Sound.
      */
-    fn get_direction(&self)  -> [f32; 3] {
+    fn get_direction(&self) -> [f32; 3] {
         check_openal_context!([0.; 3]);
 
-        let mut direction : [f32; 3] = [0.; 3];
+        let mut direction: [f32; 3] = [0.; 3];
         al::alGetSourcefv(self.al_source, ffi::AL_DIRECTION, &mut direction[0]);
         direction
     }
@@ -738,9 +749,7 @@ impl AudioController for Sound {
         check_openal_context!(0.);
 
         let mut max_distance = 0.;
-        al::alGetSourcef(self.al_source,
-                         ffi::AL_MAX_DISTANCE,
-                         &mut max_distance);
+        al::alGetSourcef(self.al_source, ffi::AL_MAX_DISTANCE, &mut max_distance);
         max_distance
     }
 
@@ -772,9 +781,11 @@ impl AudioController for Sound {
         check_openal_context!(1.);
 
         let mut ref_distance = 0.;
-        al::alGetSourcef(self.al_source,
-                         ffi::AL_REFERENCE_DISTANCE,
-                         &mut ref_distance);
+        al::alGetSourcef(
+            self.al_source,
+            ffi::AL_REFERENCE_DISTANCE,
+            &mut ref_distance,
+        );
         ref_distance
     }
 
@@ -805,9 +816,7 @@ impl AudioController for Sound {
         check_openal_context!(1.);
 
         let mut attenuation = 0.;
-        al::alGetSourcef(self.al_source,
-                         ffi::AL_ROLLOFF_FACTOR,
-                         &mut attenuation);
+        al::alGetSourcef(self.al_source, ffi::AL_ROLLOFF_FACTOR, &mut attenuation);
         attenuation
     }
 
@@ -837,7 +846,7 @@ impl AudioController for Sound {
     fn set_direct_channel(&mut self, enabled: bool) -> () {
         if OpenAlData::direct_channel_capable() {
             let value = match enabled {
-                true  => ffi::AL_TRUE,
+                true => ffi::AL_TRUE,
                 false => ffi::AL_FALSE,
             };
 
@@ -859,16 +868,14 @@ impl AudioController for Sound {
         match OpenAlData::direct_channel_capable() {
             true => {
                 let mut boolean = 0;
-                al::alGetSourcei(self.al_source,
-                                 ffi::AL_DIRECT_CHANNELS_SOFT,
-                                 &mut boolean);
+                al::alGetSourcei(self.al_source, ffi::AL_DIRECT_CHANNELS_SOFT, &mut boolean);
 
                 match boolean as _ {
-                    ffi::ALC_TRUE  => true,
+                    ffi::ALC_TRUE => true,
                     ffi::ALC_FALSE => false,
-                    _              => unreachable!()
+                    _ => unreachable!(),
                 }
-            },
+            }
             false => false,
         }
     }
@@ -904,9 +911,9 @@ impl Drop for Sound {
 mod test {
     #![allow(non_snake_case)]
 
-    use sound::Sound;
-    use states::State::{Playing, Paused, Stopped};
     use audio_controller::AudioController;
+    use sound::Sound;
+    use states::State::{Paused, Playing, Stopped};
 
     #[test]
     #[ignore]
@@ -1109,7 +1116,7 @@ mod test {
     //     assert_eq!(snd.get_pitch(), 3.0);
     // }
 
-     #[test]
+    #[test]
     #[ignore]
     fn sound_set_relative_TRUE() -> () {
         let mut snd = Sound::new("res/shot.wav").expect("Cannot create sound");
@@ -1148,7 +1155,6 @@ mod test {
         let res = snd.get_direction();
         assert_eq!([res[0], res[1], res[2]], [50f32, 150f32, 250f32]);
     }
-
 
     #[test]
     #[ignore]

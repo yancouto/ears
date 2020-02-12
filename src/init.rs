@@ -28,8 +28,8 @@
  * and destroyed in a another task.
  */
 
-use record_context::RecordContext;
 use internal::OpenAlData;
+use record_context::RecordContext;
 
 /**
  * Initialize the internal context
@@ -43,7 +43,7 @@ use internal::OpenAlData;
  * ```
  */
 pub fn init() -> Result<(), String> {
-    return OpenAlData::check_al_context()
+    return OpenAlData::check_al_context();
 }
 
 /**
@@ -58,7 +58,7 @@ pub fn init() -> Result<(), String> {
  * ```
  */
 pub fn init_in() -> Result<RecordContext, String> {
-    return OpenAlData::check_al_input_context()
+    return OpenAlData::check_al_input_context();
 }
 
 #[cfg(test)]
@@ -67,7 +67,7 @@ mod test {
 
     use init;
     use init_in;
-	use std::thread;
+    use std::thread;
 
     #[test]
     #[ignore]
@@ -92,8 +92,6 @@ mod test {
     #[ignore]
     fn test_init_in_in_another_task_OK() -> () {
         init();
-        thread::spawn(move || {
-            assert!(init_in().is_err())
-        });
+        thread::spawn(move || assert!(init_in().is_err()));
     }
 }

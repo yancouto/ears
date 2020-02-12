@@ -25,11 +25,10 @@ use std::io::stdin;
 use std::io::stdout;
 use std::io::Write;
 
-use ears::{Music, AudioController};
-use ears::State::{Playing, Stopped, Paused};
+use ears::State::{Paused, Playing, Stopped};
+use ears::{AudioController, Music};
 
 fn main() {
-
     // Read the inputs
     let stdin = stdin();
 
@@ -39,10 +38,18 @@ fn main() {
     let mut line = String::new();
     stdin.read_line(&mut line).ok();
     loop {
-        match &line[line.len()-1..] {
-            "\n" => { line.pop(); () },
-            "\r" => { line.pop(); () },
-            _ => { break; },
+        match &line[line.len() - 1..] {
+            "\n" => {
+                line.pop();
+                ()
+            }
+            "\r" => {
+                line.pop();
+                ()
+            }
+            _ => {
+                break;
+            }
         }
     }
 
@@ -61,14 +68,17 @@ fn main() {
             "l" => music.play(),
             "p" => music.pause(),
             "s" => music.stop(),
-            "x" => { music.stop(); break; },
-            _ => println!("Unknown command.")
+            "x" => {
+                music.stop();
+                break;
+            }
+            _ => println!("Unknown command."),
         }
         match music.get_state() {
             Playing => println!("State : Playing"),
             Stopped => println!("State : Stopped"),
-            Paused  => println!("State : Paused"),
-            _       => unreachable!()
+            Paused => println!("State : Paused"),
+            _ => unreachable!(),
         };
     }
     println!("Goodbye!");
