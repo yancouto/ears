@@ -81,7 +81,7 @@ impl Default for Tags {
     }
 }
 
-#[deprecated(since = "0.7.1", note = "Please use Default::default() instead")]
+#[deprecated(since = "0.8.0", note = "Please use Default::default() instead")]
 pub fn empty() -> Tags {
     Default::default()
 }
