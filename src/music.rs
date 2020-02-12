@@ -34,6 +34,7 @@ use std::vec::Vec;
 
 use audio_controller::AudioController;
 use audio_tags::{get_sound_tags, AudioTags, Tags};
+use error::SoundError;
 use internal::OpenAlData;
 use openal::{al, ffi};
 use reverb_effect::ReverbEffect;
@@ -201,18 +202,18 @@ impl Music {
      * * `path` - The path of the file to load the music
      *
      * # Return
-     * A `Result` containing Ok(Music) on success, Err(String)
+     * A `Result` containing Ok(Music) on success, Err(SoundError)
      * if there has been an error.
      */
-    pub fn new(path: &str) -> Result<Music, String> {
+    pub fn new(path: &str) -> Result<Music, SoundError> {
         // Check that OpenAL is launched
-        check_openal_context!(Err("Invalid OpenAL context.".into()));
+        check_openal_context!(Err(SoundError::InvalidOpenALContext));
 
         // Retrieve File and Music datas
         let file = match SndFile::new(path, Read) {
             Ok(file) => Box::new(file),
             Err(err) => {
-                return Err(format!("Error while loading music file: {}", err));
+                return Err(SoundError::LoadError(err));
             }
         };
         let infos = file.get_sndinfo();
@@ -229,13 +230,13 @@ impl Music {
         let format = match al::get_channels_format(infos.channels) {
             Some(fmt) => fmt,
             None => {
-                return Err("Unrecognized music format.".into());
+                return Err(SoundError::InvalidFormat);
             }
         };
 
         // Check if there is OpenAL internal error
         if let Some(err) = al::openal_has_error() {
-            return Err(format!("Internal OpenAL error: {}", err));
+            return Err(SoundError::InternalOpenALError(err));
         };
 
         let sound_tags = get_sound_tags(&*file);

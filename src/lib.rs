@@ -91,6 +91,7 @@ mod audio_controller;
 mod audio_tags;
 #[path = "init.rs"]
 mod einit;
+mod error;
 pub mod listener;
 mod music;
 mod presets;

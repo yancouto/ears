@@ -26,6 +26,7 @@ use std::mem;
 use std::vec::Vec;
 
 use audio_tags::{get_sound_tags, AudioTags, Tags};
+use error::SoundError;
 use internal::OpenAlData;
 use openal::{al, ffi};
 use sndfile::OpenMode::Read;
@@ -84,16 +85,16 @@ impl SoundData {
      * * `path` - The path of the file to load
      *
      * # Return
-     * A `Result` containing Ok(SoundData) on success, Err(String)
+     * A `Result` containing Ok(SoundData) on success, Err(SoundError)
      * if there has been an error.
      */
-    pub fn new(path: &str) -> Result<SoundData, String> {
-        check_openal_context!(Err("Invalid OpenAL context.".into()));
+    pub fn new(path: &str) -> Result<SoundData, SoundError> {
+        check_openal_context!(Err(SoundError::InvalidOpenALContext));
 
         let mut file = match SndFile::new(path, Read) {
             Ok(file) => file,
             Err(err) => {
-                return Err(format!("Error while loading sound file: {}", err));
+                return Err(SoundError::LoadError(err));
             }
         };
 
@@ -111,7 +112,7 @@ impl SoundData {
         let format = match al::get_channels_format(infos.channels) {
             Some(fmt) => fmt,
             None => {
-                return Err("Unrecognized sound format.".into());
+                return Err(SoundError::InvalidFormat);
             }
         };
 
@@ -125,7 +126,7 @@ impl SoundData {
         );
 
         if let Some(err) = al::openal_has_error() {
-            return Err(format!("Internal OpenAL error: {}", err));
+            return Err(SoundError::InternalOpenALError(err));
         };
 
         let sound_data = SoundData {
