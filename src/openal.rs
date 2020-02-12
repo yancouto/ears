@@ -214,6 +214,8 @@ pub mod al {
 
     use super::ffi;
     use libc::c_void;
+    use std::error::Error;
+    use std::fmt;
 
     pub fn alBufferData(buffer: u32, format: i32, data: *mut c_void, size: i32, freq: i32) -> () {
         unsafe {
@@ -380,21 +382,45 @@ pub mod al {
         }
     }
 
-    pub fn openal_has_error() -> Option<String> {
+    /// Any error that can happen during an OpenAL call.
+    pub struct AlError(i32);
+
+    impl AlError {
+        /// Create a new AlError from one of the ffi::AL_* enum values.
+        pub fn new(err: i32) -> AlError {
+            AlError(err)
+        }
+    }
+
+    impl fmt::Display for AlError {
+        fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+            write!(
+                fmt,
+                "{}",
+                match self.0 {
+                    ffi::AL_INVALID_NAME => "invalid name paramater passed to AL call",
+                    ffi::AL_INVALID_ENUM => "invalid enum parameter passed to AL call",
+                    ffi::AL_INVALID_VALUE => "invalid value parameter passed to AL call",
+                    ffi::AL_INVALID_OPERATION => "illegal AL call",
+                    ffi::AL_OUT_OF_MEMORY => "not enough memory",
+                    _ => "unknow error",
+                }
+            )
+        }
+    }
+
+    impl fmt::Debug for AlError {
+        fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+            fmt::Display::fmt(self, fmt)
+        }
+    }
+
+    impl Error for AlError {}
+
+    pub fn openal_has_error() -> Option<AlError> {
         match unsafe { ffi::alGetError() } {
             ffi::AL_NO_ERROR => None,
-            ffi::AL_INVALID_NAME => {
-                Some("OpenAL error : Invalid name paramater passed to AL call.".to_string())
-            }
-            ffi::AL_INVALID_ENUM => {
-                Some("OpenAL error : Invalid enum parameter passed to AL call.".to_string())
-            }
-            ffi::AL_INVALID_VALUE => {
-                Some("OpenAL error : Invalid value parameter passed to AL call.".to_string())
-            }
-            ffi::AL_INVALID_OPERATION => Some("OpenAL error : Illegal AL call.".to_string()),
-            ffi::AL_OUT_OF_MEMORY => Some("OpenAL error : Not enough memory.".to_string()),
-            _ => Some("OpenAL internal error : Unknow error.".to_string()),
+            err => Some(AlError::new(err)),
         }
     }
 
