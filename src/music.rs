@@ -21,12 +21,15 @@
 
 //! Play Music easily.
 
+use std::convert::TryInto;
 use std::thread::sleep;
 use std::mem;
 use std::thread;
 use std::time::Duration;
 use libc::c_void;
 use std::vec::Vec;
+use std::sync::Arc;
+use std::sync::atomic::{AtomicI64, Ordering};
 use std::sync::mpsc::{channel, Sender, Receiver};
 
 use reverb_effect::ReverbEffect;
@@ -40,6 +43,8 @@ use states::State::{Initial, Playing, Paused, Stopped};
 use audio_controller::AudioController;
 use audio_tags::{Tags, AudioTags, get_sound_tags};
 
+const BUFFER_COUNT: i32 = 2;
+
 /**
  * Play Music easily.
  *
@@ -47,6 +52,10 @@ use audio_tags::{Tags, AudioTags, get_sound_tags};
  *
  * Music is played in their own task and the samples are loaded progressively
  * using circular buffers.
+ *
+ * Music maintains it's own cursor into the underlying file and will use that
+ * cursor to continuously refill each buffer as it's processed by the source.
+ *
  * They aren't associated to a SoundData like Sounds.
  *
  * # Examples
@@ -70,18 +79,100 @@ pub struct Music {
     /// Information of the file
     file_infos: SndInfo,
     /// Quantity of sample to read each time
-    sample_to_read: i32,
+    sample_to_read: i64, // TODO: usize?
     /// Format of the sample
     sample_format: i32,
     /// Audio tags
     sound_tags: Tags,
-
+    /// Current cursor into the music file
+    cursor: Arc<AtomicI64>,
+    /// State
+    state: State,
+    /// Whether this music is looping or not
     is_looping: bool,
     /// Channel to tell the thread, if is_looping changed
     looping_sender: Option<Sender<bool>>,
 
+    /// Channel to tell the thread to set offset
+    offset_sender: Option<Sender<i32>>,
+
     /// Thread which streams the music file
     thread_handle: Option<thread::JoinHandle<()>>,
+}
+
+// Recursively fill a buffer with data, returning the frame offset into
+// the file when done. This can potentially read the file many times over
+// if the source is set to loop.
+//
+// This is intentional as it is the only way to ensure the buffers will
+// have enough data in them for uninterrupted playback, no matter how long
+// or short the underlying file is.
+//
+// Note: The only difference between the "items" and "frames" versions of
+// each read function is the units in which the object count is specified -
+// calling sf_readf_short with a count argument of N, on a SNDFILE with C
+// channels, is the same as calling sf_read_short with a count argument of
+// N*C. The buffer pointed to by "ptr" should be the same number of bytes
+// in each case.
+//
+// ref: http://www.mega-nerd.com/libsndfile/api.html#read
+fn fill_buffer(samples: &mut Vec<i16>, sndfile: &mut SndFile, cursor: Arc<AtomicI64>, is_looping: bool) {
+    // First, find where the buffer is currently filled to
+    let buffer_position = samples.len();
+    let cursor_position = cursor.load(Ordering::Relaxed);
+
+    // Move the sound file to where we want to read from
+    sndfile.seek(cursor_position, SeekSet);
+
+    // Read data from sound file into the buffer, from the current buffer position onwards
+    let read_amount = (samples.capacity() - samples.len()) as i64;
+    let read_length = sndfile.read_i16(&mut samples[buffer_position..], read_amount) as usize;
+
+    // Update the vector length manually
+    unsafe { samples.set_len(buffer_position + read_length); }
+
+    let channels = sndfile.get_sndinfo().channels as i64;
+    let frames = sndfile.get_sndinfo().frames;
+
+    // Calculate where the next cursor is at, based on how many 'items' were read
+    // divided by the channels in the source sound file.
+    let mut new_cursor_position = cursor_position + read_length as i64 / channels;
+
+    // Modulo on new cursor position to wrap around if we're looping
+    if is_looping { new_cursor_position = new_cursor_position % frames; }
+
+    cursor.store(new_cursor_position, Ordering::Relaxed);
+
+    // If we haven't reached capacity yet, keep recursing
+    if samples.len() != samples.capacity() && read_length > 0 {
+        fill_buffer(samples, sndfile, cursor, is_looping)
+    }
+}
+
+// Becaused the Music source is playing buffered audio, we need to be
+// able to calculate the offset into the full file ourselves
+fn calculate_true_offset(info: &SndInfo, cursor: i64, buffer_size: i64, buffers_queued: i32, source_offset: i32) -> i32 {
+    let queued_buffers_size = buffer_size / BUFFER_COUNT as i64 * buffers_queued as i64;
+    let offset = cursor - queued_buffers_size + source_offset as i64;
+
+    // This is a bit of a pro hack to deal with when the buffers wrap around
+    // when looping... seems to be accurate though
+    let offset = if offset < 0 {
+        info.frames + offset
+    } else {
+        offset
+    };
+
+    offset.try_into().unwrap_or(0)
+}
+
+// Sets the new cursor from offset in seconds with reasonable accuracy
+fn set_cursor_from_offset(info: &SndInfo, cursor: Arc<AtomicI64>, offset: f32) {
+    let frames = info.frames as f32;
+    let sample_rate = info.samplerate as f32;
+    let duration_in_seconds = frames / sample_rate;
+
+    cursor.store((frames * offset / duration_in_seconds) as i64, Ordering::Relaxed);
 }
 
 impl Music {
@@ -110,11 +201,11 @@ impl Music {
 
         // create the source and the buffers
         let mut source_id = 0;
-        let mut buffer_ids = [0; 2];
+        let mut buffer_ids = [0; BUFFER_COUNT as usize];
         // create the source
         al::alGenSources(1, &mut source_id);
         // create the buffers
-        al::alGenBuffers(2, &mut buffer_ids[0]);
+        al::alGenBuffers(BUFFER_COUNT, &mut buffer_ids[0]);
 
         // Retrieve format information
         let format =  match al::get_channels_format(infos.channels) {
@@ -135,12 +226,15 @@ impl Music {
             al_source: source_id,
             al_buffers: buffer_ids,
             file: Some(file),
+            sample_to_read: 50000 * (infos.channels as i64),
             file_infos: infos,
-            sample_to_read: 50000,
             sample_format: format,
             sound_tags: sound_tags,
+            cursor: Arc::new(AtomicI64::new(0)),
+            state: Initial,
             is_looping: false,
             looping_sender: None,
+            offset_sender: None,
             thread_handle: None,
         })
     }
@@ -153,36 +247,40 @@ impl Music {
         let al_source = self.al_source;
         let al_buffers = self.al_buffers;
 
-        // create buff
-        let mut samples = vec![0i16; sample_t_r as usize];// as u32, 0i16);
+        // create sample buffer and reserve the exact capacity we need
+        let mut samples: Vec<i16> = Vec::with_capacity(sample_t_r as usize);
 
-        // full buff1
-        let mut len = mem::size_of::<i16>() *
-            self.file.as_mut().unwrap().read_i16(&mut samples[..], sample_t_r as i64) as usize;
+        fill_buffer(&mut samples, &mut self.file.as_mut().unwrap(), self.cursor.clone(), self.is_looping);
+
         al::alBufferData(al_buffers[0],
                          sample_format,
                          samples.as_ptr() as *mut c_void,
-                         len as i32,
+                         (mem::size_of::<i16>() * samples.len()) as i32,
                          sample_rate);
 
-        // full buff2
         samples.clear();
-        len = mem::size_of::<i16>() *
-            self.file.as_mut().unwrap().read_i16(&mut samples[..], sample_t_r as i64) as usize;
+
+        fill_buffer(&mut samples, &mut self.file.as_mut().unwrap(), self.cursor.clone(), self.is_looping);
+
         al::alBufferData(al_buffers[1],
                          sample_format,
                          samples.as_ptr() as *mut c_void,
-                         len as i32,
+                         (mem::size_of::<i16>() * samples.len()) as i32,
                          sample_rate);
 
         // Queue the buffers
         al::alSourceQueueBuffers(al_source, 2, &al_buffers[0]);
 
-        // Launche the Music
+        // Start playing
         al::alSourcePlay(al_source);
 
         let (looping_sender, looping_receiver): (Sender<bool>, Receiver<bool>) = channel();
+        let (offset_sender, offset_receiver): (Sender<i32>, Receiver<i32>) = channel();
+
         self.looping_sender = Some(looping_sender);
+        self.offset_sender = Some(offset_sender);
+
+        let cursor = self.cursor.clone();
         let is_looping_clone = self.is_looping.clone();
 
         let thread = thread::Builder::new().name(String::from("ears-music"));
@@ -192,11 +290,12 @@ impl Music {
                 Err(err)    => { println!("{}", err);}
             };
             let mut file : SndFile = port.recv().ok().unwrap();
-            let mut samples = vec![0i16; sample_t_r as usize];
             let mut status = ffi::AL_PLAYING;
             let mut buffers_processed = 0;
+            let mut buffers_queued = 0;
             let mut buf = 0;
             let mut is_looping = is_looping_clone;
+            let mut offset_shift_restart = false;
 
             while status != ffi::AL_STOPPED {
                 // wait a bit
@@ -205,30 +304,42 @@ impl Music {
                     if let Ok(new_is_looping) = looping_receiver.try_recv() {
                         is_looping = new_is_looping;
                     }
+
+                    if let Ok(offset) = offset_receiver.try_recv() {
+                        // If we shift the offset, we need to stop and restart the source
+                        // so that we can swap out the buffers in an instantaneous manner
+                        al::alSourceStop(al_source);
+                        offset_shift_restart = true;
+                        cursor.store(offset.into(), Ordering::Relaxed);
+                    }
+
+                    al::alGetSourcei(al_source,
+                                     ffi::AL_BUFFERS_QUEUED,
+                                     &mut buffers_queued);
+
                     al::alGetSourcei(al_source,
                                      ffi::AL_BUFFERS_PROCESSED,
                                      &mut buffers_processed);
-                    if buffers_processed != 0 {
+
+                    for _ in 0..buffers_processed {
                         al::alSourceUnqueueBuffers(al_source, 1, &mut buf);
-                        let read = file.read_i16(&mut samples[..], sample_t_r as i64);
 
-                        if is_looping && read < sample_t_r as i64 {
-                            let additional_read = sample_t_r as i64 - read;
+                        samples.clear();
 
-                            file.seek(0, SeekSet);
-                            file.read_i16(&mut samples[read as usize..], additional_read);
-                        } else if read == 0 {
-                            // if we're not looping and we've reached
-                            // the end of the file, don't send any
-                            // more samples.
-                            samples.clear();
-                        }
+                        fill_buffer(&mut samples, &mut file, cursor.clone(), is_looping);
+
                         al::alBufferData(buf,
                                          sample_format,
                                          samples.as_ptr() as *mut c_void,
-                                         samples.len() as i32 * mem::size_of::<i16>() as i32,
+                                         (mem::size_of::<i16>() * samples.len()) as i32,
                                          sample_rate);
                         al::alSourceQueueBuffers(al_source, 1, &buf);
+                    }
+
+                    // After buffer refill restart
+                    if offset_shift_restart {
+                        al::alSourcePlay(al_source);
+                        offset_shift_restart = false;
                     }
                 }
                 // Get source status
@@ -340,6 +451,40 @@ impl AudioController for Music {
             ffi::AL_STOPPED => Stopped,
             _               => unreachable!()
         }
+    }
+
+    /**
+     * Set the playback position in the Music.
+     *
+     * # Argument
+     * * `offset` - The frame to seek to
+     */
+    fn set_offset(&mut self, offset: i32) -> () {
+        match self.offset_sender {
+            Some(ref sender) => { sender.send(offset); },
+            None => self.cursor.store(offset.into(), Ordering::Relaxed),
+        }
+    }
+
+    /**
+     * Get the current position in the Music.
+     *
+     * # Return
+     * The current frame being played
+     */
+    fn get_offset(&self) -> i32 {
+        check_openal_context!(0);
+
+        let mut sample_offset: i32 = 0;
+        al::alGetSourcei(self.al_source, ffi::AL_SAMPLE_OFFSET, &mut sample_offset);
+
+        let mut buffers_queued: i32 = 0;
+        al::alGetSourcei(self.al_source, ffi::AL_BUFFERS_QUEUED, &mut buffers_queued);
+
+        let cursor = self.cursor.load(Ordering::Relaxed);
+        let buffer_size = self.sample_to_read;
+
+        calculate_true_offset(&self.file_infos, cursor, buffer_size, buffers_queued, sample_offset)
     }
 
     /**

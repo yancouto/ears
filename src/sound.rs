@@ -418,6 +418,32 @@ impl AudioController for Sound {
     }
 
     /**
+     * Set the playback position in the Music.
+     *
+     * # Argument
+     * * `offset` - The time at which to seek, in seconds
+     */
+    fn set_offset(&mut self, offset: i32) -> () {
+        check_openal_context!(());
+
+        al::alSourcei(self.al_source, ffi::AL_SAMPLE_OFFSET, offset);
+    }
+
+    /**
+     * Get the current position in the Music.
+     *
+     * # Return
+     * The time at which the Music is currently playing
+     */
+    fn get_offset(&self) -> i32 {
+        check_openal_context!(0);
+
+        let mut offset : i32 = 0;
+        al::alGetSourcei(self.al_source, ffi::AL_SAMPLE_OFFSET, &mut offset);
+        offset
+    }
+
+    /**
      * Set the volume of the Sound.
      *
      * A value of 1.0 means unattenuated. Each division by 2 equals an
