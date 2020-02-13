@@ -17,5 +17,10 @@ addons:
     packages:
     - libopenal-dev
     - libsndfile1-dev
+before_script:
+- |
+  [ $TRAVIS_RUST_VERSION = nightly ] || rustup component add rustfmt
 script:
+- |
+  [ $TRAVIS_RUST_VERSION = nightly ] || cargo fmt -- --check
 - cargo test
