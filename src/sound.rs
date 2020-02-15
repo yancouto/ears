@@ -27,6 +27,7 @@ use std::time::Duration;
 
 use audio_controller::AudioController;
 use audio_tags::{AudioTags, Tags};
+use error::SoundError;
 use internal::OpenAlData;
 use openal::{al, ffi};
 use reverb_effect::ReverbEffect;
@@ -76,7 +77,7 @@ impl Sound {
      * `path` - The path of the sound file to create the SoundData.
      *
      * # Return
-     * A `Result` containing Ok(Sound) on success, Err(String)
+     * A `Result` containing Ok(Sound) on success, Err(SoundError)
      * if there has been an error.
      *
      * # Example
@@ -87,16 +88,11 @@ impl Sound {
      *                  .expect("Cannot load the sound from a file!");
      * ```
      */
-    pub fn new(path: &str) -> Result<Sound, String> {
-        check_openal_context!(Err("Invalid OpenAL context.".into()));
+    pub fn new(path: &str) -> Result<Sound, SoundError> {
+        check_openal_context!(Err(SoundError::InvalidOpenALContext));
 
-        let sound_data = match SoundData::new(path) {
-            Ok(data) => Rc::new(RefCell::new(data)),
-            Err(err) => {
-                return Err(format!("Error creating sound data: {}", err));
-            }
-        };
-
+        let sound_data = SoundData::new(path)?;
+        let sound_data = Rc::new(RefCell::new(sound_data));
         Sound::new_with_data(sound_data)
     }
 
@@ -120,8 +116,8 @@ impl Sound {
      * let sound = Sound::new_with_data(data).unwrap();
      * ```
      */
-    pub fn new_with_data(sound_data: Rc<RefCell<SoundData>>) -> Result<Sound, String> {
-        check_openal_context!(Err("Invalid OpenAL context.".into()));
+    pub fn new_with_data(sound_data: Rc<RefCell<SoundData>>) -> Result<Sound, SoundError> {
+        check_openal_context!(Err(SoundError::InvalidOpenALContext));
 
         let mut source_id = 0;
         // create the source
@@ -135,7 +131,7 @@ impl Sound {
 
         // Check if there is OpenAL internal error
         if let Some(err) = al::openal_has_error() {
-            return Err(format!("Internal OpenAL error: {}", err));
+            return Err(SoundError::InternalOpenALError(err));
         };
 
         Ok(Sound {
@@ -288,7 +284,7 @@ impl AudioController for Sound {
 
         match al::openal_has_error() {
             None => {}
-            Some(err) => println!("{}", err),
+            Some(err) => println!("Internal OpenAL error: {}", err),
         }
     }
 

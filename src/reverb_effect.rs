@@ -1,6 +1,46 @@
 use internal::OpenAlData;
 use openal::{al, ffi};
 use presets::ReverbProperties;
+use std::error::Error;
+use std::fmt;
+
+/// All possible errors when opening a Music.
+pub enum ReverbEffectError {
+    /// Happens when OpenAL failed to load for some reason.
+    InvalidOpenALContext,
+
+    /// Internal OpenAL error.
+    InternalOpenALError(al::AlError),
+}
+
+impl fmt::Display for ReverbEffectError {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            fmt,
+            "{}",
+            match self {
+                ReverbEffectError::InvalidOpenALContext => "invalid OpenAL context".to_string(),
+                ReverbEffectError::InternalOpenALError(err) =>
+                    format!("internal OpenAL error: {}", err),
+            }
+        )
+    }
+}
+
+impl fmt::Debug for ReverbEffectError {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        fmt::Display::fmt(self, fmt)
+    }
+}
+
+impl Error for ReverbEffectError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        match self {
+            ReverbEffectError::InvalidOpenALContext => None,
+            ReverbEffectError::InternalOpenALError(err) => Some(err),
+        }
+    }
+}
 
 /**
  * Create and configure reverb effects.
@@ -49,8 +89,8 @@ pub struct ReverbEffect {
 }
 
 impl ReverbEffect {
-    pub fn new() -> Result<ReverbEffect, String> {
-        check_openal_context!(Err("Invalid OpenAL context.".into()));
+    pub fn new() -> Result<ReverbEffect, ReverbEffectError> {
+        check_openal_context!(Err(ReverbEffectError::InvalidOpenALContext));
 
         // Can't seem to find a way to query whether or not EFX extension is available
         // or not... or if that's even necessary, so just assume it's available
@@ -69,7 +109,7 @@ impl ReverbEffect {
 
         // Check if there is OpenAL internal error
         if let Some(err) = al::openal_has_error() {
-            return Err(format!("ReverbEffect::new - OpenAL error: {}", err));
+            return Err(ReverbEffectError::InternalOpenALError(err));
         };
 
         Ok(ReverbEffect {
@@ -78,7 +118,7 @@ impl ReverbEffect {
         })
     }
 
-    pub fn preset(reverb_properties: ReverbProperties) -> Result<ReverbEffect, String> {
+    pub fn preset(reverb_properties: ReverbProperties) -> Result<ReverbEffect, ReverbEffectError> {
         match Self::new() {
             Ok(mut effect) => {
                 effect.set_density(reverb_properties.density);
@@ -97,7 +137,7 @@ impl ReverbEffect {
 
                 // Check if there is OpenAL internal error
                 if let Some(err) = al::openal_has_error() {
-                    return Err(format!("ReverbEffect::preset - OpenAL error: {}", err));
+                    return Err(ReverbEffectError::InternalOpenALError(err));
                 };
 
                 effect.update_slot();
@@ -231,8 +271,8 @@ impl Drop for ReverbEffect {
         // Check if there is OpenAL internal error
         //
         // TODO: this could probably be avoided with some better design
-        if al::openal_has_error().is_some() {
-            eprintln!("Ears failed to drop ReverbEffect completely, one or more source is probably still referencing it.");
+        if let Some(err) = al::openal_has_error() {
+            eprintln!("Ears failed to drop ReverbEffect completely, one or more source is probably still referencing it: {}", err);
             eprintln!("\tEffect Object: {}", self.effect_id);
             eprintln!("\tAuxiliary Effect Slot: {}", self.effect_slot_id);
         };

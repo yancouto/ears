@@ -28,21 +28,21 @@
  * and destroyed in a another task.
  */
 
-use internal::OpenAlData;
+use internal::{OpenAlContextError, OpenAlData};
 use record_context::RecordContext;
 
 /**
  * Initialize the internal context
  *
  * # Return
- * `Ok(())` if initialization is successful, `Err(String)` otherwise
+ * `Ok(())` if initialization is successful, `Err(OpenAlContextError)` otherwise
  *
  * # Example
  * ```no_run
  * ears::init().unwrap()
  * ```
  */
-pub fn init() -> Result<(), String> {
+pub fn init() -> Result<(), OpenAlContextError> {
     return OpenAlData::check_al_context();
 }
 
@@ -50,14 +50,14 @@ pub fn init() -> Result<(), String> {
  * Initialize the input device context
  *
  * # Return
- * `Ok(RecordContext)` if initialization is successful, `Err(String)` otherwise
+ * `Ok(RecordContext)` if initialization is successful, `Err(OpenAlContextError)` otherwise
  *
  * # Example
  * ```no_run
  * ears::init_in().unwrap();
  * ```
  */
-pub fn init_in() -> Result<RecordContext, String> {
+pub fn init_in() -> Result<RecordContext, OpenAlContextError> {
     return OpenAlData::check_al_input_context();
 }
 

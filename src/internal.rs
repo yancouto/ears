@@ -31,12 +31,59 @@ use openal::ffi;
 use record_context;
 use record_context::RecordContext;
 use std::cell::RefCell;
+use std::error::Error;
 use std::ffi::CString;
+use std::fmt;
 use std::ptr;
 use std::sync::Mutex;
 
+#[derive(Clone)]
+pub enum OpenAlContextError {
+    DefaultDeviceError,
+    CreationError,
+    MakeCurrentError,
+    NoInputDevice,
+    DefaultCaptureDeviceError,
+    WrongThread,
+    LockError(String),
+}
+
+impl fmt::Display for OpenAlContextError {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            fmt,
+            "{}",
+            match self {
+                OpenAlContextError::DefaultDeviceError =>
+                    "cannot open the default device".to_string(),
+                OpenAlContextError::CreationError => "cannot create the OpenAL context".to_string(),
+                OpenAlContextError::MakeCurrentError =>
+                    "cannot make the OpenAL context current".to_string(),
+                OpenAlContextError::NoInputDevice =>
+                    "no input device available on your system".to_string(),
+                OpenAlContextError::DefaultCaptureDeviceError =>
+                    "cannot open the default capture device".to_string(),
+                OpenAlContextError::WrongThread =>
+                    "you must request the input context in the task where you initialize ears"
+                        .to_string(),
+                OpenAlContextError::LockError(err) =>
+                    format!("Cannot lock OpenAL context mutex: {}", err),
+            }
+        )
+    }
+}
+
+impl fmt::Debug for OpenAlContextError {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        fmt::Display::fmt(self, fmt)
+    }
+}
+
+impl Error for OpenAlContextError {}
+
 lazy_static! {
-    static ref AL_CONTEXT: Mutex<Result<OpenAlData, String>> = Mutex::new(OpenAlData::new());
+    static ref AL_CONTEXT: Mutex<Result<OpenAlData, OpenAlContextError>> =
+        Mutex::new(OpenAlData::new());
 }
 
 #[derive(Clone)]
@@ -50,17 +97,17 @@ impl OpenAlData {
     /// Create a new OpenAlData struct
     ///
     /// Private method.
-    fn new() -> Result<OpenAlData, String> {
+    fn new() -> Result<OpenAlData, OpenAlContextError> {
         let device = unsafe { ffi::alcOpenDevice(ptr::null_mut()) };
         if device == 0 {
-            return Err("internal error: cannot open the default device.".to_string());
+            return Err(OpenAlContextError::DefaultDeviceError);
         }
         let context = unsafe { ffi::alcCreateContext(device, ptr::null_mut()) };
         if context == 0 {
-            return Err("internal error: cannot create the OpenAL context.".to_string());
+            return Err(OpenAlContextError::CreationError);
         }
         if unsafe { ffi::alcMakeContextCurrent(context) } == ffi::ALC_FALSE {
-            return Err("internal error: cannot make the OpenAL context current.".to_string());
+            return Err(OpenAlContextError::MakeCurrentError);
         }
 
         unsafe {
@@ -83,7 +130,7 @@ impl OpenAlData {
     /// # Return
     /// A result containing nothing if the OpenAlData struct exist,
     /// otherwise an error message.
-    pub fn check_al_context() -> Result<(), String> {
+    pub fn check_al_context() -> Result<(), OpenAlContextError> {
         if unsafe { ffi::alcGetCurrentContext() != 0 } {
             return Ok(());
         }
@@ -92,14 +139,11 @@ impl OpenAlData {
                 Ok(_) => Ok(()),
                 Err(ref err) => Err(err.clone()),
             },
-            Err(poison_error) => Err(String::from(format!(
-                "Can't lock OpenAL context mutex: {}",
-                poison_error
-            ))),
+            Err(poison_error) => Err(OpenAlContextError::LockError(poison_error.to_string())),
         }
     }
 
-    fn is_input_context_init() -> Result<RecordContext, String> {
+    fn is_input_context_init() -> Result<RecordContext, OpenAlContextError> {
         match AL_CONTEXT.lock() {
             Ok(mut guard) => {
                 if let Ok(ref mut new_context) = *guard {
@@ -111,9 +155,7 @@ impl OpenAlData {
                             ffi::alcIsExtensionPresent(new_context.al_device, c_str.as_ptr())
                         } == ffi::ALC_FALSE
                         {
-                            return Err(
-                                "Error: no input device available on your system.".to_string()
-                            );
+                            return Err(OpenAlContextError::NoInputDevice);
                         } else {
                             new_context.al_capt_device = unsafe {
                                 ffi::alcCaptureOpenDevice(
@@ -124,10 +166,7 @@ impl OpenAlData {
                                 )
                             };
                             if new_context.al_capt_device == 0 {
-                                return Err(
-                                    "internal error: cannot open the default capture device."
-                                        .to_string(),
-                                );
+                                return Err(OpenAlContextError::DefaultCaptureDeviceError);
                             } else {
                                 let cap_device = new_context.al_capt_device;
                                 return Ok(record_context::new(cap_device));
@@ -135,15 +174,10 @@ impl OpenAlData {
                         }
                     }
                 } else {
-                    Err("Error: you must request the input context, \
-                        in the task where you initialize ears."
-                        .to_string())
+                    return Err(OpenAlContextError::WrongThread);
                 }
             }
-            Err(poison_error) => Err(String::from(format!(
-                "Can't lock OpenAL context mutex: {}",
-                poison_error
-            ))),
+            Err(poison_error) => Err(OpenAlContextError::LockError(poison_error.to_string())),
         }
     }
 
@@ -165,7 +199,7 @@ impl OpenAlData {
     /// # Return
     /// A result containing nothing if the OpenAlData struct exist,
     /// otherwise an error message.
-    pub fn check_al_input_context() -> Result<RecordContext, String> {
+    pub fn check_al_input_context() -> Result<RecordContext, OpenAlContextError> {
         if unsafe { !ffi::alcGetCurrentContext() == 0 } {
             OpenAlData::is_input_context_init()
         } else {
