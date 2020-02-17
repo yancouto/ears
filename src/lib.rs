@@ -71,6 +71,8 @@ extern crate lazy_static;
 pub use audio_controller::AudioController;
 pub use audio_tags::{AudioTags, Tags};
 pub use einit::{init, init_in};
+pub use error::SoundError;
+pub use internal::OpenAlContextError;
 pub use music::Music;
 pub use presets::ReverbPreset;
 pub use record_context::RecordContext;
