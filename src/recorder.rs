@@ -46,9 +46,9 @@ use std::intrinsics::transmute;
  * ```no_run
  * use ears::Recorder;
  *
- * fn main() -> () {
+ * fn main() -> Result<(), ears::OpenAlContextError> {
  *     // Create a new context to record audio
- *     let context = ears::init_in().unwrap();
+ *     let context = ears::init_in()?;
  *     // Create the recorder
  *     let mut recorder = Recorder::new(context);
  *     // Start to record something
@@ -60,6 +60,8 @@ use std::intrinsics::transmute;
  *     recorder.stop();
  *     // Then store the recorded data in a file
  *     recorder.save_to_file("hello_file");
+ *
+ *     Ok(())
  * }
  * ```
  */

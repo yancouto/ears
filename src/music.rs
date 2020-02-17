@@ -62,11 +62,12 @@ const BUFFER_COUNT: i32 = 2;
  * # Examples
  * ```no_run
  * extern crate ears;
- * use ears::{Music, AudioController};
+ * use ears::{Music, SoundError, AudioController};
  *
- * fn main() -> () {
- *   let mut msc = Music::new("path/to/music.flac").unwrap();
+ * fn main() -> Result<(), SoundError> {
+ *   let mut msc = Music::new("path/to/music.flac")?;
  *   msc.play();
+ *   Ok(())
  * }
  * ```
  */

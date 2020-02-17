@@ -60,14 +60,14 @@ impl Error for ReverbEffectError {
  * # Examples
  * ```no_run
  * extern crate ears;
- * use ears::{ReverbEffect, ReverbPreset, Sound, AudioController};
+ * use ears::{ReverbEffect, ReverbPreset, Sound, SoundError, AudioController};
  *
- * fn main() -> () {
+ * fn main() -> Result<(), SoundError> {
  *    // Create an effect (in this case, using a preset)
  *    let effect = ReverbEffect::preset(ReverbPreset::Cave.properties()).ok();
  *
  *    // Create a Sound with the path of the sound file.
- *    let mut sound = Sound::new("path/to/my/sound.ogg").unwrap();
+ *    let mut sound = Sound::new("path/to/my/sound.ogg")?;
  *
  *    // Connect the sound to the effect
  *    sound.connect(&effect);
@@ -80,6 +80,7 @@ impl Error for ReverbEffectError {
  *
  *    // If you want to disconnect an Effect, just pass None
  *    sound.connect(&None);
+ *    Ok(())
  * }
  * ```
  */

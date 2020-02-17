@@ -39,7 +39,10 @@ use record_context::RecordContext;
  *
  * # Example
  * ```no_run
- * ears::init().unwrap()
+ * fn main() -> Result<(), ears::OpenAlContextError> {
+ *     ears::init()?;
+ *     Ok(())
+ * }
  * ```
  */
 pub fn init() -> Result<(), OpenAlContextError> {
@@ -54,7 +57,10 @@ pub fn init() -> Result<(), OpenAlContextError> {
  *
  * # Example
  * ```no_run
- * ears::init_in().unwrap();
+ * fn main() -> Result<(), ears::OpenAlContextError> {
+ *     ears::init_in()?;
+ *     Ok(())
+ * }
  * ```
  */
 pub fn init_in() -> Result<RecordContext, OpenAlContextError> {
