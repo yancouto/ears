@@ -46,17 +46,19 @@ use states::State::{Initial, Paused, Playing, Stopped};
  * # Examples
  * ```no_run
  * extern crate ears;
- * use ears::{Sound, AudioController};
+ * use ears::{Sound, AudioController, SoundError};
  *
- * fn main() -> () {
+ * fn main() -> Result<(), SoundError> {
  *    // Create a Sound with the path of the sound file.
- *    let mut snd = Sound::new("path/to/my/sound.ogg").unwrap();
+ *    let mut snd = Sound::new("path/to/my/sound.ogg")?;
  *
  *    // Play it
  *    snd.play();
  *
  *    // Wait until the sound stopped playing
  *    while snd.is_playing() {}
+ *
+ *    Ok(())
  * }
  * ```
  */
@@ -108,12 +110,15 @@ impl Sound {
      *
      * # Example
      * ```ignore
-     * use ears::{Sound, SoundData, AudioController};
+     * use ears::{Sound, SoundData, SoundError, AudioController};
      * use std::rc::Rc;
      * use std::cell::RefCell;
      *
-     * let data = Rc::new(RefCell::new(SoundData::new("path/to/the/sound.ogg").unwrap()))
-     * let sound = Sound::new_with_data(data).unwrap();
+     * fn main() -> Result<(), SoundError> {
+     *     let data = Rc::new(RefCell::new(SoundData::new("path/to/the/sound.ogg")?));
+     *     let sound = Sound::new_with_data(data)?;
+     *     Ok(())
+     * }
      * ```
      */
     pub fn new_with_data(sound_data: Rc<RefCell<SoundData>>) -> Result<Sound, SoundError> {
@@ -148,8 +153,11 @@ impl Sound {
      *
      * # Example
      * ```no_run
-     * let snd = ears::Sound::new("path/to/the/sound.ogg").unwrap();
-     * let snd_data = snd.get_datas();
+     * fn main() -> Result<(), ears::SoundError> {
+     *     let snd = ears::Sound::new("path/to/the/sound.ogg")?;
+     *     let snd_data = snd.get_datas();
+     *     Ok(())
+     * }
      * ```
      */
     pub fn get_datas(&self) -> Rc<RefCell<SoundData>> {
@@ -166,10 +174,13 @@ impl Sound {
      *
      * # Example
      * ```no_run
-     * let snd1 = ears::Sound::new("path/to/the/sound.ogg").unwrap();
-     * let mut snd2 = ears::Sound::new("other/path/to/the/sound.ogg").unwrap();
-     * let snd_data = snd1.get_datas();
-     * snd2.set_datas(snd_data);
+     * fn main() -> Result<(), ears::SoundError> {
+     *     let snd1 = ears::Sound::new("path/to/the/sound.ogg")?;
+     *     let mut snd2 = ears::Sound::new("other/path/to/the/sound.ogg")?;
+     *     let snd_data = snd1.get_datas();
+     *     snd2.set_datas(snd_data);
+     *     Ok(())
+     * }
      * ```
      */
     pub fn set_datas(&mut self, sound_data: Rc<RefCell<SoundData>>) {
@@ -271,10 +282,13 @@ impl AudioController for Sound {
      *
      * # Example
      * ```no_run
-     * use ears::{Sound, AudioController};
+     * use ears::{Sound, SoundError, AudioController};
      *
-     * let mut snd = Sound::new("path/to/the/sound.ogg").unwrap();
-     * snd.play();
+     * fn main() -> Result<(), SoundError> {
+     *     let mut snd = Sound::new("path/to/the/sound.ogg")?;
+     *     snd.play();
+     *     Ok(())
+     * }
      * ```
      */
     fn play(&mut self) -> () {
@@ -293,12 +307,15 @@ impl AudioController for Sound {
      *
      * # Example
      * ```no_run
-     * use ears::{Sound, AudioController};
+     * use ears::{Sound, SoundError, AudioController};
      *
-     * let mut snd = Sound::new("path/to/the/sound.ogg").unwrap();
-     * snd.play();
-     * snd.pause();
-     * snd.play(); // the sound restarts at the moment of the pause
+     * fn main() -> Result<(), SoundError> {
+     *     let mut snd = Sound::new("path/to/the/sound.ogg")?;
+     *     snd.play();
+     *     snd.pause();
+     *     snd.play(); // the sound restarts at the moment of the pause
+     *     Ok(())
+     * }
      * ```
      */
     fn pause(&mut self) -> () {
@@ -312,12 +329,15 @@ impl AudioController for Sound {
      *
      * # Example
      * ```no_run
-     * use ears::{Sound, AudioController};
+     * use ears::{Sound, SoundError, AudioController};
      *
-     * let mut snd = Sound::new("path/to/the/sound.ogg").unwrap();
-     * snd.play();
-     * snd.stop();
-     * snd.play(); // the sound restart at the begining
+     * fn main() -> Result<(), SoundError> {
+     *     let mut snd = Sound::new("path/to/the/sound.ogg")?;
+     *     snd.play();
+     *     snd.stop();
+     *     snd.play(); // the sound restart at the begining
+     *     Ok(())
+     * }
      * ```
      */
     fn stop(&mut self) -> () {
@@ -331,11 +351,14 @@ impl AudioController for Sound {
      *
      * # Example
      * ```no_run
-     * use ears::{Sound, ReverbEffect, ReverbPreset, AudioController};
+     * use ears::{Sound, SoundError, ReverbEffect, ReverbPreset, AudioController};
      *
-     * let reverb_effect = ReverbEffect::preset(ReverbPreset::Sewerpipe.properties()).ok();
-     * let mut snd = Sound::new("path/to/sound.ogg").unwrap();
-     * snd.connect(&reverb_effect);
+     * fn main() -> Result<(), SoundError> {
+     *     let reverb_effect = ReverbEffect::preset(ReverbPreset::Sewerpipe.properties()).ok();
+     *     let mut snd = Sound::new("path/to/sound.ogg")?;
+     *     snd.connect(&reverb_effect);
+     *     Ok(())
+     * }
      * ```
      */
     fn connect(&mut self, reverb_effect: &Option<ReverbEffect>) {
@@ -371,14 +394,17 @@ impl AudioController for Sound {
      *
      * # Example
      * ```no_run
-     * use ears::{Sound, AudioController};
+     * use ears::{Sound, SoundError, AudioController};
      *
-     * let mut snd = Sound::new("path/to/the/sound.ogg").unwrap();
-     * snd.play();
-     * if snd.is_playing() {
-     *     println!("Sound is Playing !");
-     * } else {
-     *     println!("Sound is Pause or Stopped !");
+     * fn main() -> Result<(), SoundError> {
+     *     let mut snd = Sound::new("path/to/the/sound.ogg")?;
+     *     snd.play();
+     *     if snd.is_playing() {
+     *         println!("Sound is Playing !");
+     *     } else {
+     *         println!("Sound is Pause or Stopped !");
+     *     }
+     *     Ok(())
      * }
      * ```
      */
@@ -397,14 +423,17 @@ impl AudioController for Sound {
      *
      * # Example
      * ```no_run
-     * use ears::{Sound, State, AudioController};
+     * use ears::{Sound, SoundError, State, AudioController};
      *
-     * let snd = Sound::new("path/to/the/sound.ogg").unwrap();
-     * match snd.get_state() {
-     *     State::Initial => println!("Sound has never been played"),
-     *     State::Playing => println!("Sound is playing!"),
-     *     State::Paused  => println!("Sound is paused!"),
-     *     State::Stopped => println!("Sound is stopped!")
+     * fn main() -> Result<(), SoundError> {
+     *     let snd = Sound::new("path/to/the/sound.ogg")?;
+     *     match snd.get_state() {
+     *         State::Initial => println!("Sound has never been played"),
+     *         State::Playing => println!("Sound is playing!"),
+     *         State::Paused  => println!("Sound is paused!"),
+     *         State::Stopped => println!("Sound is stopped!")
+     *     }
+     *     Ok(())
      * }
      * ```
      */

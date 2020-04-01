@@ -35,17 +35,19 @@ A simple library to play sounds and music in Rust, using OpenAL and libsndfile.
 
 ```no_run
 extern crate ears;
-use ears::{Sound, AudioController};
+use ears::{Sound, SoundError, AudioController};
 
-fn main() {
+fn main() -> Result<(), SoundError> {
     // Create a new Sound.
-    let mut snd = Sound::new("path/to/my/sound.ogg").unwrap();
+    let mut snd = Sound::new("path/to/my/sound.ogg")?;
 
     // Play the Sound
     snd.play();
 
     // Wait until the end of the sound
     while snd.is_playing() {}
+
+    Ok(())
 }
 ```
 */
@@ -71,6 +73,8 @@ extern crate lazy_static;
 pub use audio_controller::AudioController;
 pub use audio_tags::{AudioTags, Tags};
 pub use einit::{init, init_in};
+pub use error::SoundError;
+pub use internal::OpenAlContextError;
 pub use music::Music;
 pub use presets::ReverbPreset;
 pub use record_context::RecordContext;

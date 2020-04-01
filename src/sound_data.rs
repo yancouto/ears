@@ -40,18 +40,17 @@ use sndfile::{SndFile, SndInfo};
  *
  * # Example
  * ```ignore
- * use ears::{Sound, SoundData, AudioController};
+ * use ears::{Sound, SoundData, SoundError, AudioController};
  * use std::cell::RefCell;
  * use std::rc::Rc;
  *
- * fn main() -> () {
+ * fn main() -> Result<(), SoundError> {
  *   // Create a SoundData
- *   let snd_data = Rc::new(RefCell::new(SoundData::new("path/to/my/sound.wav")
- *                                       .unwrap()));
+ *   let snd_data = Rc::new(RefCell::new(SoundData::new("path/to/my/sound.wav")?));
  *
  *   // Create two Sound with the same SoundData
- *   let mut snd1 = Sound::new_with_data(snd_data.clone()).unwrap();
- *   let mut snd2 = Sound::new_with_data(snd_data.clone()).unwrap();
+ *   let mut snd1 = Sound::new_with_data(snd_data.clone())?;
+ *   let mut snd2 = Sound::new_with_data(snd_data.clone())?;
  *
  *   // Play the sounds
  *   snd1.play();
@@ -59,6 +58,7 @@ use sndfile::{SndFile, SndInfo};
  *
  *   // Wait until snd2 is playing
  *   while snd2.is_playing() {}
+ *   Ok(())
  * }
  * ```
  */
