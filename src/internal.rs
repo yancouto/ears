@@ -211,7 +211,8 @@ impl OpenAlData {
     }
 }
 
-extern "C" fn cleanup_openal_context() {
+/// Does early cleanup of the library. This is automatically called when the program exits.
+pub fn cleanup() {
     if let Ok(mut guard) = AL_CONTEXT.lock() {
         if let Ok(ref mut context) = *guard {
             unsafe {
@@ -224,6 +225,10 @@ extern "C" fn cleanup_openal_context() {
         }
     }
 }
+extern "C" fn cleanup_openal_context() {
+    cleanup()
+}
+
 
 macro_rules! check_openal_context(
     ($def_ret:expr) => (
